@@ -2276,10 +2276,91 @@ function showLinkToolbar(midX, midY, container, link, nodes, links, svgId, arrow
     const toolbar = document.createElement('div');
     toolbar.className = 'map-link-toolbar';
     toolbar.style.position = 'absolute';
-    toolbar.style.left = `${midX}px`;
-    toolbar.style.top = `${midY - 45}px`; // Display 45px above
-    toolbar.style.transform = 'translate(-50%, -100%)';
     toolbar.style.zIndex = '1000';
+    
+    // Find the scrollable canvas container and zoom level to compute boundary clamping
+    let scrollContainer = null;
+    let zoom = 1.0;
+    
+    if (isEdit) {
+        scrollContainer = document.getElementById('edit-map-canvas-container');
+        zoom = editMapZoom;
+    } else if (containerId === 'create-map-nodes-container') {
+        scrollContainer = document.getElementById('create-map-canvas-container');
+        zoom = createMapZoom;
+    } else if (containerId === 'practice-map-nodes-container') {
+        scrollContainer = document.getElementById('practice-map-canvas-container');
+        zoom = practiceMapZoom;
+    }
+    
+    // Fallback detection logic if container ids differ
+    if (!scrollContainer && containerId) {
+        const scrollContainerId = containerId.replace('nodes-container', 'canvas-container');
+        scrollContainer = document.getElementById(scrollContainerId);
+    }
+    if (!scrollContainer && container) {
+        scrollContainer = container.closest('[id$="-canvas-container"]') || container.parentNode;
+    }
+    
+    let clampedMidX = midX;
+    let toolbarTop = midY - 45;
+    let transformY = 'translate(-50%, -100%)';
+    
+    if (scrollContainer) {
+        const toolbarWidth = 220;
+        const toolbarHeight = 245; 
+        const scrollLeft = scrollContainer.scrollLeft;
+        const scrollTop = scrollContainer.scrollTop;
+        const containerWidth = scrollContainer.clientWidth;
+        const containerHeight = scrollContainer.clientHeight;
+        
+        const padding = 15;
+        const halfWidth = toolbarWidth / 2;
+        
+        // Translate scroll positions to local unscaled viewport coordinates
+        const visibleMinX = scrollLeft / zoom;
+        const visibleMaxX = (scrollLeft + containerWidth) / zoom;
+        const visibleMinY = scrollTop / zoom;
+        const visibleMaxY = (scrollTop + containerHeight) / zoom;
+        
+        // Horizontal Clamping: keep the toolbar fully within the visible left/right boundaries of the container
+        const minClampedX = visibleMinX + halfWidth + padding;
+        const maxClampedX = visibleMaxX - halfWidth - padding;
+        
+        if (minClampedX < maxClampedX) {
+            clampedMidX = Math.max(minClampedX, Math.min(maxClampedX, midX));
+        } else {
+            clampedMidX = visibleMinX + (visibleMaxX - visibleMinX) / 2;
+        }
+        
+        // Vertical Clamping & Flipping:
+        // Try placing above the connection first. The top of the toolbar in local coordinates would be midY - 45 - toolbarHeight.
+        const spaceAbove = midY - 45 - visibleMinY;
+        
+        if (spaceAbove < toolbarHeight + padding) {
+            // Not enough space above, display BELOW the connection point
+            toolbarTop = midY + 35;
+            transformY = 'translate(-50%, 0)';
+            
+            // Check if it fits below. If not, clamp to visible bottom boundary
+            if (toolbarTop + toolbarHeight + padding > visibleMaxY) {
+                toolbarTop = Math.max(visibleMinY + padding, visibleMaxY - toolbarHeight - padding);
+            }
+        } else {
+            // Plenty of space above, display ABOVE the connection point
+            toolbarTop = midY - 45;
+            transformY = 'translate(-50%, -100%)';
+            
+            // If it exceeds the visible top boundary, clamp to the top
+            if (toolbarTop - toolbarHeight < visibleMinY + padding) {
+                toolbarTop = visibleMinY + toolbarHeight + padding;
+            }
+        }
+    }
+    
+    toolbar.style.left = `${clampedMidX}px`;
+    toolbar.style.top = `${toolbarTop}px`;
+    toolbar.style.transform = transformY;
     
     // Close button
     const closeBtn = document.createElement('button');
