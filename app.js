@@ -1220,7 +1220,7 @@ function renderBoxesForWord(word, startIndex = 0) {
         } else if (/[.,\/#!$%\^&\*;:{}=\-_`~()]/.test(char)) {
             html += `<span class="letter-box-punctuation" style="margin: 0 2px; font-weight: 800; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; color: var(--text-secondary);">${char}</span>`;
         } else {
-            html += `<input type="text" class="letter-box letter-input" maxlength="1" data-index="${inputCount}" style="text-transform: uppercase;">`;
+            html += `<input type="text" class="letter-box letter-input" maxlength="1" data-index="${inputCount}">`;
             inputCount++;
         }
     }
@@ -1262,7 +1262,6 @@ function renderSpellingBoxes(word) {
             input.className = 'letter-box letter-input';
             input.maxLength = 1;
             input.dataset.index = inputCount;
-            input.style.textTransform = 'uppercase';
             container.appendChild(input);
             inputCount++;
         }
@@ -1291,6 +1290,7 @@ function getTypedSpellingAnswer(targetWord) {
     return typed;
 }
 
+// Reconstruct spelling answer from individual input boxes for multiple sentences
 function getTypedAnswersForSentences(targetWord, sentencesCount) {
     const inputs = Array.from(document.querySelectorAll('.letter-input'));
     const typedWords = [];
@@ -1333,8 +1333,6 @@ function initSpellingInputListeners() {
     // Delegated input event for direct input letter squares
     document.addEventListener('input', (e) => {
         if (e.target.classList.contains('letter-input')) {
-            e.target.value = e.target.value.toUpperCase();
-            
             const inputs = Array.from(document.querySelectorAll('.letter-input'));
             const currentIndex = inputs.indexOf(e.target);
             
@@ -1478,11 +1476,23 @@ function evaluateAnswer() {
         
         if (sentences.length > 0) {
             const typedWords = getTypedAnswersForSentences(card.back.trim(), sentences.length);
+            let allCorrect = true;
             let totalScore = 0;
             typedWords.forEach(word => {
-                totalScore += calculateMatchPercentage(word, card.back);
+                const matchScore = calculateMatchPercentage(word, card.back);
+                if (matchScore < 100) {
+                    allCorrect = false;
+                }
+                totalScore += matchScore;
             });
-            score = Math.round(totalScore / sentences.length);
+            
+            if (allCorrect) {
+                score = 100;
+            } else {
+                // If even one sentence is incorrect, force a failure score (< 75%)
+                const averageScore = Math.round(totalScore / sentences.length);
+                score = Math.min(74, averageScore);
+            }
             
             // Reconstruct a user-facing string of what they typed
             typed = typedWords.join(' | ');
@@ -1537,8 +1547,10 @@ function evaluateAnswer() {
         document.getElementById('incorrect-sentence-input').value = '';
         document.getElementById('incorrect-sentence-input').placeholder = `e.g. We are running ${card.back} on gas.`;
         document.getElementById('sentence-error-msg').classList.add('hidden');
+        document.getElementById('btn-next-card').classList.add('hidden'); // Hide the Next Memory button on failure
     } else {
         sentenceContainer.classList.add('hidden');
+        document.getElementById('btn-next-card').classList.remove('hidden'); // Show the Next Memory button on success
     }
     
     document.getElementById('evaluation-area').classList.remove('hidden');
@@ -1630,6 +1642,7 @@ function saveIncorrectExampleSentence() {
         errorMsg.classList.add('hidden');
         // Hide the incorrect sentence collector since it's saved successfully
         document.getElementById('incorrect-sentence-container').classList.add('hidden');
+        document.getElementById('btn-next-card').classList.remove('hidden'); // Show the Next Memory button!
     }, 1500);
 }
 

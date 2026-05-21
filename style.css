@@ -933,7 +933,6 @@ h1, h2, h3, h4 {
     font-weight: 800;
     color: var(--text-primary);
     background: var(--bg-card);
-    text-transform: uppercase;
     transition: all 0.1s ease;
 }
 input.letter-box {
