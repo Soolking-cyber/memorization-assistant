@@ -2220,11 +2220,12 @@ function showLinkToolbar(midX, midY, container, link, nodes, links, svgId, arrow
 
     // Label input
     const inputGroup = document.createElement('div');
-    inputGroup.style = 'display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; width: 100%;';
+    inputGroup.style = 'display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; width: 100%;';
     
     const label = document.createElement('label');
     label.textContent = 'Connection Label';
-    label.style = 'font-size: 0.65rem; color: var(--text-secondary); font-weight: 700;';
+    label.className = 'toolbar-section-label';
+    label.style.marginTop = '0'; // reset margin-top for the first element
     
     const input = document.createElement('input');
     input.type = 'text';
@@ -2242,51 +2243,48 @@ function showLinkToolbar(midX, midY, container, link, nodes, links, svgId, arrow
     inputGroup.appendChild(input);
     toolbar.appendChild(inputGroup);
     
-    // Row for Color & Style & Delete
-    const row = document.createElement('div');
-    row.style = 'display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%;';
+    // Thickness Group
+    const thickLabel = document.createElement('div');
+    thickLabel.textContent = 'Arrow Thickness';
+    thickLabel.className = 'toolbar-section-label';
+    toolbar.appendChild(thickLabel);
     
-    // Colors group
-    const colorsDiv = document.createElement('div');
-    colorsDiv.style = 'display: flex; gap: 4px;';
-    const colorOptions = [
-        { name: 'default', value: '' },
-        { name: 'blue', value: '#3b82f6' },
-        { name: 'green', value: '#22c55e' },
-        { name: 'red', value: '#ef4444' },
-        { name: 'orange', value: '#f97316' },
-        { name: 'purple', value: '#a855f7' }
-    ];
-    colorOptions.forEach(opt => {
-        const dot = document.createElement('button');
-        dot.type = 'button';
-        dot.className = `color-dot ${link.color === opt.value ? 'active' : ''}`;
-        dot.style = `width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border-color); cursor: pointer; padding: 0; background-color: ${opt.value || 'var(--text-secondary)'}; transition: transform 0.1s;`;
-        if (link.color === opt.value) {
-            dot.style.transform = 'scale(1.2)';
-            dot.style.borderColor = 'var(--text-primary)';
-        }
-        dot.addEventListener('click', (e) => {
+    const thicknessDiv = document.createElement('div');
+    thicknessDiv.className = 'segmented-control';
+    thicknessDiv.style.marginBottom = '6px';
+    
+    const thickOptions = [1, 2, 3, 4];
+    thickOptions.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = `${opt}px`;
+        btn.className = `segmented-btn ${(link.thickness || 2) === opt ? 'active' : ''}`;
+        btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            link.color = opt.value;
-            // Highlight active dot
-            toolbar.querySelectorAll('.color-dot').forEach(d => {
-                d.style.transform = '';
-                d.style.borderColor = 'var(--border-color)';
+            link.thickness = opt;
+            thicknessDiv.querySelectorAll('.segmented-btn').forEach((b, i) => {
+                if (thickOptions[i] === opt) {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
             });
-            dot.style.transform = 'scale(1.2)';
-            dot.style.borderColor = 'var(--text-primary)';
-            
             drawLinks(nodes, links, svgId, arrowheadId, true, containerId, isEdit);
         });
-        colorsDiv.appendChild(dot);
+        thicknessDiv.appendChild(btn);
     });
+    toolbar.appendChild(thicknessDiv);
     
-    row.appendChild(colorsDiv);
+    // Style Group
+    const styleLabel = document.createElement('div');
+    styleLabel.textContent = 'Line Style';
+    styleLabel.className = 'toolbar-section-label';
+    toolbar.appendChild(styleLabel);
     
-    // Styles group
     const stylesDiv = document.createElement('div');
-    stylesDiv.style = 'display: flex; gap: 4px; border: 1px solid var(--border-color); border-radius: 4px; overflow: hidden;';
+    stylesDiv.className = 'segmented-control';
+    stylesDiv.style.marginBottom = '6px';
+    
     const styleOptions = [
         { name: 'Solid', value: 'solid' },
         { name: 'Dashed', value: 'dashed' },
@@ -2295,28 +2293,125 @@ function showLinkToolbar(midX, midY, container, link, nodes, links, svgId, arrow
     styleOptions.forEach(opt => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.textContent = opt.name[0]; // S, D, D
-        btn.title = opt.name;
-        btn.className = `style-btn ${(link.style || 'solid') === opt.value ? 'active' : ''}`;
-        btn.style = `border: none; padding: 2px 6px; font-size: 0.65rem; cursor: pointer; background: ${(link.style || 'solid') === opt.value ? 'var(--accent)' : 'var(--bg-secondary)'}; color: ${(link.style || 'solid') === opt.value ? '#ffffff' : 'var(--text-primary)'}; font-weight: 700;`;
+        btn.textContent = opt.name;
+        btn.className = `segmented-btn ${(link.style || 'solid') === opt.value ? 'active' : ''}`;
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             link.style = opt.value;
-            // Update UI
-            stylesDiv.querySelectorAll('.style-btn').forEach(b => {
-                b.style.background = 'var(--bg-secondary)';
-                b.style.color = 'var(--text-primary)';
+            stylesDiv.querySelectorAll('.segmented-btn').forEach((b, i) => {
+                if (styleOptions[i].value === opt.value) {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
             });
-            btn.style.background = 'var(--accent)';
-            btn.style.color = '#ffffff';
-            
             drawLinks(nodes, links, svgId, arrowheadId, true, containerId, isEdit);
         });
         stylesDiv.appendChild(btn);
     });
-    row.appendChild(stylesDiv);
+    toolbar.appendChild(stylesDiv);
     
-    // Delete link button
+    // Colors Definition
+    const colorOptions = [
+        { name: 'Default', value: '' },
+        { name: 'Blue', value: '#3b82f6' },
+        { name: 'Green', value: '#22c55e' },
+        { name: 'Red', value: '#ef4444' },
+        { name: 'Orange', value: '#f97316' },
+        { name: 'Purple', value: '#a855f7' }
+    ];
+    
+    // Arrow Color Picker Row
+    const arrowColorLabel = document.createElement('div');
+    arrowColorLabel.textContent = 'Arrow Color';
+    arrowColorLabel.className = 'toolbar-section-label';
+    toolbar.appendChild(arrowColorLabel);
+    
+    const arrowColorsDiv = document.createElement('div');
+    arrowColorsDiv.style = 'display: flex; gap: 6px; margin-bottom: 6px;';
+    colorOptions.forEach(opt => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'color-dot';
+        dot.title = opt.name;
+        dot.style = `width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border-color); cursor: pointer; padding: 0; background-color: ${opt.value || 'var(--text-secondary)'}; transition: transform 0.1s; position: relative;`;
+        
+        if ((link.color || '') === opt.value) {
+            dot.style.transform = 'scale(1.2)';
+            dot.style.borderColor = 'var(--text-primary)';
+            dot.style.boxShadow = '0 0 4px var(--accent)';
+        }
+        
+        dot.addEventListener('click', (e) => {
+            e.stopPropagation();
+            link.color = opt.value;
+            // Update UI selected states
+            arrowColorsDiv.querySelectorAll('.color-dot').forEach((d, i) => {
+                d.style.transform = '';
+                d.style.borderColor = 'var(--border-color)';
+                d.style.boxShadow = '';
+                if (colorOptions[i].value === opt.value) {
+                    d.style.transform = 'scale(1.2)';
+                    d.style.borderColor = 'var(--text-primary)';
+                    d.style.boxShadow = '0 0 4px var(--accent)';
+                }
+            });
+            drawLinks(nodes, links, svgId, arrowheadId, true, containerId, isEdit);
+        });
+        arrowColorsDiv.appendChild(dot);
+    });
+    toolbar.appendChild(arrowColorsDiv);
+    
+    // Text Color Picker Row
+    const textColorLabel = document.createElement('div');
+    textColorLabel.textContent = 'Text Color';
+    textColorLabel.className = 'toolbar-section-label';
+    toolbar.appendChild(textColorLabel);
+    
+    const textColorsDiv = document.createElement('div');
+    textColorsDiv.style = 'display: flex; gap: 6px; margin-bottom: 10px;';
+    colorOptions.forEach(opt => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'color-dot';
+        dot.title = opt.name;
+        dot.style = `width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border-color); cursor: pointer; padding: 0; background-color: ${opt.value || 'var(--text-primary)'}; transition: transform 0.1s; position: relative;`;
+        
+        if ((link.textColor || '') === opt.value) {
+            dot.style.transform = 'scale(1.2)';
+            dot.style.borderColor = 'var(--text-primary)';
+            dot.style.boxShadow = '0 0 4px var(--accent)';
+        }
+        
+        dot.addEventListener('click', (e) => {
+            e.stopPropagation();
+            link.textColor = opt.value;
+            // Update UI selected states
+            textColorsDiv.querySelectorAll('.color-dot').forEach((d, i) => {
+                d.style.transform = '';
+                d.style.borderColor = 'var(--border-color)';
+                d.style.boxShadow = '';
+                if (colorOptions[i].value === opt.value) {
+                    d.style.transform = 'scale(1.2)';
+                    d.style.borderColor = 'var(--text-primary)';
+                    d.style.boxShadow = '0 0 4px var(--accent)';
+                }
+            });
+            drawLinks(nodes, links, svgId, arrowheadId, true, containerId, isEdit);
+        });
+        textColorsDiv.appendChild(dot);
+    });
+    toolbar.appendChild(textColorsDiv);
+    
+    // Divider line before action
+    const hr = document.createElement('div');
+    hr.style = 'border-top: 1px solid var(--border-color); margin-bottom: 8px; width: 100%;';
+    toolbar.appendChild(hr);
+    
+    // Delete connection row
+    const deleteRow = document.createElement('div');
+    deleteRow.style = 'display: flex; justify-content: flex-end; align-items: center; width: 100%;';
+    
     const delBtn = document.createElement('button');
     delBtn.type = 'button';
     delBtn.className = 'link-delete-btn';
@@ -2334,9 +2429,8 @@ function showLinkToolbar(midX, midY, container, link, nodes, links, svgId, arrow
             drawLinks(nodes, links, svgId, arrowheadId, true, containerId, isEdit);
         }
     });
-    
-    row.appendChild(delBtn);
-    toolbar.appendChild(row);
+    deleteRow.appendChild(delBtn);
+    toolbar.appendChild(deleteRow);
     
     container.appendChild(toolbar);
 }
@@ -2457,7 +2551,7 @@ function drawLinks(nodes, links, svgId, arrowheadId, interactive = false, contai
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.setAttribute('d', pathData);
         path.setAttribute('stroke', lineColor);
-        path.setAttribute('stroke-width', '2');
+        path.setAttribute('stroke-width', link.thickness || 2);
         path.setAttribute('fill', 'none');
         path.setAttribute('marker-end', `url(#${arrowheadId})`);
         path.style.opacity = '0.7';
@@ -2516,7 +2610,7 @@ function drawLinks(nodes, links, svgId, arrowheadId, interactive = false, contai
             rect.setAttribute('rx', '4');
             rect.setAttribute('ry', '4');
             rect.setAttribute('fill', 'var(--bg-card)');
-            rect.setAttribute('stroke', 'var(--border-color)');
+            rect.setAttribute('stroke', link.textColor || 'var(--border-color)');
             rect.setAttribute('stroke-width', '1');
             
             // Text
@@ -2526,7 +2620,7 @@ function drawLinks(nodes, links, svgId, arrowheadId, interactive = false, contai
             text.setAttribute('text-anchor', 'middle');
             text.setAttribute('font-size', '10');
             text.setAttribute('font-weight', '700');
-            text.setAttribute('fill', 'var(--text-primary)');
+            text.setAttribute('fill', link.textColor || 'var(--text-primary)');
             text.textContent = link.label;
             
             group.appendChild(rect);
