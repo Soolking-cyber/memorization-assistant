@@ -1062,27 +1062,41 @@ function renderCurrentCard() {
     const backEl = document.getElementById('practice-back');
     const spellingArea = document.getElementById('spelling-indicator-area');
     
-    // Check if card has a saved example sentence
+    // Check if card has saved example sentences
     const savedSentences = exampleSentences[card.id];
-    let sentence = '';
+    let sentences = [];
     if (savedSentences) {
         if (Array.isArray(savedSentences)) {
-            if (savedSentences.length > 0) {
-                sentence = savedSentences[Math.floor(Math.random() * savedSentences.length)];
-            }
+            sentences = savedSentences;
         } else if (typeof savedSentences === 'string') {
-            sentence = savedSentences;
+            sentences = [savedSentences];
         }
     }
     const targetWord = card.back.trim();
     const isSingleWord = !targetWord.includes(' ') && targetWord.length > 0;
     
-    if (sentence) {
-        // Sentence blanking mode (Fill-in-the-blank style)
-        exerciseTitleEl.textContent = "Complete the sentence with the correct word";
+    if (sentences.length > 0) {
+        // Sentence blanking mode (Fill-in-the-blank style with potentially multiple numbered sentences)
+        exerciseTitleEl.textContent = "Complete the sentences with the correct word";
         
         const explanationHtml = card.front.replace(/\n/g, '<br>');
-        const sentenceHtml = blankOutWordInSentence(sentence, targetWord);
+        
+        let sentencesHtml = '<div class="practice-sentence-list" style="display: flex; flex-direction: column; gap: 20px; width: 100%; text-align: left; margin: 10px 0;">';
+        let currentInputIndex = 0;
+        sentences.forEach((s, idx) => {
+            const blankedObj = blankOutWordInSentence(s, targetWord, currentInputIndex);
+            currentInputIndex = blankedObj.nextIndex;
+            
+            sentencesHtml += `
+                <div class="practice-sentence-item" style="display: flex; gap: 12px; font-size: 1.3rem; font-weight: 700; color: var(--text-primary); line-height: 1.8; word-break: normal; overflow-wrap: break-word; align-items: flex-start;">
+                    <span class="sentence-number" style="color: var(--accent); min-width: 24px; font-size: 1.15rem; font-weight: 800; text-align: right; padding-top: 2px;">${idx + 1}.</span>
+                    <div class="sentence-text" style="flex: 1;">
+                        ${blankedObj.html}
+                    </div>
+                </div>
+            `;
+        });
+        sentencesHtml += '</div>';
         
         frontEl.innerHTML = `
             <div class="practice-prompt-container" style="display: flex; flex-direction: column; gap: 16px; width: 100%; justify-content: center; align-items: center; text-align: center; margin: auto 0;">
@@ -1090,9 +1104,7 @@ function renderCurrentCard() {
                     ${explanationHtml}
                 </div>
                 <div class="practice-divider" style="width: 60px; height: 2px; background: var(--bg-tertiary); margin: 4px 0;"></div>
-                <div class="practice-sentence" style="font-size: 1.35rem; font-weight: 700; color: var(--text-primary); max-width: 100%; line-height: 1.8; word-break: normal; overflow-wrap: break-word;">
-                    ${sentenceHtml}
-                </div>
+                ${sentencesHtml}
             </div>
         `;
         spellingArea.classList.add('hidden'); // Covered by inline boxes
@@ -1154,10 +1166,10 @@ function renderCurrentCard() {
     }
 }
 
-function blankOutWordInSentence(sentence, word) {
-    if (!sentence || !word) return '';
+function blankOutWordInSentence(sentence, word, startIndex = 0) {
+    if (!sentence || !word) return { html: '', nextIndex: startIndex };
     const targetWord = word.trim();
-    if (!targetWord) return sentence;
+    if (!targetWord) return { html: sentence, nextIndex: startIndex };
     
     // Escape special regex characters in the target word
     const escapedWord = targetWord.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -1165,25 +1177,42 @@ function blankOutWordInSentence(sentence, word) {
     // Create regex matching the word case-insensitively at boundaries
     const regex = new RegExp('\\b' + escapedWord + '\\b', 'gi');
     
-    // Check if regex matches, else use non-boundary matching fallback
+    let currentStartIndex = startIndex;
+    let finalNextIndex = startIndex;
+    
     const match = regex.exec(sentence);
     if (!match) {
         const simpleRegex = new RegExp(escapedWord, 'gi');
         const simpleMatch = simpleRegex.exec(sentence);
         if (!simpleMatch) {
-            return sentence + `<br><br><span class="letter-boxes-container inline">${renderBoxesForWord(targetWord)}</span>`;
+            const boxesObj = renderBoxesForWord(targetWord, currentStartIndex);
+            return {
+                html: sentence + `<br><br><span class="letter-boxes-container inline">${boxesObj.html}</span>`,
+                nextIndex: boxesObj.nextIndex
+            };
         }
-        return sentence.replace(simpleRegex, (matched) => renderBoxesForWord(matched));
+        let htmlResult = sentence.replace(simpleRegex, (matched) => {
+            const boxesObj = renderBoxesForWord(matched, currentStartIndex);
+            currentStartIndex = boxesObj.nextIndex;
+            finalNextIndex = boxesObj.nextIndex;
+            return boxesObj.html;
+        });
+        return { html: htmlResult, nextIndex: finalNextIndex };
     }
     
-    // Reset regex index and replace
     regex.lastIndex = 0;
-    return sentence.replace(regex, (matched) => renderBoxesForWord(matched));
+    let htmlResult = sentence.replace(regex, (matched) => {
+        const boxesObj = renderBoxesForWord(matched, currentStartIndex);
+        currentStartIndex = boxesObj.nextIndex;
+        finalNextIndex = boxesObj.nextIndex;
+        return boxesObj.html;
+    });
+    return { html: htmlResult, nextIndex: finalNextIndex };
 }
 
-function renderBoxesForWord(word) {
+function renderBoxesForWord(word, startIndex = 0) {
     let html = `<span class="letter-boxes-container inline">`;
-    let inputCount = 0;
+    let inputCount = startIndex;
     for (let i = 0; i < word.length; i++) {
         const char = word.charAt(i);
         if (/\s/.test(char)) {
@@ -1196,7 +1225,7 @@ function renderBoxesForWord(word) {
         }
     }
     html += `</span>`;
-    return html;
+    return { html, nextIndex: inputCount };
 }
 
 function renderSpellingBoxes(word) {
@@ -1260,6 +1289,43 @@ function getTypedSpellingAnswer(targetWord) {
         }
     }
     return typed;
+}
+
+function getTypedAnswersForSentences(targetWord, sentencesCount) {
+    const inputs = Array.from(document.querySelectorAll('.letter-input'));
+    const typedWords = [];
+    
+    // Count how many letter inputs are needed for a single instance of the target word
+    let letterInputsPerWord = 0;
+    for (let i = 0; i < targetWord.length; i++) {
+        const char = targetWord.charAt(i);
+        if (!/\s/.test(char) && !/[.,\/#!$%\^&\*;:{}=\-_`~()]/g.test(char)) {
+            letterInputsPerWord++;
+        }
+    }
+    
+    if (letterInputsPerWord === 0) return [targetWord];
+    
+    let inputIndex = 0;
+    for (let s = 0; s < sentencesCount; s++) {
+        let typed = '';
+        for (let i = 0; i < targetWord.length; i++) {
+            const char = targetWord.charAt(i);
+            if (/\s/.test(char)) {
+                typed += ' ';
+            } else if (/[.,\/#!$%\^&\*;:{}=\-_`~()]/.test(char)) {
+                typed += char;
+            } else {
+                const input = inputs[inputIndex];
+                if (input) {
+                    typed += input.value || '';
+                    inputIndex++;
+                }
+            }
+        }
+        typedWords.push(typed.trim());
+    }
+    return typedWords;
 }
 
 // Initialize delegated listeners for spelling inputs
@@ -1390,11 +1456,43 @@ function evaluateAnswer() {
     if (!card) return;
 
     let typed = '';
+    let score = 0;
     const spellingInputs = document.querySelectorAll('.letter-input');
+    
+    // Retrieve example sentences to see how many we rendered
+    const savedSentences = exampleSentences[card.id];
+    let sentences = [];
+    if (savedSentences) {
+        if (Array.isArray(savedSentences)) {
+            sentences = savedSentences;
+        } else if (typeof savedSentences === 'string') {
+            sentences = [savedSentences];
+        }
+    }
+
     if (spellingInputs.length > 0) {
-        typed = getTypedSpellingAnswer(card.back.trim()).trim();
+        const enteredCount = Array.from(spellingInputs).filter(i => i.value.trim().length > 0).length;
+        if (enteredCount > 0) {
+            typed = 'attempted'; // dummy value to satisfy the (!typed) check
+        }
+        
+        if (sentences.length > 0) {
+            const typedWords = getTypedAnswersForSentences(card.back.trim(), sentences.length);
+            let totalScore = 0;
+            typedWords.forEach(word => {
+                totalScore += calculateMatchPercentage(word, card.back);
+            });
+            score = Math.round(totalScore / sentences.length);
+            
+            // Reconstruct a user-facing string of what they typed
+            typed = typedWords.join(' | ');
+        } else {
+            typed = getTypedSpellingAnswer(card.back.trim()).trim();
+            score = calculateMatchPercentage(typed, card.back);
+        }
     } else {
         typed = document.getElementById('practice-input').value.trim();
+        score = calculateMatchPercentage(typed, card.back);
     }
 
     if (!typed) {
@@ -1406,8 +1504,6 @@ function evaluateAnswer() {
     spellingInputs.forEach(input => {
         input.disabled = true;
     });
-
-    const score = calculateMatchPercentage(typed, card.back);
     
     let gradeInt = 0;
     let gradeText = "Again";
