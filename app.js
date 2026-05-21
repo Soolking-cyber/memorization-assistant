@@ -57,6 +57,8 @@ let createMapLinks = [];
 let editMapNodes = [];
 let editMapLinks = [];
 let linkingSourceNodeId = null;
+let linkingSourceSide = null;
+let linkingMousePos = { x: 0, y: 0 };
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -99,6 +101,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize Memory Map canvas and button click listeners
     initMapCanvasListeners();
+
+    // Cancel active linking mode on Escape click
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (linkingSourceNodeId) {
+                linkingSourceNodeId = null;
+                linkingSourceSide = null;
+                if (document.getElementById('view-create').classList.contains('active')) {
+                    renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
+                } else if (document.getElementById('view-edit').classList.contains('active')) {
+                    renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
+                }
+            }
+        }
+    });
 
     if (supabase) {
         checkAuth();
@@ -1267,8 +1284,8 @@ function renderCurrentCard() {
                     <div style="position: absolute; inset: 0; background-size: 20px 20px; background-image: radial-gradient(var(--border-color) 1px, transparent 0); opacity: 0.4; pointer-events: none;"></div>
                     <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;" id="practice-map-svg">
                         <defs>
-                            <marker id="practice-arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-                                <polygon points="0 0, 10 3.5, 0 7" fill="var(--text-secondary)" />
+                            <marker id="practice-arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                                <polygon points="0 1.5, 5 3.5, 0 5.5" fill="currentColor" />
                             </marker>
                         </defs>
                     </svg>
@@ -2109,7 +2126,7 @@ function deleteEditSentence(index) {
 
 // ------ Memory Map Core Engine & Interactive Canvas Handlers ------
 
-function getNodeBoundaryIntersection(src, tgt, w = 140, h = 55) {
+function getNodeBoundaryIntersection(src, tgt, w = 160, h = 60) {
     const cx = src.x + w / 2;
     const cy = src.y + h / 2;
     const tx = tgt.x + w / 2;
@@ -2294,6 +2311,60 @@ function showLinkToolbar(midX, midY, container, link, nodes, links, svgId, arrow
     container.appendChild(toolbar);
 }
 
+function getNodeSideCoords(node, side, w = 160, h = 60) {
+    if (side === 'top') {
+        return { x: node.x + w / 2, y: node.y };
+    } else if (side === 'right') {
+        return { x: node.x + w, y: node.y + h / 2 };
+    } else if (side === 'bottom') {
+        return { x: node.x + w / 2, y: node.y + h };
+    } else if (side === 'left') {
+        return { x: node.x, y: node.y + h / 2 };
+    }
+    return { x: node.x + w / 2, y: node.y + h / 2 };
+}
+
+function getClosestSides(src, tgt, w = 160, h = 60) {
+    const sides = ['top', 'right', 'bottom', 'left'];
+    let minD = Infinity;
+    let bestSrcSide = 'right';
+    let bestTgtSide = 'left';
+    
+    sides.forEach(sSide => {
+        const sPt = getNodeSideCoords(src, sSide, w, h);
+        sides.forEach(tSide => {
+            const tPt = getNodeSideCoords(tgt, tSide, w, h);
+            const dx = tPt.x - sPt.x;
+            const dy = tPt.y - sPt.y;
+            const dist = dx * dx + dy * dy;
+            if (dist < minD) {
+                minD = dist;
+                bestSrcSide = sSide;
+                bestTgtSide = tSide;
+            }
+        });
+    });
+    return { srcSide: bestSrcSide, tgtSide: bestTgtSide };
+}
+
+function getClosestTargetSide(sPt, tgt, w = 160, h = 60) {
+    const sides = ['top', 'right', 'bottom', 'left'];
+    let minD = Infinity;
+    let bestTgtSide = 'left';
+    
+    sides.forEach(tSide => {
+        const tPt = getNodeSideCoords(tgt, tSide, w, h);
+        const dx = tPt.x - sPt.x;
+        const dy = tPt.y - sPt.y;
+        const dist = dx * dx + dy * dy;
+        if (dist < minD) {
+            minD = dist;
+            bestTgtSide = tSide;
+        }
+    });
+    return bestTgtSide;
+}
+
 function drawLinks(nodes, links, svgId, arrowheadId, interactive = false, containerId = null, isEdit = false) {
     const svg = document.getElementById(svgId);
     if (!svg) return;
@@ -2309,30 +2380,45 @@ function drawLinks(nodes, links, svgId, arrowheadId, interactive = false, contai
         
         if (!src || !tgt) return;
         
-        const sPt = getNodeBoundaryIntersection(src, tgt);
-        const tPtRaw = getNodeBoundaryIntersection(tgt, src);
+        let sSide = link.sourceSide;
+        let tSide = link.targetSide;
         
-        const dx = tPtRaw.x - sPt.x;
-        const dy = tPtRaw.y - sPt.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        
-        let tPt = tPtRaw;
-        if (dist > 10) {
-            const lux = dx / dist;
-            const luy = dy / dist;
-            // Offset 8px back so arrowhead marker doesn't overlap the border
-            tPt = {
-                x: tPtRaw.x - lux * 8,
-                y: tPtRaw.y - luy * 8
-            };
+        if (!sSide) {
+            const closest = getClosestSides(src, tgt);
+            sSide = closest.srcSide;
+            tSide = closest.tgtSide;
+        } else if (!tSide) {
+            const sPtTemp = getNodeSideCoords(src, sSide);
+            tSide = getClosestTargetSide(sPtTemp, tgt);
         }
         
-        // Gorgeous Curved Cubic Bezier horizontal skew paths
-        const cp1x = sPt.x + dx * 0.5;
-        const cp1y = sPt.y;
-        const cp2x = tPt.x - dx * 0.5;
-        const cp2y = tPt.y;
-        const pathData = `M ${sPt.x} ${sPt.y} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${tPt.x} ${tPt.y}`;
+        const sPt = getNodeSideCoords(src, sSide);
+        const tPtRaw = getNodeSideCoords(tgt, tSide);
+        
+        let tPt = { x: tPtRaw.x, y: tPtRaw.y };
+        if (tSide === 'top') tPt.y -= 6;
+        else if (tSide === 'bottom') tPt.y += 6;
+        else if (tSide === 'left') tPt.x -= 6;
+        else if (tSide === 'right') tPt.x += 6;
+        
+        const dx = tPt.x - sPt.x;
+        const dy = tPt.y - sPt.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const offset = Math.min(150, Math.max(35, dist * 0.35));
+        
+        const cp1 = { x: sPt.x, y: sPt.y };
+        if (sSide === 'left') cp1.x -= offset;
+        else if (sSide === 'right') cp1.x += offset;
+        else if (sSide === 'top') cp1.y -= offset;
+        else if (sSide === 'bottom') cp1.y += offset;
+        
+        const cp2 = { x: tPt.x, y: tPt.y };
+        if (tSide === 'left') cp2.x -= offset;
+        else if (tSide === 'right') cp2.x += offset;
+        else if (tSide === 'top') cp2.y -= offset;
+        else if (tSide === 'bottom') cp2.y += offset;
+        
+        const pathData = `M ${sPt.x} ${sPt.y} C ${cp1.x} ${cp1.y}, ${cp2.x} ${cp2.y}, ${tPt.x} ${tPt.y}`;
         
         // Link stroke color
         const lineColor = link.color || 'var(--text-secondary)';
@@ -2345,7 +2431,6 @@ function drawLinks(nodes, links, svgId, arrowheadId, interactive = false, contai
         path.setAttribute('fill', 'none');
         path.setAttribute('marker-end', `url(#${arrowheadId})`);
         path.style.opacity = '0.7';
-        // Set color style so the arrowhead inherits it if set to currentColor
         path.style.color = lineColor;
         
         // Handle styles
@@ -2358,9 +2443,8 @@ function drawLinks(nodes, links, svgId, arrowheadId, interactive = false, contai
         svg.appendChild(path);
         
         // Compute Midpoint for labels & click events
-        // Cubic bezier midpoint formula at t = 0.5
-        const midX = 0.125 * sPt.x + 0.375 * cp1x + 0.375 * cp2x + 0.125 * tPt.x;
-        const midY = 0.125 * sPt.y + 0.375 * cp1y + 0.375 * cp2y + 0.125 * tPt.y;
+        const midX = 0.125 * sPt.x + 0.375 * cp1.x + 0.375 * cp2.x + 0.125 * tPt.x;
+        const midY = 0.125 * sPt.y + 0.375 * cp1.y + 0.375 * cp2.y + 0.125 * tPt.y;
         
         // 2. Draw invisible thick stroke path for easy clicking/hovering
         if (interactive && containerId) {
@@ -2431,6 +2515,51 @@ function drawLinks(nodes, links, svgId, arrowheadId, interactive = false, contai
             svg.appendChild(group);
         }
     });
+    
+    // Render live draft curve if currently linking in this container
+    if (interactive && linkingSourceNodeId) {
+        const srcNode = nodes.find(n => n.id === linkingSourceNodeId);
+        if (srcNode) {
+            const sSide = linkingSourceSide || 'right';
+            const sPt = getNodeSideCoords(srcNode, sSide);
+            const tPt = linkingMousePos;
+            
+            const dx = tPt.x - sPt.x;
+            const dy = tPt.y - sPt.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const offset = Math.min(150, Math.max(35, dist * 0.35));
+            
+            let tSide = 'left';
+            if (sSide === 'left') tSide = 'right';
+            else if (sSide === 'right') tSide = 'left';
+            else if (sSide === 'top') tSide = 'bottom';
+            else if (sSide === 'bottom') tSide = 'top';
+            
+            const cp1 = { x: sPt.x, y: sPt.y };
+            if (sSide === 'left') cp1.x -= offset;
+            else if (sSide === 'right') cp1.x += offset;
+            else if (sSide === 'top') cp1.y -= offset;
+            else if (sSide === 'bottom') cp1.y += offset;
+            
+            const cp2 = { x: tPt.x, y: tPt.y };
+            if (tSide === 'left') cp2.x -= offset;
+            else if (tSide === 'right') cp2.x += offset;
+            else if (tSide === 'top') cp2.y -= offset;
+            else if (tSide === 'bottom') cp2.y += offset;
+            
+            const pathData = `M ${sPt.x} ${sPt.y} C ${cp1.x} ${cp1.y}, ${cp2.x} ${cp2.y}, ${tPt.x} ${tPt.y}`;
+            
+            const draftPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            draftPath.setAttribute('d', pathData);
+            draftPath.setAttribute('stroke', '#22c55e');
+            draftPath.setAttribute('stroke-width', '2');
+            draftPath.setAttribute('stroke-dasharray', '6,4');
+            draftPath.setAttribute('fill', 'none');
+            draftPath.style.opacity = '0.8';
+            
+            svg.appendChild(draftPath);
+        }
+    }
 }
 
 function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit = false) {
@@ -2486,36 +2615,7 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
             renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
         });
         
-        // 2. Add Child Node Button (+)
-        const addChildBtn = document.createElement('button');
-        addChildBtn.type = 'button';
-        addChildBtn.className = 'node-btn add-child-btn';
-        addChildBtn.innerHTML = ICONS.plus;
-        addChildBtn.title = 'Add Linked Child Node';
-        addChildBtn.style.background = 'none';
-        addChildBtn.style.border = 'none';
-        addChildBtn.style.cursor = 'pointer';
-        addChildBtn.style.padding = '0';
-        addChildBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const childId = 'node_' + Date.now();
-            const rect = container.getBoundingClientRect();
-            
-            // Auto position to the right with a small vertical offset
-            const childNode = {
-                id: childId,
-                text: '',
-                x: Math.max(0, Math.min(rect.width - 160, node.x + 180)),
-                y: Math.max(0, Math.min(rect.height - 60, node.y + (Math.random() * 40 - 20))),
-                isRoot: false
-            };
-            
-            nodes.push(childNode);
-            links.push({ source: node.id, target: childId });
-            renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
-        });
-        
-        // 3. Select Icon Button (Smile)
+        // 2. Select Icon Button (Smile)
         const iconBtn = document.createElement('button');
         iconBtn.type = 'button';
         iconBtn.className = 'node-btn icon-btn';
@@ -2572,39 +2672,7 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
             }
         });
         
-        // 4. Link Button
-        const linkBtn = document.createElement('button');
-        linkBtn.type = 'button';
-        linkBtn.className = 'node-btn link-btn';
-        const isLinkingSource = (linkingSourceNodeId === node.id);
-        linkBtn.innerHTML = isLinkingSource ? ICONS.linkActive : ICONS.link;
-        linkBtn.title = isLinkingSource ? 'Click target node to connect' : 'Link from this node';
-        linkBtn.style.background = 'none';
-        linkBtn.style.border = 'none';
-        linkBtn.style.cursor = 'pointer';
-        linkBtn.style.padding = '0';
-        if (isLinkingSource) {
-            linkBtn.style.color = 'var(--accent)';
-            nodeEl.style.boxShadow = '0 0 8px var(--accent)';
-        }
-        linkBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (linkingSourceNodeId === node.id) {
-                linkingSourceNodeId = null;
-            } else if (linkingSourceNodeId) {
-                // Connect link
-                const exists = links.some(l => l.source === linkingSourceNodeId && l.target === node.id);
-                if (!exists && linkingSourceNodeId !== node.id) {
-                    links.push({ source: linkingSourceNodeId, target: node.id });
-                }
-                linkingSourceNodeId = null;
-            } else {
-                linkingSourceNodeId = node.id;
-            }
-            renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
-        });
-        
-        // 5. Delete Node Button
+        // 3. Delete Node Button
         const deleteBtn = document.createElement('button');
         deleteBtn.type = 'button';
         deleteBtn.className = 'node-btn delete-btn';
@@ -2635,10 +2703,50 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         });
         
         headerEl.appendChild(rootBtn);
-        headerEl.appendChild(addChildBtn);
         headerEl.appendChild(iconBtn);
-        headerEl.appendChild(linkBtn);
         headerEl.appendChild(deleteBtn);
+        
+        // 4-Sided Plus Connectors (Top, Right, Bottom, Left)
+        const sides = ['top', 'right', 'bottom', 'left'];
+        sides.forEach(side => {
+            const plusBtn = document.createElement('div');
+            plusBtn.className = `node-connector-plus ${side}`;
+            if (linkingSourceNodeId === node.id && linkingSourceSide === side) {
+                plusBtn.classList.add('active');
+            }
+            plusBtn.innerHTML = '+';
+            
+            let posStyles = '';
+            if (side === 'top') posStyles = 'top: -10px; left: calc(50% - 10px);';
+            else if (side === 'right') posStyles = 'top: calc(50% - 10px); right: -10px;';
+            else if (side === 'bottom') posStyles = 'bottom: -10px; left: calc(50% - 10px);';
+            else if (side === 'left') posStyles = 'top: calc(50% - 10px); left: -10px;';
+            
+            plusBtn.style.cssText = posStyles;
+            
+            plusBtn.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+            });
+            
+            plusBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (linkingSourceNodeId === node.id && linkingSourceSide === side) {
+                    linkingSourceNodeId = null;
+                    linkingSourceSide = null;
+                } else {
+                    linkingSourceNodeId = node.id;
+                    linkingSourceSide = side;
+                    
+                    const canvasEl = container.parentNode;
+                    const rect = canvasEl.getBoundingClientRect();
+                    linkingMousePos.x = e.clientX - rect.left;
+                    linkingMousePos.y = e.clientY - rect.top;
+                }
+                renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
+            });
+            
+            nodeEl.appendChild(plusBtn);
+        });
         
         // Node Concept Input & Icon Container
         const bodyEl = document.createElement('div');
@@ -2676,9 +2784,14 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
                 e.stopPropagation();
                 const exists = links.some(l => l.source === linkingSourceNodeId && l.target === node.id);
                 if (!exists) {
-                    links.push({ source: linkingSourceNodeId, target: node.id });
+                    links.push({
+                        source: linkingSourceNodeId,
+                        target: node.id,
+                        sourceSide: linkingSourceSide
+                    });
                 }
                 linkingSourceNodeId = null;
+                linkingSourceSide = null;
                 renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
             }
         });
@@ -2791,10 +2904,46 @@ function initMapCanvasListeners() {
             renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
         });
         
+        createCanvas.addEventListener('mousemove', (e) => {
+            if (linkingSourceNodeId) {
+                const rect = createCanvas.getBoundingClientRect();
+                linkingMousePos.x = e.clientX - rect.left;
+                linkingMousePos.y = e.clientY - rect.top;
+                drawLinks(createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead', true, 'create-map-nodes-container', false);
+            }
+        });
+        
         createCanvas.addEventListener('click', (e) => {
             if (e.target.id === 'create-map-canvas-container' || e.target.id === 'create-map-nodes-container' || e.target.id === 'create-map-svg') {
-                hideLinkToolbar(createCanvas);
-                createCanvas.querySelectorAll('.icon-picker-dropdown').forEach(p => p.remove());
+                if (linkingSourceNodeId) {
+                    const rect = createCanvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left - 80;
+                    const y = e.clientY - rect.top - 30;
+                    const boundedX = Math.max(0, Math.min(rect.width - 160, x));
+                    const boundedY = Math.max(0, Math.min(rect.height - 60, y));
+                    
+                    const newId = 'node_' + Date.now();
+                    createMapNodes.push({
+                        id: newId,
+                        text: '',
+                        x: boundedX,
+                        y: boundedY,
+                        isRoot: createMapNodes.length === 0
+                    });
+                    
+                    createMapLinks.push({
+                        source: linkingSourceNodeId,
+                        target: newId,
+                        sourceSide: linkingSourceSide
+                    });
+                    
+                    linkingSourceNodeId = null;
+                    linkingSourceSide = null;
+                    renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead', false);
+                } else {
+                    hideLinkToolbar(createCanvas);
+                    createCanvas.querySelectorAll('.icon-picker-dropdown').forEach(p => p.remove());
+                }
             }
         });
     }
@@ -2850,10 +2999,46 @@ function initMapCanvasListeners() {
             renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
         });
         
+        editCanvas.addEventListener('mousemove', (e) => {
+            if (linkingSourceNodeId) {
+                const rect = editCanvas.getBoundingClientRect();
+                linkingMousePos.x = e.clientX - rect.left;
+                linkingMousePos.y = e.clientY - rect.top;
+                drawLinks(editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true, 'edit-map-nodes-container', true);
+            }
+        });
+        
         editCanvas.addEventListener('click', (e) => {
             if (e.target.id === 'edit-map-canvas-container' || e.target.id === 'edit-map-nodes-container' || e.target.id === 'edit-map-svg') {
-                hideLinkToolbar(editCanvas);
-                editCanvas.querySelectorAll('.icon-picker-dropdown').forEach(p => p.remove());
+                if (linkingSourceNodeId) {
+                    const rect = editCanvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left - 80;
+                    const y = e.clientY - rect.top - 30;
+                    const boundedX = Math.max(0, Math.min(rect.width - 160, x));
+                    const boundedY = Math.max(0, Math.min(rect.height - 60, y));
+                    
+                    const newId = 'node_' + Date.now();
+                    editMapNodes.push({
+                        id: newId,
+                        text: '',
+                        x: boundedX,
+                        y: boundedY,
+                        isRoot: editMapNodes.length === 0
+                    });
+                    
+                    editMapLinks.push({
+                        source: linkingSourceNodeId,
+                        target: newId,
+                        sourceSide: linkingSourceSide
+                    });
+                    
+                    linkingSourceNodeId = null;
+                    linkingSourceSide = null;
+                    renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
+                } else {
+                    hideLinkToolbar(editCanvas);
+                    editCanvas.querySelectorAll('.icon-picker-dropdown').forEach(p => p.remove());
+                }
             }
         });
     }

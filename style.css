@@ -1220,6 +1220,43 @@ input.letter-box:focus {
     outline: none;
     background: rgba(0,0,0,0.05);
 }
+.node-connector-plus {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #22c55e;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: crosshair;
+    z-index: 100;
+    border: 2px solid var(--bg-card);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    transition: transform 0.1s ease, background 0.1s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+.node-connector-plus.active {
+    background: var(--accent) !important;
+    box-shadow: 0 0 8px var(--accent) !important;
+    transform: scale(1.2) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+.map-node:hover .node-connector-plus,
+.map-node:focus-within .node-connector-plus {
+    opacity: 1;
+    pointer-events: auto;
+}
+.node-connector-plus:hover {
+    transform: scale(1.2);
+    background: #16a34a;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
 .correct-answer-label {
     font-size: 0.7rem;
     color: var(--success);
