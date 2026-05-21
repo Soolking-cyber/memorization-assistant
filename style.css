@@ -1628,6 +1628,22 @@ input.letter-box:focus {
     line-height: 1.4;
 }
 
+/* Node container layer pointer events pass-through */
+#create-map-nodes-container,
+#edit-map-nodes-container,
+#practice-map-nodes-container {
+    pointer-events: none;
+}
+
+.map-node {
+    pointer-events: auto !important;
+}
+
+.map-link-toolbar {
+    pointer-events: auto !important;
+}
+
+
 
 
 

@@ -2596,6 +2596,7 @@ function drawLinks(nodes, links, svgId, arrowheadId, interactive = false, contai
             group.style.userSelect = 'none';
             if (interactive) {
                 group.style.cursor = 'pointer';
+                group.style.pointerEvents = 'auto';
             }
             
             // Mask rect
