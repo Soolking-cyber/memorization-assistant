@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuromem | Scientifically Proven Memories</title>
+    <!-- Add Supabase SDK via CDN -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css?v=5">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script type="module" src="app.js?v=5" defer></script>
+</head>
+<body>
+
+    <!-- Global Top Header (Duolingo Style) -->
+    <header class="top-header">
+        <div class="top-header-content">
+            <h1 class="logo" data-view="dashboard" style="cursor: pointer;">Neuro<span>mem</span></h1>
+            <div class="top-header-right">
+                <!-- Vault Storage status icon -->
+                <button class="header-icon-btn" id="btn-sync-status" title="Sync Status: Connected">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                </button>
+                <!-- Monochromatic Theme Toggle Button -->
+                <button class="header-icon-btn" id="btn-theme-toggle" title="Toggle Theme">
+                    <!-- Moon icon for light mode (meaning switch to dark) -->
+                    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    <!-- Sun icon for dark mode (meaning switch to light) -->
+                    <svg class="theme-icon-dark hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                </button>
+                <!-- Monochromatic User Profile Avatar Circle -->
+                <div class="user-avatar" id="user-avatar-badge">U</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout Container -->
+    <div class="app-container">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <nav id="nav-buttons" class="hidden">
+                <button class="nav-btn active" data-view="dashboard">
+                    <span class="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    </span>
+                    <span class="nav-text">Retention</span>
+                </button>
+                <button class="nav-btn" data-view="manage">
+                    <span class="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                    </span>
+                    <span class="nav-text">Memory Bank</span>
+                </button>
+                <button class="nav-btn primary-nav-btn" data-view="create">
+                    <span class="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </span>
+                    <span class="nav-text">Create Card</span>
+                </button>
+                <button class="nav-btn" id="btn-logout">
+                    <span class="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    </span>
+                    <span class="nav-text">Logout</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="content-wrapper">
+            
+            <!-- Auth View -->
+            <section id="view-auth" class="view active">
+                <div class="hero-section">
+                    <h2>Master Your Mind.</h2>
+                    <p>Using spaced repetition based on the SuperMemo-2 algorithm, Neuromem locks information into your long-term memory. Sign in to sync your progress.</p>
+                </div>
+                
+                <div class="auth-box glass slide-up form-container centered">
+                    <h3>Get Started</h3>
+                    <p class="auth-subtext">Access your personal memory bank securely.</p>
+                    <button class="btn btn-google full-width" id="btn-google-login">
+                        <svg viewBox="0 0 48 48" width="24px" height="24px"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                        Sign in with Google
+                    </button>
+                </div>
+            </section>
+
+            <!-- Dashboard View -->
+            <section id="view-dashboard" class="view hidden">
+                <!-- Hero Banner Card (Duolingo Style) -->
+                <div class="dashboard-hero glass slide-up">
+                    <div class="hero-left">
+                        <h2>Take a full retention mapping practice</h2>
+                        <p>Lock information into long-term memory using scientific spaced repetition.</p>
+                        
+                        <div class="practice-controls-inline">
+                            <div class="input-group-select">
+                                <select id="practice-type-select">
+                                    <option value="mixed">All Types (Mixed)</option>
+                                </select>
+                            </div>
+                            <button class="btn primary" id="btn-practice">Practice Free</button>
+                        </div>
+                        <p id="practice-status-msg" class="status-msg-dashboard"></p>
+                    </div>
+                    <div class="hero-right">
+                        <!-- Pure CSS Grayscale Laptop Illustration -->
+                        <div class="geometric-art">
+                            <div class="art-backdrop"></div>
+                            <div class="art-clock"></div>
+                            <div class="art-laptop">
+                                <div class="art-laptop-screen">
+                                    <div class="art-laptop-bar active"></div>
+                                    <div class="art-laptop-bar"></div>
+                                    <div class="art-laptop-graph">
+                                        <div class="art-graph-column"></div>
+                                        <div class="art-graph-column"></div>
+                                        <div class="art-graph-column"></div>
+                                        <div class="art-graph-column"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="art-laptop-base"></div>
+                            <div class="art-desk-line"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-row slide-up" style="--delay: 0.15s">
+                    <div class="stat-pill">
+                        <span class="pill-label">Total Memories:</span>
+                        <span id="stat-total" class="pill-value">0</span>
+                    </div>
+                    <div class="stat-pill active">
+                        <span class="pill-label">Due Today:</span>
+                        <span id="stat-due" class="pill-value highlight">0</span>
+                    </div>
+                </div>
+
+                <!-- Memory Categories / Practice Skills Section -->
+                <div class="skills-section slide-up" style="--delay: 0.2s">
+                    <h3>Practice Skills</h3>
+                    <!-- Dynamic tabs navigation replicating Duolingo tab bar -->
+                    <div id="category-tabs" class="category-tabs">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                    <div id="category-cards-grid" class="category-cards-grid">
+                        <!-- Dynamically populated category cards -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Create Card View -->
+            <section id="view-create" class="view hidden">
+                <div class="glass form-container slide-up">
+                    <div class="form-header">
+                        <h2>New Memory</h2>
+                        <button class="btn-icon close-view" data-view="dashboard">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+                    <form id="create-card-form">
+                        <div class="input-group">
+                            <label for="card-type">Memory Type (Category)</label>
+                            <select id="card-type" required style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); margin-bottom: 8px; font-family: 'Outfit', sans-serif;">
+                                <option value="mixed">All Types (Mixed)</option>
+                            </select>
+                            <div id="create-type-tags" class="type-tags-container" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;"></div>
+                        </div>
+                        <div class="input-group">
+                            <label for="card-front">Concept (Front)</label>
+                            <textarea id="card-front" required placeholder="What is the powerhouse of the cell?"></textarea>
+                            <input type="file" id="card-front-image" class="file-input" accept="image/*">
+                        </div>
+                        <div class="input-group">
+                            <label for="card-back">Recall (Back / Target Word)</label>
+                            <textarea id="card-back" required placeholder="Mitochondria"></textarea>
+                            <input type="file" id="card-back-image" class="file-input" accept="image/*">
+                        </div>
+                        <div class="input-group" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
+                            <label>Example Sentences (Vocabulary Memory Clues)</label>
+                            <div id="create-sentences-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
+                                <!-- Drafted sentences will render here -->
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="text" id="create-new-sentence" placeholder="e.g. The cells contain Mitochondria." style="flex: 1; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit;">
+                                <button type="button" id="btn-create-add-sentence" class="btn" style="padding: 12px 18px; border-radius: 8px;">+ Add</button>
+                            </div>
+                            <span id="create-sentence-error" style="color: #ef4444; font-size: 0.8rem; margin-top: 6px; display: none;"></span>
+                        </div>
+                        <button type="submit" class="btn primary full-width">Lock Memory</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Edit Card View -->
+            <section id="view-edit" class="view hidden">
+                <div class="glass form-container slide-up">
+                    <div class="form-header">
+                        <h2>Edit Memory</h2>
+                        <button class="btn-icon close-view" data-view="manage">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+                    <form id="edit-card-form">
+                        <input type="hidden" id="edit-card-id">
+                        <div class="input-group">
+                            <label for="edit-card-type">Memory Type (Category)</label>
+                            <select id="edit-card-type" required style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); margin-bottom: 8px; font-family: 'Outfit', sans-serif;">
+                                <option value="mixed">All Types (Mixed)</option>
+                            </select>
+                            <div id="edit-type-tags" class="type-tags-container" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;"></div>
+                        </div>
+                        <div class="input-group">
+                            <label for="edit-card-front">Concept (Front)</label>
+                            <textarea id="edit-card-front" required></textarea>
+                            <div id="edit-front-img-preview" class="hidden" style="margin-top: 10px; margin-bottom: 10px;">
+                                <img src="" style="max-height: 100px; border-radius: 4px;" alt="Current Front Image">
+                            </div>
+                            <input type="file" id="edit-card-front-image" class="file-input" accept="image/*">
+                            <small style="color: var(--text-secondary);">Select a new image to replace the current one.</small>
+                        </div>
+                        <div class="input-group">
+                            <label for="edit-card-back">Recall (Back / Target Word)</label>
+                            <textarea id="edit-card-back" required></textarea>
+                            <div id="edit-back-img-preview" class="hidden" style="margin-top: 10px; margin-bottom: 10px;">
+                                <img src="" style="max-height: 100px; border-radius: 4px;" alt="Current Back Image">
+                            </div>
+                            <input type="file" id="edit-card-back-image" class="file-input" accept="image/*">
+                            <small style="color: var(--text-secondary);">Select a new image to replace the current one.</small>
+                        </div>
+                        <div class="input-group" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
+                            <label>Example Sentences (Vocabulary Memory Clues)</label>
+                            <div id="edit-sentences-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
+                                <!-- Saved sentences will render here -->
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="text" id="edit-new-sentence" placeholder="e.g. The cells contain Mitochondria." style="flex: 1; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit;">
+                                <button type="button" id="btn-edit-add-sentence" class="btn" style="padding: 12px 18px; border-radius: 8px;">+ Add</button>
+                            </div>
+                            <span id="edit-sentence-error" style="color: #ef4444; font-size: 0.8rem; margin-top: 6px; display: none;"></span>
+                        </div>
+                        <button type="submit" class="btn primary full-width">Save Changes</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Practice View -->
+            <section id="view-practice" class="view hidden">
+                <div class="practice-header">
+                    <h2>Practice Session</h2>
+                    <p><span id="practice-progress">1</span> / <span id="practice-total">10</span></p>
+                    <button class="btn-icon close-view" data-view="dashboard">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+
+                <div class="flashcard-container perspective">
+                    <div class="flashcard" id="active-card">
+                        <div class="card-face card-front glass">
+                            <h3 id="practice-exercise-title">Complete the sentence with the correct word</h3>
+                            <!-- Inline letter boxes inside the front face if sentence prompt exists -->
+                            <div class="card-content" id="practice-front"></div>
+                            <img id="practice-front-img" class="card-img hidden" alt="Front Attachment">
+                        </div>
+                        <div class="card-face card-back glass hidden">
+                            <h3>Answer</h3>
+                            <div class="card-content" id="practice-back"></div>
+                            <img id="practice-back-img" class="card-img hidden" alt="Back Attachment">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="practice-controls">
+                    <!-- Dynamic Letter Spelling boxes container (Duolingo visual hint) -->
+                    <div id="spelling-indicator-area" class="hidden" style="width: 100%; text-align: center; margin-bottom: 12px;">
+                        <div id="practice-letter-boxes" class="letter-boxes-container">
+                            <!-- Letters filled dynamically -->
+                        </div>
+                    </div>
+
+                    <div id="typing-area" class="input-group slide-up">
+                        <textarea id="practice-input" placeholder="Type your answer here..." rows="2"></textarea>
+                        <button class="btn primary full-width" id="btn-submit-answer" style="margin-top: 16px;">Submit Answer</button>
+                    </div>
+                    
+                    <div id="evaluation-area" class="hidden slide-up" style="width: 100%; text-align: left; background: var(--bg-card); padding: 20px; border-radius: 16px; border: 2px solid var(--border-color); border-bottom: 4px solid var(--border-color);">
+                        <h3 style="margin-bottom: 8px; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Match Analysis</h3>
+                        <p style="font-size: 1.3rem; margin-bottom: 8px; font-weight: 700;">Score: <span id="eval-score">0%</span> - <span id="eval-grade" style="color: var(--accent);">Good</span></p>
+                        <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">Your Grade has been locked in automatically.</p>
+                        
+                        <!-- Incorrect example sentence collector container -->
+                        <div id="incorrect-sentence-container" class="hidden" style="margin-top: 16px; border-top: 2px solid var(--border-color); padding-top: 16px;">
+                            <label for="incorrect-sentence-input" style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 8px;">Create an example sentence using this word:</label>
+                            <div style="display: flex; gap: 8px; width: 100%;">
+                                <input type="text" id="incorrect-sentence-input" placeholder="e.g. We're running low on gas." style="flex: 1; padding: 12px 14px; border: 2px solid var(--border-color); border-radius: 12px; font-family: inherit; font-size: 0.95rem; background: var(--bg-card); color: var(--text-primary);">
+                                <button type="button" class="btn" id="btn-save-sentence" style="padding: 12px 20px; font-size: 0.85rem; border-radius: 12px;">Save Clue</button>
+                            </div>
+                            <small id="sentence-error-msg" style="color: #ea4335; font-size: 0.8rem; display: block; margin-top: 6px; font-weight: 600;" class="hidden"></small>
+                        </div>
+
+                        <button class="btn full-width" id="btn-next-card" style="margin-top: 20px;">
+                            Next Memory <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="margin-left: 6px; transition: transform 0.2s;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="practice-completed" class="hidden glass slide-up form-container centered">
+                    <h2>Session Complete</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 24px;">Your brain is getting stronger.</p>
+                    <button class="btn primary" id="btn-finish-practice">Back to Dashboard</button>
+                </div>
+            </section>
+
+            <!-- Manage View -->
+            <section id="view-manage" class="view hidden">
+                <div class="glass form-container slide-up">
+                    <div class="form-header">
+                        <h2>Memory Bank</h2>
+                        <button class="btn-icon close-view" data-view="dashboard">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+                    <div id="manage-toolbar" class="manage-toolbar hidden">
+                        <label class="manage-select-all">
+                            <input type="checkbox" id="select-all-checkbox">
+                            <span class="custom-checkbox"></span>
+                            <span>Select All</span>
+                        </label>
+                        <div class="manage-toolbar-right">
+                            <span id="selected-count" class="selected-count">0 selected</span>
+                            <button class="btn btn-delete-batch hidden" id="btn-delete-selected">Delete Selected</button>
+                        </div>
+                    </div>
+                    <div id="manage-list" class="manage-grid">
+                        <!-- Memories populated here -->
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+</body>
+</html>
