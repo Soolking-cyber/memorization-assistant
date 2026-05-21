@@ -62,6 +62,47 @@ let linkingSourceNodeId = null;
 let linkingSourceSide = null;
 let linkingMousePos = { x: 0, y: 0 };
 
+// Global Canvas Zoom States
+let createMapZoom = 1.0;
+let editMapZoom = 1.0;
+let practiceMapZoom = 1.0;
+
+function setCreateMapZoom(level) {
+    createMapZoom = Math.min(1.5, Math.max(0.5, level));
+    const viewport = document.getElementById('create-map-viewport');
+    if (viewport) {
+        viewport.style.transform = `scale(${createMapZoom})`;
+    }
+    const label = document.getElementById('create-zoom-label');
+    if (label) {
+        label.textContent = `${Math.round(createMapZoom * 100)}%`;
+    }
+}
+
+function setEditMapZoom(level) {
+    editMapZoom = Math.min(1.5, Math.max(0.5, level));
+    const viewport = document.getElementById('edit-map-viewport');
+    if (viewport) {
+        viewport.style.transform = `scale(${editMapZoom})`;
+    }
+    const label = document.getElementById('edit-zoom-label');
+    if (label) {
+        label.textContent = `${Math.round(editMapZoom * 100)}%`;
+    }
+}
+
+function setPracticeMapZoom(level) {
+    practiceMapZoom = Math.min(1.5, Math.max(0.5, level));
+    const viewport = document.getElementById('practice-map-viewport');
+    if (viewport) {
+        viewport.style.transform = `scale(${practiceMapZoom})`;
+    }
+    const label = document.getElementById('practice-zoom-label');
+    if (label) {
+        label.textContent = `${Math.round(practiceMapZoom * 100)}%`;
+    }
+}
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
     initThemeSystem();
@@ -104,6 +145,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize Memory Map canvas and button click listeners
     initMapCanvasListeners();
+
+    // Bind Zoom Control click listeners
+    const btnCreateZoomIn = document.getElementById('btn-create-zoom-in');
+    if (btnCreateZoomIn) btnCreateZoomIn.addEventListener('click', () => setCreateMapZoom(createMapZoom + 0.1));
+    const btnCreateZoomOut = document.getElementById('btn-create-zoom-out');
+    if (btnCreateZoomOut) btnCreateZoomOut.addEventListener('click', () => setCreateMapZoom(createMapZoom - 0.1));
+    const btnCreateZoomReset = document.getElementById('btn-create-zoom-reset');
+    if (btnCreateZoomReset) btnCreateZoomReset.addEventListener('click', () => setCreateMapZoom(1.0));
+
+    const btnEditZoomIn = document.getElementById('btn-edit-zoom-in');
+    if (btnEditZoomIn) btnEditZoomIn.addEventListener('click', () => setEditMapZoom(editMapZoom + 0.1));
+    const btnEditZoomOut = document.getElementById('btn-edit-zoom-out');
+    if (btnEditZoomOut) btnEditZoomOut.addEventListener('click', () => setEditMapZoom(editMapZoom - 0.1));
+    const btnEditZoomReset = document.getElementById('btn-edit-zoom-reset');
+    if (btnEditZoomReset) btnEditZoomReset.addEventListener('click', () => setEditMapZoom(1.0));
 
     // Cancel active linking mode on Escape click
     document.addEventListener('keydown', (e) => {
@@ -1308,21 +1364,32 @@ function renderCurrentCard() {
         exerciseTitleEl.textContent = "Recall the Memory Map";
         spellingArea.classList.add('hidden');
         
+        // Reset practice zoom level
+        practiceMapZoom = 1.0;
+        
         frontEl.innerHTML = `
             <div class="practice-prompt-container" style="display: flex; flex-direction: column; gap: 12px; width: 100%; height: 100%;">
                 <div class="practice-explanation" style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); text-align: center;">
                     ${mapData ? mapData.title : 'Recall this Memory Map'}
                 </div>
-                <div id="practice-map-canvas-container" style="position: relative; width: 100%; height: 350px; background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: inset 0 -2px 0 var(--border-color); user-select: none;">
-                    <div style="position: absolute; inset: 0; background-size: 20px 20px; background-image: radial-gradient(var(--border-color) 1px, transparent 0); opacity: 0.4; pointer-events: none;"></div>
-                    <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;" id="practice-map-svg">
-                        <defs>
-                            <marker id="practice-arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                                <polygon points="0 1.5, 5 3.5, 0 5.5" fill="currentColor" />
-                            </marker>
-                        </defs>
-                    </svg>
-                    <div id="practice-map-nodes-container" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2;"></div>
+                <div id="practice-map-canvas-container" style="position: relative; width: 100%; height: 500px; background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 12px; overflow: auto; box-shadow: inset 0 -2px 0 var(--border-color); user-select: none;">
+                    <div id="practice-map-viewport" style="position: absolute; left: 0; top: 0; width: 2500px; height: 2000px; transform-origin: 0 0;">
+                        <div style="position: absolute; inset: 0; background-size: 20px 20px; background-image: radial-gradient(var(--border-color) 1px, transparent 0); opacity: 0.4; pointer-events: none;"></div>
+                        <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;" id="practice-map-svg">
+                            <defs>
+                                <marker id="practice-arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                                    <polygon points="0 1.5, 5 3.5, 0 5.5" fill="currentColor" />
+                                </marker>
+                            </defs>
+                        </svg>
+                        <div id="practice-map-nodes-container" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2;"></div>
+                    </div>
+                    <div class="canvas-zoom-controls">
+                        <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-out">−</button>
+                        <span class="zoom-percent" id="practice-zoom-label">100%</span>
+                        <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-in">+</button>
+                        <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-reset" style="font-size: 0.65rem; margin-left: 2px;">R</button>
+                    </div>
                 </div>
             </div>
         `;
@@ -1330,6 +1397,14 @@ function renderCurrentCard() {
         if (mapData) {
             renderPracticeNodes('practice-map-nodes-container', mapData.nodes, mapData.links, 'practice-map-svg', 'practice-arrowhead');
         }
+        
+        // Bind practice zoom click handlers dynamically
+        const btnPracticeZoomIn = document.getElementById('btn-practice-zoom-in');
+        if (btnPracticeZoomIn) btnPracticeZoomIn.addEventListener('click', () => setPracticeMapZoom(practiceMapZoom + 0.1));
+        const btnPracticeZoomOut = document.getElementById('btn-practice-zoom-out');
+        if (btnPracticeZoomOut) btnPracticeZoomOut.addEventListener('click', () => setPracticeMapZoom(practiceMapZoom - 0.1));
+        const btnPracticeZoomReset = document.getElementById('btn-practice-zoom-reset');
+        if (btnPracticeZoomReset) btnPracticeZoomReset.addEventListener('click', () => setPracticeMapZoom(1.0));
         
         backEl.innerHTML = `<strong style="color:var(--accent);">Memory Map Title:</strong> ${mapData ? mapData.title : ''}`;
         
@@ -2431,8 +2506,12 @@ function showLinkToolbar(midX, midY, container, link, nodes, links, svgId, arrow
     });
     deleteRow.appendChild(delBtn);
     toolbar.appendChild(deleteRow);
-    
-    container.appendChild(toolbar);
+    const viewport = container.querySelector('[id$="-viewport"]');
+    if (viewport) {
+        viewport.appendChild(toolbar);
+    } else {
+        container.appendChild(toolbar);
+    }
 }
 
 function getNodeSideCoords(node, side, w = 180, h = 90) {
@@ -2959,17 +3038,17 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
             startNodeX = node.x;
             startNodeY = node.y;
             
+            const activeZoom = isEdit ? editMapZoom : createMapZoom;
             const onMouseMove = (moveEvent) => {
                 if (!isDragging) return;
-                const dx = moveEvent.clientX - startX;
-                const dy = moveEvent.clientY - startY;
+                const dx = (moveEvent.clientX - startX) / activeZoom;
+                const dy = (moveEvent.clientY - startY) / activeZoom;
                 
                 let nx = startNodeX + dx;
                 let ny = startNodeY + dy;
                 
-                const rect = container.getBoundingClientRect();
-                nx = Math.max(0, Math.min(rect.width - 180, nx));
-                ny = Math.max(0, Math.min(rect.height - 90, ny));
+                nx = Math.max(0, Math.min(2500 - 180, nx));
+                ny = Math.max(0, Math.min(2000 - 90, ny));
                 
                 node.x = nx;
                 node.y = ny;
@@ -3031,14 +3110,15 @@ function initMapCanvasListeners() {
     const createCanvas = document.getElementById('create-map-canvas-container');
     if (createCanvas) {
         createCanvas.addEventListener('dblclick', (e) => {
-            if (e.target.id !== 'create-map-canvas-container' && e.target.id !== 'create-map-nodes-container') {
+            if (e.target.id !== 'create-map-canvas-container' && e.target.id !== 'create-map-nodes-container' && e.target.id !== 'create-map-svg') {
                 return;
             }
-            const rect = createCanvas.getBoundingClientRect();
-            const x = e.clientX - rect.left - 90;
-            const y = e.clientY - rect.top - 45;
-            const boundedX = Math.max(0, Math.min(rect.width - 180, x));
-            const boundedY = Math.max(0, Math.min(rect.height - 90, y));
+            const viewport = document.getElementById('create-map-viewport');
+            const rect = viewport.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / createMapZoom - 90;
+            const y = (e.clientY - rect.top) / createMapZoom - 45;
+            const boundedX = Math.max(0, Math.min(2500 - 180, x));
+            const boundedY = Math.max(0, Math.min(2000 - 90, y));
             
             const id = 'node_' + Date.now();
             createMapNodes.push({
@@ -3054,9 +3134,10 @@ function initMapCanvasListeners() {
         
         createCanvas.addEventListener('mousemove', (e) => {
             if (linkingSourceNodeId) {
-                const rect = createCanvas.getBoundingClientRect();
-                linkingMousePos.x = e.clientX - rect.left;
-                linkingMousePos.y = e.clientY - rect.top;
+                const viewport = document.getElementById('create-map-viewport');
+                const rect = viewport.getBoundingClientRect();
+                linkingMousePos.x = (e.clientX - rect.left) / createMapZoom;
+                linkingMousePos.y = (e.clientY - rect.top) / createMapZoom;
                 drawLinks(createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead', true, 'create-map-nodes-container', false);
             }
         });
@@ -3064,11 +3145,12 @@ function initMapCanvasListeners() {
         createCanvas.addEventListener('click', (e) => {
             if (e.target.id === 'create-map-canvas-container' || e.target.id === 'create-map-nodes-container' || e.target.id === 'create-map-svg') {
                 if (linkingSourceNodeId) {
-                    const rect = createCanvas.getBoundingClientRect();
-                    const x = e.clientX - rect.left - 90;
-                    const y = e.clientY - rect.top - 45;
-                    const boundedX = Math.max(0, Math.min(rect.width - 180, x));
-                    const boundedY = Math.max(0, Math.min(rect.height - 90, y));
+                    const viewport = document.getElementById('create-map-viewport');
+                    const rect = viewport.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / createMapZoom - 90;
+                    const y = (e.clientY - rect.top) / createMapZoom - 45;
+                    const boundedX = Math.max(0, Math.min(2500 - 180, x));
+                    const boundedY = Math.max(0, Math.min(2000 - 90, y));
                     
                     const newId = 'node_' + Date.now();
                     createMapNodes.push({
@@ -3129,14 +3211,15 @@ function initMapCanvasListeners() {
     const editCanvas = document.getElementById('edit-map-canvas-container');
     if (editCanvas) {
         editCanvas.addEventListener('dblclick', (e) => {
-            if (e.target.id !== 'edit-map-canvas-container' && e.target.id !== 'edit-map-nodes-container') {
+            if (e.target.id !== 'edit-map-canvas-container' && e.target.id !== 'edit-map-nodes-container' && e.target.id !== 'edit-map-svg') {
                 return;
             }
-            const rect = editCanvas.getBoundingClientRect();
-            const x = e.clientX - rect.left - 90;
-            const y = e.clientY - rect.top - 45;
-            const boundedX = Math.max(0, Math.min(rect.width - 180, x));
-            const boundedY = Math.max(0, Math.min(rect.height - 90, y));
+            const viewport = document.getElementById('edit-map-viewport');
+            const rect = viewport.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / editMapZoom - 90;
+            const y = (e.clientY - rect.top) / editMapZoom - 45;
+            const boundedX = Math.max(0, Math.min(2500 - 180, x));
+            const boundedY = Math.max(0, Math.min(2000 - 90, y));
             
             const id = 'node_' + Date.now();
             editMapNodes.push({
@@ -3152,9 +3235,10 @@ function initMapCanvasListeners() {
         
         editCanvas.addEventListener('mousemove', (e) => {
             if (linkingSourceNodeId) {
-                const rect = editCanvas.getBoundingClientRect();
-                linkingMousePos.x = e.clientX - rect.left;
-                linkingMousePos.y = e.clientY - rect.top;
+                const viewport = document.getElementById('edit-map-viewport');
+                const rect = viewport.getBoundingClientRect();
+                linkingMousePos.x = (e.clientX - rect.left) / editMapZoom;
+                linkingMousePos.y = (e.clientY - rect.top) / editMapZoom;
                 drawLinks(editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true, 'edit-map-nodes-container', true);
             }
         });
@@ -3162,11 +3246,12 @@ function initMapCanvasListeners() {
         editCanvas.addEventListener('click', (e) => {
             if (e.target.id === 'edit-map-canvas-container' || e.target.id === 'edit-map-nodes-container' || e.target.id === 'edit-map-svg') {
                 if (linkingSourceNodeId) {
-                    const rect = editCanvas.getBoundingClientRect();
-                    const x = e.clientX - rect.left - 90;
-                    const y = e.clientY - rect.top - 45;
-                    const boundedX = Math.max(0, Math.min(rect.width - 180, x));
-                    const boundedY = Math.max(0, Math.min(rect.height - 90, y));
+                    const viewport = document.getElementById('edit-map-viewport');
+                    const rect = viewport.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / editMapZoom - 90;
+                    const y = (e.clientY - rect.top) / editMapZoom - 45;
+                    const boundedX = Math.max(0, Math.min(2500 - 180, x));
+                    const boundedY = Math.max(0, Math.min(2000 - 90, y));
                     
                     const newId = 'node_' + Date.now();
                     editMapNodes.push({
