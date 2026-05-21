@@ -1119,20 +1119,28 @@ input.letter-box:focus {
     .primary-nav-btn {
         margin-top: 0;
         box-shadow: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     .primary-nav-btn .nav-icon {
         background: var(--accent);
         color: var(--btn-primary-text);
         border-radius: 50%;
-        width: 36px;
-        height: 36px;
+        width: 44px;
+        height: 44px;
         display: flex;
         align-items: center;
         justify-content: center;
         box-sizing: border-box;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        transition: transform 0.1s ease;
     }
-    .primary-nav-btn:active {
-        transform: none;
+    .primary-nav-btn .nav-text {
+        display: none;
+    }
+    .primary-nav-btn:active .nav-icon {
+        transform: scale(0.95);
     }
     .logo { font-size: 1.25rem; }
     .content-wrapper {
@@ -1370,6 +1378,191 @@ input.letter-box:focus {
     width: 14px;
     height: 14px;
 }
+
+/* User Profile Dropdown Styles */
+.user-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 220px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    z-index: 1100;
+    padding: 8px 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform-origin: top right;
+    transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
+}
+.user-dropdown.hidden {
+    display: none !important;
+    opacity: 0;
+    transform: scale(0.95);
+    pointer-events: none;
+}
+.user-dropdown-header {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.user-email-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+.user-email {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    word-break: break-all;
+}
+.user-dropdown-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 4px 0;
+}
+.user-dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.1s ease, color 0.1s ease;
+}
+.user-dropdown-item:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--accent);
+}
+[data-theme="dark"] .user-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* Modal Styles */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    transition: opacity 0.2s ease;
+}
+.modal-backdrop.hidden {
+    display: none !important;
+    opacity: 0;
+    pointer-events: none;
+}
+.modal-content {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.modal-body {
+    padding: 20px;
+}
+.modal-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 20px 0;
+}
+
+/* Settings & Profile Specific Modal Elements */
+.profile-info-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.profile-avatar-large {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--btn-primary-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.profile-email {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    word-break: break-all;
+}
+.profile-stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 4px 10px;
+    align-self: flex-start;
+}
+[data-theme="dark"] .profile-stat-badge {
+    background: rgba(255, 255, 255, 0.03);
+}
+.profile-stat-badge .stat-num {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+.profile-stat-badge .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+.settings-section h4 {
+    margin: 0 0 6px 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.settings-subtext {
+    margin: 0 0 10px 0;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
 
 
 

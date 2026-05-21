@@ -66,6 +66,7 @@ let linkingMousePos = { x: 0, y: 0 };
 document.addEventListener('DOMContentLoaded', async () => {
     initThemeSystem();
     initNavigation();
+    initProfileMenu();
     
     // Auth events
     document.getElementById('btn-google-login').addEventListener('click', handleLogin);
@@ -160,6 +161,18 @@ function updateUserAvatarBadge() {
         const initial = email.charAt(0).toUpperCase();
         const badge = document.getElementById('user-avatar-badge');
         if (badge) badge.textContent = initial;
+
+        const dropdownEmail = document.getElementById('user-dropdown-email');
+        if (dropdownEmail) dropdownEmail.textContent = email;
+
+        const settingsEmail = document.getElementById('settings-email');
+        if (settingsEmail) settingsEmail.textContent = email;
+
+        const settingsAvatar = document.getElementById('settings-avatar');
+        if (settingsAvatar) settingsAvatar.textContent = initial;
+        
+        const settingsStatCount = document.getElementById('settings-stat-count');
+        if (settingsStatCount) settingsStatCount.textContent = cards.length;
     }
 }
 
@@ -425,6 +438,7 @@ function handleTypeSelectChange(e) {
 function renderTypeTags() {
     const createContainer = document.getElementById('create-type-tags');
     const editContainer = document.getElementById('edit-type-tags');
+    const settingsContainer = document.getElementById('settings-type-tags');
     
     const tagHtml = customTypes.map(t => {
         const displayType = t === 'mixed' ? 'All Types (Mixed)' : t;
@@ -436,6 +450,7 @@ function renderTypeTags() {
     
     if (createContainer) createContainer.innerHTML = tagHtml;
     if (editContainer) editContainer.innerHTML = tagHtml;
+    if (settingsContainer) settingsContainer.innerHTML = tagHtml;
 }
 
 function updateTypeDatalists() {
@@ -518,6 +533,9 @@ function updateDashboard() {
 
     if (totalElement) totalElement.textContent = total;
     if (dueElement) dueElement.textContent = dueCards.length;
+
+    const settingsStatCount = document.getElementById('settings-stat-count');
+    if (settingsStatCount) settingsStatCount.textContent = cards.length;
 
     if (dueCards.length > 0) {
         if (btnPractice) btnPractice.style.display = 'inline-block';
@@ -3137,4 +3155,100 @@ function renderPracticeNodes(containerId, nodes, links, svgId, arrowheadId) {
         container.appendChild(nodeEl);
     });
 }
+
+// ------ User Profile & Settings Modal ------
+
+function initProfileMenu() {
+    const avatarBadge = document.getElementById('user-avatar-badge');
+    const dropdownMenu = document.getElementById('user-dropdown-menu');
+    const btnOpenSettings = document.getElementById('btn-open-settings');
+    const btnCloseSettings = document.getElementById('btn-close-settings');
+    const settingsModal = document.getElementById('settings-modal');
+    const btnSettingsAddType = document.getElementById('btn-settings-add-type');
+    const settingsNewTypeInput = document.getElementById('settings-new-type-input');
+
+    if (avatarBadge && dropdownMenu) {
+        avatarBadge.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('hidden');
+        });
+
+        // Hide dropdown menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!dropdownMenu.classList.contains('hidden') && !dropdownMenu.contains(e.target) && e.target !== avatarBadge) {
+                dropdownMenu.classList.add('hidden');
+            }
+        });
+    }
+
+    if (btnOpenSettings && settingsModal) {
+        btnOpenSettings.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (dropdownMenu) dropdownMenu.classList.add('hidden');
+            
+            // Populate settings profile details before opening
+            if (userSession && userSession.user) {
+                const email = userSession.user.email || 'User';
+                const initial = email.charAt(0).toUpperCase();
+                const settingsAvatar = document.getElementById('settings-avatar');
+                const settingsEmail = document.getElementById('settings-email');
+                const settingsStatCount = document.getElementById('settings-stat-count');
+                
+                if (settingsAvatar) settingsAvatar.textContent = initial;
+                if (settingsEmail) settingsEmail.textContent = email;
+                if (settingsStatCount) settingsStatCount.textContent = cards.length;
+            }
+            
+            settingsModal.classList.remove('hidden');
+            renderTypeTags();
+        });
+    }
+
+    if (btnCloseSettings && settingsModal) {
+        btnCloseSettings.addEventListener('click', () => {
+            settingsModal.classList.add('hidden');
+        });
+    }
+
+    if (settingsModal) {
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) {
+                settingsModal.classList.add('hidden');
+            }
+        });
+    }
+
+    if (btnSettingsAddType && settingsNewTypeInput) {
+        btnSettingsAddType.addEventListener('click', handleSettingsAddType);
+        settingsNewTypeInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSettingsAddType();
+            }
+        });
+    }
+}
+
+function handleSettingsAddType() {
+    const input = document.getElementById('settings-new-type-input');
+    if (!input) return;
+    let newType = input.value.trim();
+    if (newType === '') return;
+    
+    if (newType.toLowerCase() === 'vocabulary') {
+        alert("The Vocabulary category must be capitalized. It has been auto-corrected.");
+        newType = 'Vocabulary';
+    }
+    
+    if (customTypes.includes(newType)) {
+        alert("This category type already exists.");
+        return;
+    }
+    
+    customTypes.push(newType);
+    localStorage.setItem('customTypes', JSON.stringify(customTypes));
+    updateTypeDatalists();
+    input.value = '';
+}
+
 

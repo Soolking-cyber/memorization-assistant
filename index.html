@@ -28,8 +28,25 @@
                     <!-- Sun icon for dark mode (meaning switch to light) -->
                     <svg class="theme-icon-dark hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
                 </button>
-                <!-- Monochromatic User Profile Avatar Circle -->
-                <div class="user-avatar" id="user-avatar-badge">U</div>
+                <!-- Monochromatic User Profile Avatar Circle with Dropdown -->
+                <div class="user-profile-container" style="position: relative; display: flex; align-items: center;">
+                    <div class="user-avatar" id="user-avatar-badge" style="cursor: pointer;" title="User Profile">U</div>
+                    <div class="user-dropdown glass hidden" id="user-dropdown-menu">
+                        <div class="user-dropdown-header">
+                            <span class="user-email-label">Signed in as</span>
+                            <span class="user-email" id="user-dropdown-email">user@example.com</span>
+                        </div>
+                        <div class="user-dropdown-divider"></div>
+                        <button class="user-dropdown-item" id="btn-open-settings" type="button">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align: middle; margin-right: 8px;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            <span>Profile & Settings</span>
+                        </button>
+                        <button class="user-dropdown-item" id="btn-logout" type="button">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align: middle; margin-right: 8px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -46,23 +63,17 @@
                     </span>
                     <span class="nav-text">Retention</span>
                 </button>
-                <button class="nav-btn" data-view="manage">
-                    <span class="nav-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-                    </span>
-                    <span class="nav-text">Memory Bank</span>
-                </button>
                 <button class="nav-btn primary-nav-btn" data-view="create">
                     <span class="nav-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </span>
                     <span class="nav-text">Create Card</span>
                 </button>
-                <button class="nav-btn" id="btn-logout">
+                <button class="nav-btn" data-view="manage">
                     <span class="nav-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
                     </span>
-                    <span class="nav-text">Logout</span>
+                    <span class="nav-text">Memory Bank</span>
                 </button>
             </nav>
         </aside>
@@ -409,6 +420,45 @@
             </section>
 
         </main>
+    </div>
+
+    <!-- User Settings Modal -->
+    <div id="settings-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass slide-up">
+            <div class="modal-header">
+                <h3>Profile & Settings</h3>
+                <button class="btn-icon" id="btn-close-settings" type="button" style="background: none; border: none; cursor: pointer; color: var(--text-primary); display: flex; align-items: center; justify-content: center;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- User Profile Info Section -->
+                <div class="profile-info-section">
+                    <div class="profile-avatar-large" id="settings-avatar">U</div>
+                    <div class="profile-details">
+                        <div class="profile-email" id="settings-email">user@example.com</div>
+                        <div class="profile-stat-badge">
+                            <span class="stat-num" id="settings-stat-count">0</span>
+                            <span class="stat-label">Total Memories</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-divider"></div>
+                
+                <!-- Manage Memory Types Section -->
+                <div class="settings-section">
+                    <h4>Manage Memory Types</h4>
+                    <p class="settings-subtext">View, add, or remove custom memory categories.</p>
+                    <div id="settings-type-tags" class="type-tags-container" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; margin-top: 8px;"></div>
+                    
+                    <div class="input-group-inline" style="display: flex; gap: 8px; align-items: center;">
+                        <input type="text" id="settings-new-type-input" placeholder="New memory type name..." style="flex: 1; padding: 10px 14px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit; font-size: 0.9rem; box-sizing: border-box; outline: none; transition: border-color 0.15s ease;">
+                        <button type="button" class="btn btn-primary" id="btn-settings-add-type" style="padding: 10px 16px; font-size: 0.9rem; font-family: inherit; font-weight: 600; cursor: pointer; border-radius: 8px; border: none; background: var(--accent); color: var(--btn-primary-text); transition: filter 0.1s ease;">Add Type</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>
