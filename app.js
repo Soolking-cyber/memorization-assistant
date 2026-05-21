@@ -1800,11 +1800,8 @@ function evaluateAnswer() {
                 nodeEl.style.borderColor = 'var(--danger)';
                 input.style.color = 'var(--danger)';
                 input.style.borderBottom = 'none';
-                
-                const label = document.createElement('span');
-                label.className = 'correct-answer-label';
-                label.textContent = node.text;
-                nodeEl.appendChild(label);
+                input.value = node.text; // Show correct keyword
+                input.title = `You typed: "${typedVal}"`;
             }
         });
         
@@ -2156,7 +2153,7 @@ function deleteEditSentence(index) {
 
 // ------ Memory Map Core Engine & Interactive Canvas Handlers ------
 
-function getNodeBoundaryIntersection(src, tgt, w = 160, h = 60) {
+function getNodeBoundaryIntersection(src, tgt, w = 180, h = 90) {
     const cx = src.x + w / 2;
     const cy = src.y + h / 2;
     const tx = tgt.x + w / 2;
@@ -2341,7 +2338,7 @@ function showLinkToolbar(midX, midY, container, link, nodes, links, svgId, arrow
     container.appendChild(toolbar);
 }
 
-function getNodeSideCoords(node, side, w = 160, h = 60) {
+function getNodeSideCoords(node, side, w = 180, h = 90) {
     if (side === 'top') {
         return { x: node.x + w / 2, y: node.y };
     } else if (side === 'right') {
@@ -2354,7 +2351,7 @@ function getNodeSideCoords(node, side, w = 160, h = 60) {
     return { x: node.x + w / 2, y: node.y + h / 2 };
 }
 
-function getClosestSides(src, tgt, w = 160, h = 60) {
+function getClosestSides(src, tgt, w = 180, h = 90) {
     const sides = ['top', 'right', 'bottom', 'left'];
     let minD = Infinity;
     let bestSrcSide = 'right';
@@ -2377,7 +2374,7 @@ function getClosestSides(src, tgt, w = 160, h = 60) {
     return { srcSide: bestSrcSide, tgtSide: bestTgtSide };
 }
 
-function getClosestTargetSide(sPt, tgt, w = 160, h = 60) {
+function getClosestTargetSide(sPt, tgt, w = 180, h = 90) {
     const sides = ['top', 'right', 'bottom', 'left'];
     let minD = Infinity;
     let bestTgtSide = 'left';
@@ -2606,8 +2603,8 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         nodeEl.style.position = 'absolute';
         nodeEl.style.left = `${node.x}px`;
         nodeEl.style.top = `${node.y}px`;
-        nodeEl.style.width = '160px';
-        nodeEl.style.height = '60px';
+        nodeEl.style.width = '180px';
+        nodeEl.style.height = '90px';
         nodeEl.style.background = 'var(--bg-card)';
         nodeEl.style.border = node.isRoot ? '2px solid var(--warning)' : '2px solid var(--border-color)';
         nodeEl.style.borderRadius = '8px';
@@ -2778,14 +2775,35 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
             nodeEl.appendChild(plusBtn);
         });
         
-        // Node Concept Input & Icon Container
+        // 1. Explanation input field
+        const expRow = document.createElement('div');
+        expRow.style = 'width: 100%; box-sizing: border-box; margin-bottom: 4px;';
+        
+        const expInput = document.createElement('input');
+        expInput.type = 'text';
+        expInput.className = 'node-explanation-input';
+        expInput.value = node.explanation || '';
+        expInput.placeholder = 'Explanation...';
+        
+        expInput.addEventListener('input', (e) => {
+            node.explanation = e.target.value;
+        });
+        expInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                expInput.blur();
+            }
+        });
+        expRow.appendChild(expInput);
+        
+        // 2. Keyword input field & Icon Container
         const bodyEl = document.createElement('div');
         bodyEl.style = 'display: flex; align-items: center; gap: 4px; width: 100%; box-sizing: border-box;';
         
         if (node.icon && ICONS[node.icon]) {
             const iconWrapper = document.createElement('span');
             iconWrapper.className = 'node-icon-wrapper';
-            iconWrapper.style = 'display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 4px; background: var(--bg-secondary); color: var(--accent); flex-shrink: 0;';
+            iconWrapper.style = 'display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 4px; background: var(--bg-secondary); color: var(--accent); flex-shrink: 0;';
             iconWrapper.innerHTML = ICONS[node.icon];
             bodyEl.appendChild(iconWrapper);
         }
@@ -2794,8 +2812,7 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         inputEl.type = 'text';
         inputEl.className = 'node-input';
         inputEl.value = node.text || '';
-        inputEl.placeholder = 'Concept...';
-        inputEl.style = 'flex: 1; border: none; background: rgba(0,0,0,0.02); border-radius: 4px; padding: 2px 4px; font-size: 0.8rem; color: var(--text-primary); box-sizing: border-box; font-family: inherit; text-align: center; width: 100%;';
+        inputEl.placeholder = 'Keyword...';
         
         inputEl.addEventListener('input', (e) => {
             node.text = e.target.value;
@@ -2807,6 +2824,7 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
             }
         });
         bodyEl.appendChild(inputEl);
+        nodeEl.appendChild(expRow);
         
         // Connect link when clicking node body in linking mode
         nodeEl.addEventListener('click', (e) => {
@@ -2852,8 +2870,8 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
                 let ny = startNodeY + dy;
                 
                 const rect = container.getBoundingClientRect();
-                nx = Math.max(0, Math.min(rect.width - 160, nx));
-                ny = Math.max(0, Math.min(rect.height - 60, ny));
+                nx = Math.max(0, Math.min(rect.width - 180, nx));
+                ny = Math.max(0, Math.min(rect.height - 90, ny));
                 
                 node.x = nx;
                 node.y = ny;
@@ -2891,6 +2909,7 @@ function initMapCanvasListeners() {
             createMapNodes.push({
                 id: id,
                 text: '',
+                explanation: '',
                 x: 80 + Math.random() * 80,
                 y: 80 + Math.random() * 80,
                 isRoot: createMapNodes.length === 0
@@ -2918,15 +2937,16 @@ function initMapCanvasListeners() {
                 return;
             }
             const rect = createCanvas.getBoundingClientRect();
-            const x = e.clientX - rect.left - 80;
-            const y = e.clientY - rect.top - 30;
-            const boundedX = Math.max(0, Math.min(rect.width - 160, x));
-            const boundedY = Math.max(0, Math.min(rect.height - 60, y));
+            const x = e.clientX - rect.left - 90;
+            const y = e.clientY - rect.top - 45;
+            const boundedX = Math.max(0, Math.min(rect.width - 180, x));
+            const boundedY = Math.max(0, Math.min(rect.height - 90, y));
             
             const id = 'node_' + Date.now();
             createMapNodes.push({
                 id: id,
                 text: '',
+                explanation: '',
                 x: boundedX,
                 y: boundedY,
                 isRoot: createMapNodes.length === 0
@@ -2947,15 +2967,16 @@ function initMapCanvasListeners() {
             if (e.target.id === 'create-map-canvas-container' || e.target.id === 'create-map-nodes-container' || e.target.id === 'create-map-svg') {
                 if (linkingSourceNodeId) {
                     const rect = createCanvas.getBoundingClientRect();
-                    const x = e.clientX - rect.left - 80;
-                    const y = e.clientY - rect.top - 30;
-                    const boundedX = Math.max(0, Math.min(rect.width - 160, x));
-                    const boundedY = Math.max(0, Math.min(rect.height - 60, y));
+                    const x = e.clientX - rect.left - 90;
+                    const y = e.clientY - rect.top - 45;
+                    const boundedX = Math.max(0, Math.min(rect.width - 180, x));
+                    const boundedY = Math.max(0, Math.min(rect.height - 90, y));
                     
                     const newId = 'node_' + Date.now();
                     createMapNodes.push({
                         id: newId,
                         text: '',
+                        explanation: '',
                         x: boundedX,
                         y: boundedY,
                         isRoot: createMapNodes.length === 0
@@ -2986,6 +3007,7 @@ function initMapCanvasListeners() {
             editMapNodes.push({
                 id: id,
                 text: '',
+                explanation: '',
                 x: 80 + Math.random() * 80,
                 y: 80 + Math.random() * 80,
                 isRoot: editMapNodes.length === 0
@@ -3013,15 +3035,16 @@ function initMapCanvasListeners() {
                 return;
             }
             const rect = editCanvas.getBoundingClientRect();
-            const x = e.clientX - rect.left - 80;
-            const y = e.clientY - rect.top - 30;
-            const boundedX = Math.max(0, Math.min(rect.width - 160, x));
-            const boundedY = Math.max(0, Math.min(rect.height - 60, y));
+            const x = e.clientX - rect.left - 90;
+            const y = e.clientY - rect.top - 45;
+            const boundedX = Math.max(0, Math.min(rect.width - 180, x));
+            const boundedY = Math.max(0, Math.min(rect.height - 90, y));
             
             const id = 'node_' + Date.now();
             editMapNodes.push({
                 id: id,
                 text: '',
+                explanation: '',
                 x: boundedX,
                 y: boundedY,
                 isRoot: editMapNodes.length === 0
@@ -3042,15 +3065,16 @@ function initMapCanvasListeners() {
             if (e.target.id === 'edit-map-canvas-container' || e.target.id === 'edit-map-nodes-container' || e.target.id === 'edit-map-svg') {
                 if (linkingSourceNodeId) {
                     const rect = editCanvas.getBoundingClientRect();
-                    const x = e.clientX - rect.left - 80;
-                    const y = e.clientY - rect.top - 30;
-                    const boundedX = Math.max(0, Math.min(rect.width - 160, x));
-                    const boundedY = Math.max(0, Math.min(rect.height - 60, y));
+                    const x = e.clientX - rect.left - 90;
+                    const y = e.clientY - rect.top - 45;
+                    const boundedX = Math.max(0, Math.min(rect.width - 180, x));
+                    const boundedY = Math.max(0, Math.min(rect.height - 90, y));
                     
                     const newId = 'node_' + Date.now();
                     editMapNodes.push({
                         id: newId,
                         text: '',
+                        explanation: '',
                         x: boundedX,
                         y: boundedY,
                         isRoot: editMapNodes.length === 0
@@ -3088,8 +3112,8 @@ function renderPracticeNodes(containerId, nodes, links, svgId, arrowheadId) {
         nodeEl.style.position = 'absolute';
         nodeEl.style.left = `${node.x}px`;
         nodeEl.style.top = `${node.y}px`;
-        nodeEl.style.width = '160px';
-        nodeEl.style.height = '60px';
+        nodeEl.style.width = '180px';
+        nodeEl.style.height = '90px';
         nodeEl.style.background = 'var(--bg-card)';
         nodeEl.style.borderRadius = '8px';
         nodeEl.style.display = 'flex';
@@ -3102,34 +3126,43 @@ function renderPracticeNodes(containerId, nodes, links, svgId, arrowheadId) {
         
         if (node.isRoot) {
             nodeEl.style.border = '2px solid var(--warning)';
-            nodeEl.style.fontWeight = '700';
             nodeEl.style.color = 'var(--text-primary)';
             
             const badge = document.createElement('span');
-            badge.style = 'font-size: 0.7rem; color: var(--warning); margin-bottom: 2px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 4px;';
+            badge.style = 'font-size: 0.7rem; color: var(--warning); margin-bottom: 2px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;';
             badge.innerHTML = `${ICONS.crown} ROOT`;
             
             const textSpan = document.createElement('span');
-            textSpan.style = 'font-size: 0.85rem; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 4px;';
+            textSpan.style = 'font-size: 0.85rem; font-weight: 700; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;';
             
             if (node.icon && ICONS[node.icon]) {
                 textSpan.innerHTML = `<span style="display:inline-flex; width:14px; height:14px; color:var(--accent); align-items:center; justify-content:center;">${ICONS[node.icon]}</span> <span>${node.text || ''}</span>`;
             } else {
                 textSpan.textContent = node.text || '';
             }
+
+            const expSpan = document.createElement('span');
+            expSpan.style = 'font-size: 0.7rem; color: var(--text-secondary); text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; margin-top: 2px; flex-shrink: 0;';
+            expSpan.textContent = node.explanation || 'Anchor';
             
             nodeEl.appendChild(badge);
             nodeEl.appendChild(textSpan);
+            nodeEl.appendChild(expSpan);
         } else {
             nodeEl.style.border = '2px solid var(--border-color)';
             
+            const expLabel = document.createElement('span');
+            expLabel.style = 'font-size: 0.75rem; color: var(--text-secondary); text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; font-weight: 500; flex-shrink: 0;';
+            expLabel.textContent = node.explanation || 'No explanation';
+            expLabel.title = node.explanation || '';
+            
             const bodyEl = document.createElement('div');
-            bodyEl.style = 'display: flex; align-items: center; gap: 4px; width: 100%; box-sizing: border-box;';
+            bodyEl.style = 'display: flex; align-items: center; gap: 4px; width: 100%; box-sizing: border-box; justify-content: center;';
             
             if (node.icon && ICONS[node.icon]) {
                 const iconWrapper = document.createElement('span');
                 iconWrapper.className = 'node-icon-wrapper';
-                iconWrapper.style = 'display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 4px; background: var(--bg-secondary); color: var(--accent); flex-shrink: 0;';
+                iconWrapper.style = 'display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 4px; background: var(--bg-secondary); color: var(--accent); flex-shrink: 0;';
                 iconWrapper.innerHTML = ICONS[node.icon];
                 bodyEl.appendChild(iconWrapper);
             }
@@ -3137,9 +3170,9 @@ function renderPracticeNodes(containerId, nodes, links, svgId, arrowheadId) {
             const input = document.createElement('input');
             input.type = 'text';
             input.className = 'practice-map-node-input';
-            input.placeholder = 'Type concept...';
+            input.placeholder = 'Type keyword...';
             input.dataset.nodeId = node.id;
-            input.style = 'flex: 1; border: none; border-bottom: 2px dashed var(--border-color); background: transparent; text-align: center; font-size: 0.8rem; color: var(--text-primary); font-family: inherit; font-weight: 700; box-sizing: border-box; padding: 2px 0; width: 100%;';
+            input.style = 'flex: 1; border: none; border-bottom: 2px dashed var(--border-color); background: transparent; text-align: center; font-size: 0.8rem; color: var(--text-primary); font-family: inherit; font-weight: 700; box-sizing: border-box; padding: 2px 0; width: 100%; outline: none;';
             
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
@@ -3149,6 +3182,7 @@ function renderPracticeNodes(containerId, nodes, links, svgId, arrowheadId) {
             });
             
             bodyEl.appendChild(input);
+            nodeEl.appendChild(expLabel);
             nodeEl.appendChild(bodyEl);
         }
         
