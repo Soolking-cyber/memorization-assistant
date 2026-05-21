@@ -1000,7 +1000,14 @@ input.letter-box:focus {
 }
 .manage-select-all input:checked ~ .custom-checkbox::after,
 .manage-card-checkbox input:checked ~ .custom-checkbox::after {
-    content: '✓'; color: #ffffff; font-size: 12px; font-weight: 900;
+    content: '';
+    width: 5px;
+    height: 9px;
+    border: solid #ffffff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    display: inline-block;
+    margin-bottom: 2px;
 }
 .manage-select-all span:last-child { pointer-events: none; }
 
@@ -1223,6 +1230,42 @@ input.letter-box:focus {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
+}
+
+/* Standardized Icon SVG Core Styles */
+.icon-svg {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: middle;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.icon-svg.inline-icon {
+    width: 14px;
+    height: 14px;
+    margin-right: 4px;
+    vertical-align: -2.5px;
+}
+
+.icon-svg.glow {
+    filter: drop-shadow(0 0 3px var(--accent));
+}
+
+.icon-svg.active {
+    color: var(--accent);
+}
+
+/* Adjust inline guides Bulb and Link styles to align perfectly */
+.guide-wrapper .icon-svg.inline-icon {
+    width: 15px;
+    height: 15px;
+    color: var(--accent);
 }
 
 

@@ -11,6 +11,17 @@ try {
     console.error("Supabase client not initialized. Ensure your keys are set properly.");
 }
 
+const ICONS = {
+    crown: `<svg viewBox="0 0 24 24" class="icon-svg"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"></path><path d="M3 20h18"></path></svg>`,
+    circle: `<svg viewBox="0 0 24 24" class="icon-svg"><circle cx="12" cy="12" r="10"></circle></svg>`,
+    link: `<svg viewBox="0 0 24 24" class="icon-svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`,
+    linkActive: `<svg viewBox="0 0 24 24" class="icon-svg glow active"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`,
+    close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" style="vertical-align: middle; display: inline-block; pointer-events: none;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+    closeSmall: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11" style="vertical-align: middle; display: inline-block; pointer-events: none;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+    trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" style="vertical-align: middle; display: inline-block; pointer-events: none;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`,
+    check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16" style="vertical-align: middle; display: inline-block; margin-left: 6px; pointer-events: none;"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+};
+
 let cards = [];
 let customTypes = JSON.parse(localStorage.getItem('customTypes')) || ['mixed', 'Vocabulary', 'Memory Map'];
 if (!customTypes.includes('mixed')) customTypes.unshift('mixed');
@@ -390,7 +401,7 @@ function renderTypeTags() {
         if (t === 'mixed' || t === 'Vocabulary' || t === 'Memory Map') {
             return `<span style="display: inline-flex; align-items: center; padding: 4px 10px; background: rgba(0,0,0,0.05); border-radius: 12px; font-size: 0.85rem; border: 1px solid var(--border-color);">${displayType}</span>`;
         }
-        return `<span style="display: inline-flex; align-items: center; padding: 4px 10px; background: rgba(0,0,0,0.05); border-radius: 12px; font-size: 0.85rem; border: 1px solid var(--border-color);">${displayType} <button type="button" onclick="removeType('${t}')" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; margin-left:6px; font-size:0.9rem; padding:0; font-weight:bold;">×</button></span>`;
+        return `<span style="display: inline-flex; align-items: center; padding: 4px 10px; background: rgba(0,0,0,0.05); border-radius: 12px; font-size: 0.85rem; border: 1px solid var(--border-color);">${displayType} <button type="button" onclick="removeType('${t}')" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; margin-left:6px; padding:0; display:inline-flex; align-items:center;">${ICONS.closeSmall}</button></span>`;
     }).join('');
     
     if (createContainer) createContainer.innerHTML = tagHtml;
@@ -640,7 +651,7 @@ function renderManageView() {
                     ${sentencesArray.map((s, idx) => `
                         <div class="manage-sentence-item" style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 8px; font-size: 0.85rem;">
                             <span style="flex: 1; margin-right: 8px; line-height: 1.4;">${s}</span>
-                            <button type="button" class="delete-sentence-bank-btn" data-card-id="${card.id}" data-index="${idx}" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer; font-size:1.1rem; padding:0 4px;" title="Delete Clue">×</button>
+                            <button type="button" class="delete-sentence-bank-btn" data-card-id="${card.id}" data-index="${idx}" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:0 4px; display:inline-flex; align-items:center;" title="Delete Clue">${ICONS.trash}</button>
                         </div>
                     `).join('')}
                 </div>
@@ -934,14 +945,14 @@ async function handleCreateCard(e) {
     draftCreateSentences = [];
     renderCreateSentencesList();
     
-    btn.textContent = "Memory Locked! ✓";
+    btn.innerHTML = "Memory Locked! " + ICONS.check;
     btn.style.background = "var(--accent)";
     btn.style.borderColor = "var(--accent)";
     btn.style.color = "#ffffff";
     btn.disabled = false;
     
     setTimeout(() => {
-        btn.textContent = oldText;
+        btn.innerHTML = oldText;
         btn.style.background = "";
         btn.style.borderColor = "";
         btn.style.color = "";
@@ -1146,13 +1157,13 @@ async function handleEditCardSubmit(e) {
         updateDashboard();
         renderManageView();
         
-        btn.textContent = "Changes Saved! ✓";
+        btn.innerHTML = "Changes Saved! " + ICONS.check;
         btn.style.background = "var(--accent)";
         btn.style.borderColor = "var(--accent)";
         btn.style.color = "#ffffff";
         
         setTimeout(() => {
-            btn.textContent = oldText;
+            btn.innerHTML = oldText;
             btn.style.background = "";
             btn.style.borderColor = "";
             btn.style.color = "";
@@ -1906,7 +1917,7 @@ function saveIncorrectExampleSentence() {
     exampleSentences[card.id] = sentencesArray;
     localStorage.setItem('exampleSentences', JSON.stringify(exampleSentences));
     
-    errorMsg.textContent = "Sentence saved as memory clue! ✓";
+    errorMsg.innerHTML = "Sentence saved as memory clue! " + ICONS.check;
     errorMsg.style.color = "#34a853";
     errorMsg.classList.remove('hidden');
     
@@ -2013,7 +2024,7 @@ function renderCreateSentencesList() {
         
         row.innerHTML = `
             <span style="flex: 1; margin-right: 10px; line-height: 1.4;">${sentence}</span>
-            <button type="button" onclick="deleteDraftCreateSentence(${index})" style="background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; padding: 0 4px; font-size: 1.1rem;">×</button>
+            <button type="button" onclick="deleteDraftCreateSentence(${index})" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0 4px; display: inline-flex; align-items: center;">${ICONS.closeSmall}</button>
         `;
         listDiv.appendChild(row);
     });
@@ -2074,7 +2085,7 @@ function renderEditSentencesList() {
         
         row.innerHTML = `
             <span style="flex: 1; margin-right: 10px; line-height: 1.4;">${sentence}</span>
-            <button type="button" onclick="deleteEditSentence(${index})" style="background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; padding: 0 4px; font-size: 1.1rem;">×</button>
+            <button type="button" onclick="deleteEditSentence(${index})" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0 4px; display: inline-flex; align-items: center;">${ICONS.closeSmall}</button>
         `;
         listDiv.appendChild(row);
     });
@@ -2194,12 +2205,11 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         const rootBtn = document.createElement('button');
         rootBtn.type = 'button';
         rootBtn.className = `node-btn root-btn ${node.isRoot ? 'active' : ''}`;
-        rootBtn.innerHTML = node.isRoot ? '👑' : '⚪';
+        rootBtn.innerHTML = node.isRoot ? ICONS.crown : ICONS.circle;
         rootBtn.title = node.isRoot ? 'Root Node (Static)' : 'Set as Root Node';
         rootBtn.style.background = 'none';
         rootBtn.style.border = 'none';
         rootBtn.style.cursor = 'pointer';
-        rootBtn.style.fontSize = '0.75rem';
         rootBtn.style.padding = '0';
         if (node.isRoot) {
             rootBtn.style.color = 'var(--warning)';
@@ -2216,12 +2226,11 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         linkBtn.type = 'button';
         linkBtn.className = 'node-btn link-btn';
         const isLinkingSource = (linkingSourceNodeId === node.id);
-        linkBtn.innerHTML = isLinkingSource ? '⚡' : '🔗';
+        linkBtn.innerHTML = isLinkingSource ? ICONS.linkActive : ICONS.link;
         linkBtn.title = isLinkingSource ? 'Click target node to connect' : 'Link from this node';
         linkBtn.style.background = 'none';
         linkBtn.style.border = 'none';
         linkBtn.style.cursor = 'pointer';
-        linkBtn.style.fontSize = '0.75rem';
         linkBtn.style.padding = '0';
         if (isLinkingSource) {
             linkBtn.style.color = 'var(--accent)';
@@ -2248,14 +2257,12 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         const deleteBtn = document.createElement('button');
         deleteBtn.type = 'button';
         deleteBtn.className = 'node-btn delete-btn';
-        deleteBtn.innerHTML = '×';
+        deleteBtn.innerHTML = ICONS.close;
         deleteBtn.title = 'Delete Node';
         deleteBtn.style.background = 'none';
         deleteBtn.style.border = 'none';
         deleteBtn.style.cursor = 'pointer';
         deleteBtn.style.color = '#ef4444';
-        deleteBtn.style.fontSize = '0.9rem';
-        deleteBtn.style.fontWeight = 'bold';
         deleteBtn.style.padding = '0';
         deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -2514,8 +2521,8 @@ function renderPracticeNodes(containerId, nodes, links, svgId, arrowheadId) {
             nodeEl.style.color = 'var(--text-primary)';
             
             const badge = document.createElement('span');
-            badge.style = 'font-size: 0.7rem; color: var(--warning); margin-bottom: 2px; font-weight: 800;';
-            badge.textContent = '👑 ROOT';
+            badge.style = 'font-size: 0.7rem; color: var(--warning); margin-bottom: 2px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 4px;';
+            badge.innerHTML = `${ICONS.crown} ROOT`;
             
             const textSpan = document.createElement('span');
             textSpan.style = 'font-size: 0.85rem; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px; box-sizing: border-box;';
