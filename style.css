@@ -1268,4 +1268,71 @@ input.letter-box:focus {
     color: var(--accent);
 }
 
+/* Floating Link (Connection) Styling Toolbar */
+.map-link-toolbar {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 10px 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    width: 190px;
+    align-items: stretch;
+    box-sizing: border-box;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.map-link-toolbar::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 12px;
+    height: 12px;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    pointer-events: none;
+}
+
+/* Colors and Styles hover effects */
+.color-dot:hover {
+    transform: scale(1.3) !important;
+}
+.color-dot:active {
+    transform: scale(1.1) !important;
+}
+
+.style-btn:hover {
+    filter: brightness(1.1);
+}
+
+.link-delete-btn:hover {
+    color: #f87171 !important;
+    transform: scale(1.15);
+}
+
+.link-delete-btn:active {
+    transform: scale(0.95);
+}
+
+/* Icon Picker Grid button styles */
+.icon-picker-dropdown button {
+    border: 1px solid transparent;
+}
+.icon-picker-dropdown button:hover {
+    border-color: var(--border-color);
+}
+
+/* Node Icon inline styling wrapper */
+.node-icon-wrapper svg {
+    width: 14px;
+    height: 14px;
+}
+
+
 

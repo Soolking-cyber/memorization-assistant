@@ -19,7 +19,18 @@ const ICONS = {
     close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" style="vertical-align: middle; display: inline-block; pointer-events: none;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
     closeSmall: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11" style="vertical-align: middle; display: inline-block; pointer-events: none;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
     trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" style="vertical-align: middle; display: inline-block; pointer-events: none;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`,
-    check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16" style="vertical-align: middle; display: inline-block; margin-left: 6px; pointer-events: none;"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+    check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16" style="vertical-align: middle; display: inline-block; margin-left: 6px; pointer-events: none;"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+    plus: `<svg viewBox="0 0 24 24" class="icon-svg"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+    smile: `<svg viewBox="0 0 24 24" class="icon-svg"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>`,
+    star: `<svg viewBox="0 0 24 24" class="icon-svg"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`,
+    idea: `<svg viewBox="0 0 24 24" class="icon-svg"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15 15.6c1.1-1.03 1.88-2.43 1.88-3.9 0-3.04-2.46-5.5-5.5-5.5S5.88 8.66 5.88 11.7c0 1.47.78 2.87 1.88 3.9H15z"></path></svg>`,
+    trophy: `<svg viewBox="0 0 24 24" class="icon-svg"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34"></path><path d="M12 2a6 6 0 0 1 6 6v3.5a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8a6 6 0 0 1 6-6z"></path></svg>`,
+    folder: `<svg viewBox="0 0 24 24" class="icon-svg"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`,
+    pin: `<svg viewBox="0 0 24 24" class="icon-svg"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`,
+    help: `<svg viewBox="0 0 24 24" class="icon-svg"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
+    heart: `<svg viewBox="0 0 24 24" class="icon-svg"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`,
+    gear: `<svg viewBox="0 0 24 24" class="icon-svg"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
+    calendar: `<svg viewBox="0 0 24 24" class="icon-svg"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`
 };
 
 let cards = [];
@@ -1731,7 +1742,7 @@ function evaluateAnswer() {
             const matchScore = calculateMatchPercentage(typedVal, correctVal);
             totalScore += matchScore;
             
-            const nodeEl = input.parentNode;
+            const nodeEl = input.closest('.map-node');
             input.disabled = true;
             
             if (matchScore === 100) {
@@ -2124,13 +2135,173 @@ function getNodeBoundaryIntersection(src, tgt, w = 140, h = 55) {
     };
 }
 
-function drawLinks(nodes, links, svgId, arrowheadId) {
+let activeSelectedLink = null;
+
+function hideLinkToolbar(container) {
+    const existing = container.querySelector('.map-link-toolbar');
+    if (existing) {
+        existing.remove();
+    }
+    activeSelectedLink = null;
+}
+
+function showLinkToolbar(midX, midY, container, link, nodes, links, svgId, arrowheadId, containerId, isEdit) {
+    // Hide any existing toolbar first
+    hideLinkToolbar(container);
+    
+    activeSelectedLink = { link, svgId, containerId, nodes, links, arrowheadId, isEdit };
+    
+    const toolbar = document.createElement('div');
+    toolbar.className = 'map-link-toolbar';
+    toolbar.style.position = 'absolute';
+    toolbar.style.left = `${midX}px`;
+    toolbar.style.top = `${midY - 45}px`; // Display 45px above
+    toolbar.style.transform = 'translate(-50%, -100%)';
+    toolbar.style.zIndex = '1000';
+    
+    // Close button
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'toolbar-close-btn';
+    closeBtn.innerHTML = ICONS.closeSmall;
+    closeBtn.style = 'position: absolute; right: 4px; top: 4px; border: none; background: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; padding: 2px;';
+    closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        hideLinkToolbar(container);
+    });
+    toolbar.appendChild(closeBtn);
+
+    // Label input
+    const inputGroup = document.createElement('div');
+    inputGroup.style = 'display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; width: 100%;';
+    
+    const label = document.createElement('label');
+    label.textContent = 'Connection Label';
+    label.style = 'font-size: 0.65rem; color: var(--text-secondary); font-weight: 700;';
+    
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = link.label || '';
+    input.placeholder = 'e.g. causes, belongs to...';
+    input.className = 'toolbar-input';
+    input.style = 'padding: 6px 8px; font-size: 0.75rem; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-secondary); color: var(--text-primary); outline: none; width: 100%; box-sizing: border-box;';
+    
+    input.addEventListener('input', (e) => {
+        link.label = e.target.value;
+        drawLinks(nodes, links, svgId, arrowheadId, true, containerId, isEdit);
+    });
+    
+    inputGroup.appendChild(label);
+    inputGroup.appendChild(input);
+    toolbar.appendChild(inputGroup);
+    
+    // Row for Color & Style & Delete
+    const row = document.createElement('div');
+    row.style = 'display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%;';
+    
+    // Colors group
+    const colorsDiv = document.createElement('div');
+    colorsDiv.style = 'display: flex; gap: 4px;';
+    const colorOptions = [
+        { name: 'default', value: '' },
+        { name: 'blue', value: '#3b82f6' },
+        { name: 'green', value: '#22c55e' },
+        { name: 'red', value: '#ef4444' },
+        { name: 'orange', value: '#f97316' },
+        { name: 'purple', value: '#a855f7' }
+    ];
+    colorOptions.forEach(opt => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = `color-dot ${link.color === opt.value ? 'active' : ''}`;
+        dot.style = `width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border-color); cursor: pointer; padding: 0; background-color: ${opt.value || 'var(--text-secondary)'}; transition: transform 0.1s;`;
+        if (link.color === opt.value) {
+            dot.style.transform = 'scale(1.2)';
+            dot.style.borderColor = 'var(--text-primary)';
+        }
+        dot.addEventListener('click', (e) => {
+            e.stopPropagation();
+            link.color = opt.value;
+            // Highlight active dot
+            toolbar.querySelectorAll('.color-dot').forEach(d => {
+                d.style.transform = '';
+                d.style.borderColor = 'var(--border-color)';
+            });
+            dot.style.transform = 'scale(1.2)';
+            dot.style.borderColor = 'var(--text-primary)';
+            
+            drawLinks(nodes, links, svgId, arrowheadId, true, containerId, isEdit);
+        });
+        colorsDiv.appendChild(dot);
+    });
+    
+    row.appendChild(colorsDiv);
+    
+    // Styles group
+    const stylesDiv = document.createElement('div');
+    stylesDiv.style = 'display: flex; gap: 4px; border: 1px solid var(--border-color); border-radius: 4px; overflow: hidden;';
+    const styleOptions = [
+        { name: 'Solid', value: 'solid' },
+        { name: 'Dashed', value: 'dashed' },
+        { name: 'Dotted', value: 'dotted' }
+    ];
+    styleOptions.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = opt.name[0]; // S, D, D
+        btn.title = opt.name;
+        btn.className = `style-btn ${(link.style || 'solid') === opt.value ? 'active' : ''}`;
+        btn.style = `border: none; padding: 2px 6px; font-size: 0.65rem; cursor: pointer; background: ${(link.style || 'solid') === opt.value ? 'var(--accent)' : 'var(--bg-secondary)'}; color: ${(link.style || 'solid') === opt.value ? '#ffffff' : 'var(--text-primary)'}; font-weight: 700;`;
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            link.style = opt.value;
+            // Update UI
+            stylesDiv.querySelectorAll('.style-btn').forEach(b => {
+                b.style.background = 'var(--bg-secondary)';
+                b.style.color = 'var(--text-primary)';
+            });
+            btn.style.background = 'var(--accent)';
+            btn.style.color = '#ffffff';
+            
+            drawLinks(nodes, links, svgId, arrowheadId, true, containerId, isEdit);
+        });
+        stylesDiv.appendChild(btn);
+    });
+    row.appendChild(stylesDiv);
+    
+    // Delete link button
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'link-delete-btn';
+    delBtn.innerHTML = ICONS.trash;
+    delBtn.title = 'Delete Connection';
+    delBtn.style = 'border: none; background: none; cursor: pointer; color: #ef4444; display: flex; align-items: center; justify-content: center; padding: 2px; transition: transform 0.1s;';
+    delBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (confirm("Are you sure you want to delete this connection?")) {
+            const idx = links.indexOf(link);
+            if (idx !== -1) {
+                links.splice(idx, 1);
+            }
+            hideLinkToolbar(container);
+            drawLinks(nodes, links, svgId, arrowheadId, true, containerId, isEdit);
+        }
+    });
+    
+    row.appendChild(delBtn);
+    toolbar.appendChild(row);
+    
+    container.appendChild(toolbar);
+}
+
+function drawLinks(nodes, links, svgId, arrowheadId, interactive = false, containerId = null, isEdit = false) {
     const svg = document.getElementById(svgId);
     if (!svg) return;
     
-    // Clear all existing paths
-    const paths = svg.querySelectorAll('path');
-    paths.forEach(p => p.remove());
+    // Keep defs but clear everything else
+    const defs = svg.querySelector('defs');
+    svg.innerHTML = '';
+    if (defs) svg.appendChild(defs);
     
     links.forEach(link => {
         const src = nodes.find(n => n.id === link.source);
@@ -2156,15 +2327,109 @@ function drawLinks(nodes, links, svgId, arrowheadId) {
             };
         }
         
+        // Gorgeous Curved Cubic Bezier horizontal skew paths
+        const cp1x = sPt.x + dx * 0.5;
+        const cp1y = sPt.y;
+        const cp2x = tPt.x - dx * 0.5;
+        const cp2y = tPt.y;
+        const pathData = `M ${sPt.x} ${sPt.y} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${tPt.x} ${tPt.y}`;
+        
+        // Link stroke color
+        const lineColor = link.color || 'var(--text-secondary)';
+        
+        // 1. Draw actual path
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', `M ${sPt.x} ${sPt.y} L ${tPt.x} ${tPt.y}`);
-        path.setAttribute('stroke', 'var(--text-secondary)');
+        path.setAttribute('d', pathData);
+        path.setAttribute('stroke', lineColor);
         path.setAttribute('stroke-width', '2');
         path.setAttribute('fill', 'none');
         path.setAttribute('marker-end', `url(#${arrowheadId})`);
-        path.style.opacity = '0.6';
+        path.style.opacity = '0.7';
+        // Set color style so the arrowhead inherits it if set to currentColor
+        path.style.color = lineColor;
+        
+        // Handle styles
+        if (link.style === 'dashed') {
+            path.setAttribute('stroke-dasharray', '6,4');
+        } else if (link.style === 'dotted') {
+            path.setAttribute('stroke-dasharray', '2,3');
+        }
         
         svg.appendChild(path);
+        
+        // Compute Midpoint for labels & click events
+        // Cubic bezier midpoint formula at t = 0.5
+        const midX = 0.125 * sPt.x + 0.375 * cp1x + 0.375 * cp2x + 0.125 * tPt.x;
+        const midY = 0.125 * sPt.y + 0.375 * cp1y + 0.375 * cp2y + 0.125 * tPt.y;
+        
+        // 2. Draw invisible thick stroke path for easy clicking/hovering
+        if (interactive && containerId) {
+            const overlay = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            overlay.setAttribute('d', pathData);
+            overlay.setAttribute('stroke', 'transparent');
+            overlay.setAttribute('stroke-width', '12');
+            overlay.setAttribute('fill', 'none');
+            overlay.style.cursor = 'pointer';
+            overlay.style.pointerEvents = 'stroke';
+            
+            overlay.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const container = document.getElementById(containerId);
+                if (container) {
+                    showLinkToolbar(midX, midY, container, link, nodes, links, svgId, arrowheadId, containerId, isEdit);
+                }
+            });
+            svg.appendChild(overlay);
+        }
+        
+        // 3. Draw connection label group if it exists
+        if (link.label && link.label.trim().length > 0) {
+            const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            group.style.userSelect = 'none';
+            if (interactive) {
+                group.style.cursor = 'pointer';
+            }
+            
+            // Mask rect
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            const labelLength = link.label.length;
+            const rWidth = Math.max(45, labelLength * 6.5 + 10);
+            const rHeight = 18;
+            rect.setAttribute('width', rWidth);
+            rect.setAttribute('height', rHeight);
+            rect.setAttribute('x', midX - rWidth / 2);
+            rect.setAttribute('y', midY - rHeight / 2);
+            rect.setAttribute('rx', '4');
+            rect.setAttribute('ry', '4');
+            rect.setAttribute('fill', 'var(--bg-card)');
+            rect.setAttribute('stroke', 'var(--border-color)');
+            rect.setAttribute('stroke-width', '1');
+            
+            // Text
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', midX);
+            text.setAttribute('y', midY + 4);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('font-size', '10');
+            text.setAttribute('font-weight', '700');
+            text.setAttribute('fill', 'var(--text-primary)');
+            text.textContent = link.label;
+            
+            group.appendChild(rect);
+            group.appendChild(text);
+            
+            if (interactive && containerId) {
+                group.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const container = document.getElementById(containerId);
+                    if (container) {
+                        showLinkToolbar(midX, midY, container, link, nodes, links, svgId, arrowheadId, containerId, isEdit);
+                    }
+                });
+            }
+            
+            svg.appendChild(group);
+        }
     });
 }
 
@@ -2173,8 +2438,8 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
     if (!container) return;
     container.innerHTML = '';
     
-    // Draw links first so they are behind the nodes
-    drawLinks(nodes, links, svgId, arrowheadId);
+    // Draw links first so they are behind the nodes (interactive = true)
+    drawLinks(nodes, links, svgId, arrowheadId, true, containerId, isEdit);
     
     nodes.forEach(node => {
         const nodeEl = document.createElement('div');
@@ -2182,8 +2447,8 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         nodeEl.style.position = 'absolute';
         nodeEl.style.left = `${node.x}px`;
         nodeEl.style.top = `${node.y}px`;
-        nodeEl.style.width = '140px';
-        nodeEl.style.height = '55px';
+        nodeEl.style.width = '160px';
+        nodeEl.style.height = '60px';
         nodeEl.style.background = 'var(--bg-card)';
         nodeEl.style.border = node.isRoot ? '2px solid var(--warning)' : '2px solid var(--border-color)';
         nodeEl.style.borderRadius = '8px';
@@ -2201,7 +2466,7 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         headerEl.style.alignItems = 'center';
         headerEl.style.marginBottom = '2px';
         
-        // Root Toggle Button
+        // 1. Root Toggle Button
         const rootBtn = document.createElement('button');
         rootBtn.type = 'button';
         rootBtn.className = `node-btn root-btn ${node.isRoot ? 'active' : ''}`;
@@ -2221,7 +2486,93 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
             renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
         });
         
-        // Link Button
+        // 2. Add Child Node Button (+)
+        const addChildBtn = document.createElement('button');
+        addChildBtn.type = 'button';
+        addChildBtn.className = 'node-btn add-child-btn';
+        addChildBtn.innerHTML = ICONS.plus;
+        addChildBtn.title = 'Add Linked Child Node';
+        addChildBtn.style.background = 'none';
+        addChildBtn.style.border = 'none';
+        addChildBtn.style.cursor = 'pointer';
+        addChildBtn.style.padding = '0';
+        addChildBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const childId = 'node_' + Date.now();
+            const rect = container.getBoundingClientRect();
+            
+            // Auto position to the right with a small vertical offset
+            const childNode = {
+                id: childId,
+                text: '',
+                x: Math.max(0, Math.min(rect.width - 160, node.x + 180)),
+                y: Math.max(0, Math.min(rect.height - 60, node.y + (Math.random() * 40 - 20))),
+                isRoot: false
+            };
+            
+            nodes.push(childNode);
+            links.push({ source: node.id, target: childId });
+            renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
+        });
+        
+        // 3. Select Icon Button (Smile)
+        const iconBtn = document.createElement('button');
+        iconBtn.type = 'button';
+        iconBtn.className = 'node-btn icon-btn';
+        iconBtn.innerHTML = ICONS.smile;
+        iconBtn.title = 'Attach Icon to Concept';
+        iconBtn.style.background = 'none';
+        iconBtn.style.border = 'none';
+        iconBtn.style.cursor = 'pointer';
+        iconBtn.style.padding = '0';
+        iconBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            const existingPicker = nodeEl.querySelector('.icon-picker-dropdown');
+            if (existingPicker) {
+                existingPicker.remove();
+            } else {
+                // Close other open icon pickers first
+                container.querySelectorAll('.icon-picker-dropdown').forEach(p => p.remove());
+                
+                const picker = document.createElement('div');
+                picker.className = 'icon-picker-dropdown';
+                picker.style = 'position: absolute; top: 22px; left: 0; z-index: 1001; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 6px; width: 120px;';
+                
+                const availableIcons = ['star', 'idea', 'trophy', 'folder', 'pin', 'help', 'heart', 'gear', 'calendar'];
+                
+                // None / Remove Option
+                const noneBtn = document.createElement('button');
+                noneBtn.type = 'button';
+                noneBtn.textContent = 'Remove';
+                noneBtn.style = 'grid-column: span 4; font-size: 0.65rem; padding: 2px; border: none; background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; border-radius: 3px; font-weight: 700;';
+                noneBtn.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    delete node.icon;
+                    renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
+                });
+                picker.appendChild(noneBtn);
+                
+                availableIcons.forEach(iconName => {
+                    const optBtn = document.createElement('button');
+                    optBtn.type = 'button';
+                    optBtn.innerHTML = ICONS[iconName];
+                    optBtn.style = 'background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--text-primary); transition: background 0.1s;';
+                    optBtn.addEventListener('mouseenter', () => optBtn.style.background = 'var(--bg-secondary)');
+                    optBtn.addEventListener('mouseleave', () => optBtn.style.background = 'none');
+                    optBtn.addEventListener('click', (ev) => {
+                        ev.stopPropagation();
+                        node.icon = iconName;
+                        renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
+                    });
+                    picker.appendChild(optBtn);
+                });
+                
+                nodeEl.appendChild(picker);
+            }
+        });
+        
+        // 4. Link Button
         const linkBtn = document.createElement('button');
         linkBtn.type = 'button';
         linkBtn.className = 'node-btn link-btn';
@@ -2253,7 +2604,7 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
             renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
         });
         
-        // Delete Node Button
+        // 5. Delete Node Button
         const deleteBtn = document.createElement('button');
         deleteBtn.type = 'button';
         deleteBtn.className = 'node-btn delete-btn';
@@ -2284,25 +2635,29 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         });
         
         headerEl.appendChild(rootBtn);
+        headerEl.appendChild(addChildBtn);
+        headerEl.appendChild(iconBtn);
         headerEl.appendChild(linkBtn);
         headerEl.appendChild(deleteBtn);
         
-        // Node Concept Input
+        // Node Concept Input & Icon Container
+        const bodyEl = document.createElement('div');
+        bodyEl.style = 'display: flex; align-items: center; gap: 4px; width: 100%; box-sizing: border-box;';
+        
+        if (node.icon && ICONS[node.icon]) {
+            const iconWrapper = document.createElement('span');
+            iconWrapper.className = 'node-icon-wrapper';
+            iconWrapper.style = 'display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 4px; background: var(--bg-secondary); color: var(--accent); flex-shrink: 0;';
+            iconWrapper.innerHTML = ICONS[node.icon];
+            bodyEl.appendChild(iconWrapper);
+        }
+        
         const inputEl = document.createElement('input');
         inputEl.type = 'text';
         inputEl.className = 'node-input';
         inputEl.value = node.text || '';
         inputEl.placeholder = 'Concept...';
-        inputEl.style.width = '100%';
-        inputEl.style.border = 'none';
-        inputEl.style.background = 'rgba(0,0,0,0.02)';
-        inputEl.style.borderRadius = '4px';
-        inputEl.style.padding = '2px 4px';
-        inputEl.style.fontSize = '0.8rem';
-        inputEl.style.color = 'var(--text-primary)';
-        inputEl.style.boxSizing = 'border-box';
-        inputEl.style.fontFamily = 'inherit';
-        inputEl.style.textAlign = 'center';
+        inputEl.style = 'flex: 1; border: none; background: rgba(0,0,0,0.02); border-radius: 4px; padding: 2px 4px; font-size: 0.8rem; color: var(--text-primary); box-sizing: border-box; font-family: inherit; text-align: center; width: 100%;';
         
         inputEl.addEventListener('input', (e) => {
             node.text = e.target.value;
@@ -2313,6 +2668,7 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
                 inputEl.blur();
             }
         });
+        bodyEl.appendChild(inputEl);
         
         // Connect link when clicking node body in linking mode
         nodeEl.addEventListener('click', (e) => {
@@ -2333,7 +2689,7 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         let startNodeX, startNodeY;
         
         nodeEl.addEventListener('mousedown', (e) => {
-            if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'button') {
+            if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'button' || e.target.closest('.icon-picker-dropdown')) {
                 return;
             }
             e.preventDefault();
@@ -2353,8 +2709,8 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
                 let ny = startNodeY + dy;
                 
                 const rect = container.getBoundingClientRect();
-                nx = Math.max(0, Math.min(rect.width - 140, nx));
-                ny = Math.max(0, Math.min(rect.height - 55, ny));
+                nx = Math.max(0, Math.min(rect.width - 160, nx));
+                ny = Math.max(0, Math.min(rect.height - 60, ny));
                 
                 node.x = nx;
                 node.y = ny;
@@ -2362,7 +2718,7 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
                 nodeEl.style.left = `${nx}px`;
                 nodeEl.style.top = `${ny}px`;
                 
-                drawLinks(nodes, links, svgId, arrowheadId);
+                drawLinks(nodes, links, svgId, arrowheadId, true, containerId, isEdit);
             };
             
             const onMouseUp = () => {
@@ -2377,7 +2733,7 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         });
         
         nodeEl.appendChild(headerEl);
-        nodeEl.appendChild(inputEl);
+        nodeEl.appendChild(bodyEl);
         
         container.appendChild(nodeEl);
     });
@@ -2419,10 +2775,10 @@ function initMapCanvasListeners() {
                 return;
             }
             const rect = createCanvas.getBoundingClientRect();
-            const x = e.clientX - rect.left - 70;
-            const y = e.clientY - rect.top - 27;
-            const boundedX = Math.max(0, Math.min(rect.width - 140, x));
-            const boundedY = Math.max(0, Math.min(rect.height - 55, y));
+            const x = e.clientX - rect.left - 80;
+            const y = e.clientY - rect.top - 30;
+            const boundedX = Math.max(0, Math.min(rect.width - 160, x));
+            const boundedY = Math.max(0, Math.min(rect.height - 60, y));
             
             const id = 'node_' + Date.now();
             createMapNodes.push({
@@ -2433,6 +2789,13 @@ function initMapCanvasListeners() {
                 isRoot: createMapNodes.length === 0
             });
             renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
+        });
+        
+        createCanvas.addEventListener('click', (e) => {
+            if (e.target.id === 'create-map-canvas-container' || e.target.id === 'create-map-nodes-container' || e.target.id === 'create-map-svg') {
+                hideLinkToolbar(createCanvas);
+                createCanvas.querySelectorAll('.icon-picker-dropdown').forEach(p => p.remove());
+            }
         });
     }
     
@@ -2471,10 +2834,10 @@ function initMapCanvasListeners() {
                 return;
             }
             const rect = editCanvas.getBoundingClientRect();
-            const x = e.clientX - rect.left - 70;
-            const y = e.clientY - rect.top - 27;
-            const boundedX = Math.max(0, Math.min(rect.width - 140, x));
-            const boundedY = Math.max(0, Math.min(rect.height - 55, y));
+            const x = e.clientX - rect.left - 80;
+            const y = e.clientY - rect.top - 30;
+            const boundedX = Math.max(0, Math.min(rect.width - 160, x));
+            const boundedY = Math.max(0, Math.min(rect.height - 60, y));
             
             const id = 'node_' + Date.now();
             editMapNodes.push({
@@ -2486,6 +2849,13 @@ function initMapCanvasListeners() {
             });
             renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
         });
+        
+        editCanvas.addEventListener('click', (e) => {
+            if (e.target.id === 'edit-map-canvas-container' || e.target.id === 'edit-map-nodes-container' || e.target.id === 'edit-map-svg') {
+                hideLinkToolbar(editCanvas);
+                editCanvas.querySelectorAll('.icon-picker-dropdown').forEach(p => p.remove());
+            }
+        });
     }
 }
 
@@ -2494,8 +2864,8 @@ function renderPracticeNodes(containerId, nodes, links, svgId, arrowheadId) {
     if (!container) return;
     container.innerHTML = '';
     
-    // Draw links
-    drawLinks(nodes, links, svgId, arrowheadId);
+    // Draw links (interactive = false)
+    drawLinks(nodes, links, svgId, arrowheadId, false);
     
     nodes.forEach(node => {
         const nodeEl = document.createElement('div');
@@ -2503,8 +2873,8 @@ function renderPracticeNodes(containerId, nodes, links, svgId, arrowheadId) {
         nodeEl.style.position = 'absolute';
         nodeEl.style.left = `${node.x}px`;
         nodeEl.style.top = `${node.y}px`;
-        nodeEl.style.width = '140px';
-        nodeEl.style.height = '55px';
+        nodeEl.style.width = '160px';
+        nodeEl.style.height = '60px';
         nodeEl.style.background = 'var(--bg-card)';
         nodeEl.style.borderRadius = '8px';
         nodeEl.style.display = 'flex';
@@ -2525,20 +2895,36 @@ function renderPracticeNodes(containerId, nodes, links, svgId, arrowheadId) {
             badge.innerHTML = `${ICONS.crown} ROOT`;
             
             const textSpan = document.createElement('span');
-            textSpan.style = 'font-size: 0.85rem; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px; box-sizing: border-box;';
-            textSpan.textContent = node.text || '';
+            textSpan.style = 'font-size: 0.85rem; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 4px;';
+            
+            if (node.icon && ICONS[node.icon]) {
+                textSpan.innerHTML = `<span style="display:inline-flex; width:14px; height:14px; color:var(--accent); align-items:center; justify-content:center;">${ICONS[node.icon]}</span> <span>${node.text || ''}</span>`;
+            } else {
+                textSpan.textContent = node.text || '';
+            }
             
             nodeEl.appendChild(badge);
             nodeEl.appendChild(textSpan);
         } else {
             nodeEl.style.border = '2px solid var(--border-color)';
             
+            const bodyEl = document.createElement('div');
+            bodyEl.style = 'display: flex; align-items: center; gap: 4px; width: 100%; box-sizing: border-box;';
+            
+            if (node.icon && ICONS[node.icon]) {
+                const iconWrapper = document.createElement('span');
+                iconWrapper.className = 'node-icon-wrapper';
+                iconWrapper.style = 'display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 4px; background: var(--bg-secondary); color: var(--accent); flex-shrink: 0;';
+                iconWrapper.innerHTML = ICONS[node.icon];
+                bodyEl.appendChild(iconWrapper);
+            }
+            
             const input = document.createElement('input');
             input.type = 'text';
             input.className = 'practice-map-node-input';
             input.placeholder = 'Type concept...';
             input.dataset.nodeId = node.id;
-            input.style = 'width: 100%; border: none; border-bottom: 2px dashed var(--border-color); background: transparent; text-align: center; font-size: 0.8rem; color: var(--text-primary); font-family: inherit; font-weight: 700; box-sizing: border-box; padding: 2px 0;';
+            input.style = 'flex: 1; border: none; border-bottom: 2px dashed var(--border-color); background: transparent; text-align: center; font-size: 0.8rem; color: var(--text-primary); font-family: inherit; font-weight: 700; box-sizing: border-box; padding: 2px 0; width: 100%;';
             
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
@@ -2547,7 +2933,8 @@ function renderPracticeNodes(containerId, nodes, links, svgId, arrowheadId) {
                 }
             });
             
-            nodeEl.appendChild(input);
+            bodyEl.appendChild(input);
+            nodeEl.appendChild(bodyEl);
         }
         
         container.appendChild(nodeEl);
