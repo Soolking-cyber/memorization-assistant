@@ -30,7 +30,15 @@ const ICONS = {
     help: `<svg viewBox="0 0 24 24" class="icon-svg"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
     heart: `<svg viewBox="0 0 24 24" class="icon-svg"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`,
     gear: `<svg viewBox="0 0 24 24" class="icon-svg"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
-    calendar: `<svg viewBox="0 0 24 24" class="icon-svg"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`
+    calendar: `<svg viewBox="0 0 24 24" class="icon-svg"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
+    palette: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" style="vertical-align: middle; display: inline-block; pointer-events: none;"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19H5C6.10457 19 7 18.1046 7 17C7 15.8954 7.89543 15 9 15H10C11.1046 15 12 15.8954 12 17V22Z"></path><circle cx="7.5" cy="10.5" r="1.5" fill="currentColor"></circle><circle cx="11.5" cy="7.5" r="1.5" fill="currentColor"></circle><circle cx="16.5" cy="9.5" r="1.5" fill="currentColor"></circle><circle cx="15.5" cy="14.5" r="1.5" fill="currentColor"></circle></svg>`
+};
+
+const fontSizeMap = {
+    small: { keyword: '0.7rem', exp: '0.65rem' },
+    medium: { keyword: '0.8rem', exp: '0.75rem' },
+    large: { keyword: '1.0rem', exp: '0.85rem' },
+    xl: { keyword: '1.2rem', exp: '0.95rem' }
 };
 
 let cards = [];
@@ -958,12 +966,7 @@ async function handleCreateCard(e) {
             return;
         }
         if (createMapNodes.length === 0) {
-            alert("Please add at least one node to your Memory Map.");
-            return;
-        }
-        const hasRoot = createMapNodes.some(n => n.isRoot);
-        if (!hasRoot) {
-            alert("Please designate exactly one Root Node (using the crown button).");
+            alert("Please add at least one card to your Memory Map.");
             return;
         }
         
@@ -1175,12 +1178,7 @@ async function handleEditCardSubmit(e) {
             return;
         }
         if (editMapNodes.length === 0) {
-            alert("Please add at least one node to your Memory Map.");
-            return;
-        }
-        const hasRoot = editMapNodes.some(n => n.isRoot);
-        if (!hasRoot) {
-            alert("Please designate exactly one Root Node (using the crown button).");
+            alert("Please add at least one card to your Memory Map.");
             return;
         }
         
@@ -2595,6 +2593,228 @@ function showLinkToolbar(midX, midY, container, link, nodes, links, svgId, arrow
     }
 }
 
+let activeSelectedNode = null;
+
+function hideNodeToolbar(container) {
+    const existing = container.querySelector('.map-node-toolbar');
+    if (existing) {
+        existing.remove();
+    }
+    activeSelectedNode = null;
+}
+
+function showNodeToolbar(node, container, containerId, nodes, links, svgId, arrowheadId, isEdit) {
+    // Hide any existing node toolbar first
+    hideNodeToolbar(container);
+    
+    activeSelectedNode = { node, containerId, isEdit };
+    
+    const toolbar = document.createElement('div');
+    toolbar.className = 'map-node-toolbar';
+    toolbar.style.position = 'absolute';
+    toolbar.style.zIndex = '1000';
+    
+    // Find the scrollable canvas container and zoom level to compute boundary clamping
+    let scrollContainer = null;
+    let zoom = 1.0;
+    
+    if (isEdit) {
+        scrollContainer = document.getElementById('edit-map-canvas-container');
+        zoom = editMapZoom;
+    } else if (containerId === 'create-map-nodes-container') {
+        scrollContainer = document.getElementById('create-map-canvas-container');
+        zoom = createMapZoom;
+    } else if (containerId === 'practice-map-nodes-container') {
+        scrollContainer = document.getElementById('practice-map-canvas-container');
+        zoom = practiceMapZoom;
+    }
+    
+    // Fallback detection logic if container ids differ
+    if (!scrollContainer && containerId) {
+        const scrollContainerId = containerId.replace('nodes-container', 'canvas-container');
+        scrollContainer = document.getElementById(scrollContainerId);
+    }
+    if (!scrollContainer && container) {
+        scrollContainer = container.closest('[id$="-canvas-container"]') || container.parentNode;
+    }
+    
+    // Position the node toolbar right above the node's center top
+    const nodeCenterX = node.x + 90; // Node width is 180, so center is x + 90
+    const nodeTopY = node.y; // Node top is node.y
+    
+    let clampedMidX = nodeCenterX;
+    let toolbarTop = nodeTopY - 15;
+    let transformY = 'translate(-50%, -100%)';
+    
+    if (scrollContainer) {
+        const toolbarWidth = 220;
+        const toolbarHeight = 180; // Node toolbar is simpler and shorter than link toolbar (around 180px)
+        const scrollLeft = scrollContainer.scrollLeft;
+        const scrollTop = scrollContainer.scrollTop;
+        const containerWidth = scrollContainer.clientWidth;
+        const containerHeight = scrollContainer.clientHeight;
+        
+        const padding = 15;
+        const halfWidth = toolbarWidth / 2;
+        
+        // Translate scroll positions to local unscaled viewport coordinates
+        const visibleMinX = scrollLeft / zoom;
+        const visibleMaxX = (scrollLeft + containerWidth) / zoom;
+        const visibleMinY = scrollTop / zoom;
+        const visibleMaxY = (scrollTop + containerHeight) / zoom;
+        
+        // Horizontal Clamping
+        const minClampedX = visibleMinX + halfWidth + padding;
+        const maxClampedX = visibleMaxX - halfWidth - padding;
+        
+        if (minClampedX < maxClampedX) {
+            clampedMidX = Math.max(minClampedX, Math.min(maxClampedX, nodeCenterX));
+        } else {
+            clampedMidX = visibleMinX + (visibleMaxX - visibleMinX) / 2;
+        }
+        
+        // Vertical Clamping & Flipping
+        const spaceAbove = nodeTopY - 15 - visibleMinY;
+        
+        if (spaceAbove < toolbarHeight + padding) {
+            // Not enough space above, display BELOW the node (node height is 90px, so topStyle is nodeTopY + 90 + 15)
+            toolbarTop = nodeTopY + 90 + 15;
+            transformY = 'translate(-50%, 0)';
+            
+            // Check if it fits below. If not, clamp to visible bottom boundary
+            if (toolbarTop + toolbarHeight + padding > visibleMaxY) {
+                toolbarTop = Math.max(visibleMinY + padding, visibleMaxY - toolbarHeight - padding);
+            }
+        } else {
+            // Plenty of space above, display ABOVE the node
+            toolbarTop = nodeTopY - 15;
+            transformY = 'translate(-50%, -100%)';
+            
+            // If it exceeds the visible top boundary, clamp to the top
+            if (toolbarTop - toolbarHeight < visibleMinY + padding) {
+                toolbarTop = visibleMinY + toolbarHeight + padding;
+            }
+        }
+    }
+    
+    toolbar.style.left = `${clampedMidX}px`;
+    toolbar.style.top = `${toolbarTop}px`;
+    toolbar.style.transform = transformY;
+    
+    // Close button
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'toolbar-close-btn';
+    closeBtn.innerHTML = ICONS.closeSmall;
+    closeBtn.style = 'position: absolute; right: 4px; top: 4px; border: none; background: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; padding: 2px;';
+    closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        hideNodeToolbar(container);
+    });
+    toolbar.appendChild(closeBtn);
+    
+    // Toolbar Title
+    const title = document.createElement('div');
+    title.textContent = 'Card Styling';
+    title.style = 'font-size: 0.8rem; font-weight: 800; color: var(--text-primary); margin-bottom: 10px; padding-right: 16px;';
+    toolbar.appendChild(title);
+    
+    // Section 1: Text Color
+    const textColorLabel = document.createElement('div');
+    textColorLabel.textContent = 'Text Color';
+    textColorLabel.className = 'toolbar-section-label';
+    toolbar.appendChild(textColorLabel);
+    
+    const colorOptions = [
+        { name: 'Default', value: '' },
+        { name: 'Blue', value: '#3b82f6' },
+        { name: 'Green', value: '#22c55e' },
+        { name: 'Red', value: '#ef4444' },
+        { name: 'Orange', value: '#f97316' },
+        { name: 'Purple', value: '#a855f7' }
+    ];
+    
+    const colorsDiv = document.createElement('div');
+    colorsDiv.style = 'display: flex; gap: 6px; margin-bottom: 12px;';
+    colorOptions.forEach(opt => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'color-dot';
+        dot.title = opt.name;
+        dot.style = `width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border-color); cursor: pointer; padding: 0; background-color: ${opt.value || 'var(--text-primary)'}; transition: transform 0.1s; position: relative;`;
+        
+        if ((node.textColor || '') === opt.value) {
+            dot.style.transform = 'scale(1.2)';
+            dot.style.borderColor = 'var(--text-primary)';
+            dot.style.boxShadow = '0 0 4px var(--accent)';
+        }
+        
+        dot.addEventListener('click', (e) => {
+            e.stopPropagation();
+            node.textColor = opt.value;
+            // Update selected states UI
+            colorsDiv.querySelectorAll('.color-dot').forEach((d, i) => {
+                d.style.transform = '';
+                d.style.borderColor = 'var(--border-color)';
+                d.style.boxShadow = '';
+                if (colorOptions[i].value === opt.value) {
+                    d.style.transform = 'scale(1.2)';
+                    d.style.borderColor = 'var(--text-primary)';
+                    d.style.boxShadow = '0 0 4px var(--accent)';
+                }
+            });
+            renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
+        });
+        colorsDiv.appendChild(dot);
+    });
+    toolbar.appendChild(colorsDiv);
+    
+    // Section 2: Text Size
+    const sizeLabel = document.createElement('div');
+    sizeLabel.textContent = 'Text Size';
+    sizeLabel.className = 'toolbar-section-label';
+    toolbar.appendChild(sizeLabel);
+    
+    const sizeDiv = document.createElement('div');
+    sizeDiv.className = 'segmented-control';
+    
+    const sizeOptions = [
+        { name: 'Small', value: 'small' },
+        { name: 'Medium', value: 'medium' },
+        { name: 'Large', value: 'large' },
+        { name: 'XL', value: 'xl' }
+    ];
+    
+    sizeOptions.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = opt.name;
+        btn.className = `segmented-btn ${(node.fontSize || 'medium') === opt.value ? 'active' : ''}`;
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            node.fontSize = opt.value;
+            sizeDiv.querySelectorAll('.segmented-btn').forEach((b, i) => {
+                if (sizeOptions[i].value === opt.value) {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
+            });
+            renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
+        });
+        sizeDiv.appendChild(btn);
+    });
+    toolbar.appendChild(sizeDiv);
+    
+    // Append to viewport or container
+    const viewport = container.querySelector('[id$="-viewport"]') || container.parentNode;
+    if (viewport) {
+        viewport.appendChild(toolbar);
+    } else {
+        container.appendChild(toolbar);
+    }
+}
+
 function getNodeSideCoords(node, side, w = 180, h = 90) {
     if (side === 'top') {
         return { x: node.x + w / 2, y: node.y };
@@ -2864,7 +3084,7 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         nodeEl.style.width = '180px';
         nodeEl.style.height = '90px';
         nodeEl.style.background = 'var(--bg-card)';
-        nodeEl.style.border = node.isRoot ? '2px solid var(--warning)' : '2px solid var(--border-color)';
+        nodeEl.style.border = '2px solid var(--border-color)';
         nodeEl.style.borderRadius = '8px';
         nodeEl.style.display = 'flex';
         nodeEl.style.flexDirection = 'column';
@@ -2880,84 +3100,22 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         headerEl.style.alignItems = 'center';
         headerEl.style.marginBottom = '2px';
         
-        // 1. Root Toggle Button
-        const rootBtn = document.createElement('button');
-        rootBtn.type = 'button';
-        rootBtn.className = `node-btn root-btn ${node.isRoot ? 'active' : ''}`;
-        rootBtn.innerHTML = node.isRoot ? ICONS.crown : ICONS.circle;
-        rootBtn.title = node.isRoot ? 'Root Node (Static)' : 'Set as Root Node';
-        rootBtn.style.background = 'none';
-        rootBtn.style.border = 'none';
-        rootBtn.style.cursor = 'pointer';
-        rootBtn.style.padding = '0';
-        if (node.isRoot) {
-            rootBtn.style.color = 'var(--warning)';
-        }
-        rootBtn.addEventListener('click', (e) => {
+        // 1. Style Button (Palette)
+        const styleBtn = document.createElement('button');
+        styleBtn.type = 'button';
+        styleBtn.className = 'node-btn style-btn';
+        styleBtn.innerHTML = ICONS.palette;
+        styleBtn.title = 'Style Card Text';
+        styleBtn.style.background = 'none';
+        styleBtn.style.border = 'none';
+        styleBtn.style.cursor = 'pointer';
+        styleBtn.style.padding = '0';
+        styleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            nodes.forEach(n => n.isRoot = false);
-            node.isRoot = true;
-            renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
+            showNodeToolbar(node, container, containerId, nodes, links, svgId, arrowheadId, isEdit);
         });
         
-        // 2. Select Icon Button (Smile)
-        const iconBtn = document.createElement('button');
-        iconBtn.type = 'button';
-        iconBtn.className = 'node-btn icon-btn';
-        iconBtn.innerHTML = ICONS.smile;
-        iconBtn.title = 'Attach Icon to Concept';
-        iconBtn.style.background = 'none';
-        iconBtn.style.border = 'none';
-        iconBtn.style.cursor = 'pointer';
-        iconBtn.style.padding = '0';
-        iconBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            
-            const existingPicker = nodeEl.querySelector('.icon-picker-dropdown');
-            if (existingPicker) {
-                existingPicker.remove();
-            } else {
-                // Close other open icon pickers first
-                container.querySelectorAll('.icon-picker-dropdown').forEach(p => p.remove());
-                
-                const picker = document.createElement('div');
-                picker.className = 'icon-picker-dropdown';
-                picker.style = 'position: absolute; top: 22px; left: 0; z-index: 1001; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 6px; width: 120px;';
-                
-                const availableIcons = ['star', 'idea', 'trophy', 'folder', 'pin', 'help', 'heart', 'gear', 'calendar'];
-                
-                // None / Remove Option
-                const noneBtn = document.createElement('button');
-                noneBtn.type = 'button';
-                noneBtn.textContent = 'Remove';
-                noneBtn.style = 'grid-column: span 4; font-size: 0.65rem; padding: 2px; border: none; background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; border-radius: 3px; font-weight: 700;';
-                noneBtn.addEventListener('click', (ev) => {
-                    ev.stopPropagation();
-                    delete node.icon;
-                    renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
-                });
-                picker.appendChild(noneBtn);
-                
-                availableIcons.forEach(iconName => {
-                    const optBtn = document.createElement('button');
-                    optBtn.type = 'button';
-                    optBtn.innerHTML = ICONS[iconName];
-                    optBtn.style = 'background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--text-primary); transition: background 0.1s;';
-                    optBtn.addEventListener('mouseenter', () => optBtn.style.background = 'var(--bg-secondary)');
-                    optBtn.addEventListener('mouseleave', () => optBtn.style.background = 'none');
-                    optBtn.addEventListener('click', (ev) => {
-                        ev.stopPropagation();
-                        node.icon = iconName;
-                        renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
-                    });
-                    picker.appendChild(optBtn);
-                });
-                
-                nodeEl.appendChild(picker);
-            }
-        });
-        
-        // 3. Delete Node Button
+        // 2. Delete Node Button
         const deleteBtn = document.createElement('button');
         deleteBtn.type = 'button';
         deleteBtn.className = 'node-btn delete-btn';
@@ -2987,8 +3145,7 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
             renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
         });
         
-        headerEl.appendChild(rootBtn);
-        headerEl.appendChild(iconBtn);
+        headerEl.appendChild(styleBtn);
         headerEl.appendChild(deleteBtn);
         
         // 4-Sided Plus Connectors (Top, Right, Bottom, Left)
@@ -3043,6 +3200,15 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         expInput.value = node.explanation || '';
         expInput.placeholder = 'Explanation...';
         
+        // Apply text styling
+        const sizeStyles = fontSizeMap[node.fontSize || 'medium'];
+        expInput.style.fontSize = sizeStyles.exp;
+        if (node.textColor) {
+            expInput.style.color = node.textColor;
+        } else {
+            expInput.style.color = 'var(--text-secondary)';
+        }
+        
         expInput.addEventListener('input', (e) => {
             node.explanation = e.target.value;
         });
@@ -3054,23 +3220,23 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         });
         expRow.appendChild(expInput);
         
-        // 2. Keyword input field & Icon Container
+        // 2. Keyword input field
         const bodyEl = document.createElement('div');
         bodyEl.style = 'display: flex; align-items: center; gap: 4px; width: 100%; box-sizing: border-box;';
-        
-        if (node.icon && ICONS[node.icon]) {
-            const iconWrapper = document.createElement('span');
-            iconWrapper.className = 'node-icon-wrapper';
-            iconWrapper.style = 'display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 4px; background: var(--bg-secondary); color: var(--accent); flex-shrink: 0;';
-            iconWrapper.innerHTML = ICONS[node.icon];
-            bodyEl.appendChild(iconWrapper);
-        }
         
         const inputEl = document.createElement('input');
         inputEl.type = 'text';
         inputEl.className = 'node-input';
         inputEl.value = node.text || '';
         inputEl.placeholder = 'Keyword...';
+        
+        // Apply text styling
+        inputEl.style.fontSize = sizeStyles.keyword;
+        if (node.textColor) {
+            inputEl.style.color = node.textColor;
+        } else {
+            inputEl.style.color = 'var(--text-primary)';
+        }
         
         inputEl.addEventListener('input', (e) => {
             node.text = e.target.value;
@@ -3254,6 +3420,7 @@ function initMapCanvasListeners() {
                     renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead', false);
                 } else {
                     hideLinkToolbar(createCanvas);
+                    hideNodeToolbar(createCanvas);
                     createCanvas.querySelectorAll('.icon-picker-dropdown').forEach(p => p.remove());
                 }
             }
@@ -3355,6 +3522,7 @@ function initMapCanvasListeners() {
                     renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
                 } else {
                     hideLinkToolbar(editCanvas);
+                    hideNodeToolbar(editCanvas);
                     editCanvas.querySelectorAll('.icon-picker-dropdown').forEach(p => p.remove());
                 }
             }
@@ -3370,7 +3538,7 @@ function renderPracticeNodes(containerId, nodes, links, svgId, arrowheadId) {
     // Draw links (interactive = false)
     drawLinks(nodes, links, svgId, arrowheadId, false);
     
-    nodes.forEach(node => {
+    nodes.forEach((node, idx) => {
         const nodeEl = document.createElement('div');
         nodeEl.className = 'map-node';
         nodeEl.style.position = 'absolute';
@@ -3388,26 +3556,38 @@ function renderPracticeNodes(containerId, nodes, links, svgId, arrowheadId) {
         nodeEl.style.padding = '6px';
         nodeEl.style.zIndex = '5';
         
-        if (node.isRoot) {
+        const isAnchor = node.isRoot || (idx === 0);
+        
+        if (isAnchor) {
             nodeEl.style.border = '2px solid var(--warning)';
             nodeEl.style.color = 'var(--text-primary)';
             
             const badge = document.createElement('span');
             badge.style = 'font-size: 0.7rem; color: var(--warning); margin-bottom: 2px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;';
-            badge.innerHTML = `${ICONS.crown} ROOT`;
+            badge.textContent = 'START';
             
             const textSpan = document.createElement('span');
             textSpan.style = 'font-size: 0.85rem; font-weight: 700; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;';
+            textSpan.textContent = node.text || '';
             
-            if (node.icon && ICONS[node.icon]) {
-                textSpan.innerHTML = `<span style="display:inline-flex; width:14px; height:14px; color:var(--accent); align-items:center; justify-content:center;">${ICONS[node.icon]}</span> <span>${node.text || ''}</span>`;
+            // Apply text styling
+            const sizeStyles = fontSizeMap[node.fontSize || 'medium'];
+            textSpan.style.fontSize = sizeStyles.keyword;
+            if (node.textColor) {
+                textSpan.style.color = node.textColor;
             } else {
-                textSpan.textContent = node.text || '';
+                textSpan.style.color = 'var(--text-primary)';
             }
-
+ 
             const expSpan = document.createElement('span');
             expSpan.style = 'font-size: 0.7rem; color: var(--text-secondary); text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; margin-top: 2px; flex-shrink: 0;';
             expSpan.textContent = node.explanation || 'Anchor';
+            expSpan.style.fontSize = sizeStyles.exp;
+            if (node.textColor) {
+                expSpan.style.color = node.textColor;
+            } else {
+                expSpan.style.color = 'var(--text-secondary)';
+            }
             
             nodeEl.appendChild(badge);
             nodeEl.appendChild(textSpan);
@@ -3415,21 +3595,21 @@ function renderPracticeNodes(containerId, nodes, links, svgId, arrowheadId) {
         } else {
             nodeEl.style.border = '2px solid var(--border-color)';
             
+            const sizeStyles = fontSizeMap[node.fontSize || 'medium'];
+            
             const expLabel = document.createElement('span');
             expLabel.style = 'font-size: 0.75rem; color: var(--text-secondary); text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; font-weight: 500; flex-shrink: 0;';
             expLabel.textContent = node.explanation || 'No explanation';
             expLabel.title = node.explanation || '';
+            expLabel.style.fontSize = sizeStyles.exp;
+            if (node.textColor) {
+                expLabel.style.color = node.textColor;
+            } else {
+                expLabel.style.color = 'var(--text-secondary)';
+            }
             
             const bodyEl = document.createElement('div');
             bodyEl.style = 'display: flex; align-items: center; gap: 4px; width: 100%; box-sizing: border-box; justify-content: center;';
-            
-            if (node.icon && ICONS[node.icon]) {
-                const iconWrapper = document.createElement('span');
-                iconWrapper.className = 'node-icon-wrapper';
-                iconWrapper.style = 'display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 4px; background: var(--bg-secondary); color: var(--accent); flex-shrink: 0;';
-                iconWrapper.innerHTML = ICONS[node.icon];
-                bodyEl.appendChild(iconWrapper);
-            }
             
             const input = document.createElement('input');
             input.type = 'text';
@@ -3437,6 +3617,13 @@ function renderPracticeNodes(containerId, nodes, links, svgId, arrowheadId) {
             input.placeholder = 'Type keyword...';
             input.dataset.nodeId = node.id;
             input.style = 'flex: 1; border: none; border-bottom: 2px dashed var(--border-color); background: transparent; text-align: center; font-size: 0.8rem; color: var(--text-primary); font-family: inherit; font-weight: 700; box-sizing: border-box; padding: 2px 0; width: 100%; outline: none;';
+            
+            input.style.fontSize = sizeStyles.keyword;
+            if (node.textColor) {
+                input.style.color = node.textColor;
+            } else {
+                input.style.color = 'var(--text-primary)';
+            }
             
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {

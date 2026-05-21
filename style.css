@@ -1643,6 +1643,23 @@ input.letter-box:focus {
     pointer-events: auto !important;
 }
 
+.map-node-toolbar {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 10px 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    width: 220px;
+    align-items: stretch;
+    box-sizing: border-box;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    pointer-events: auto !important;
+}
+
 /* Custom Sleek Scrollbars for Canvas Containers */
 #create-map-canvas-container::-webkit-scrollbar,
 #edit-map-canvas-container::-webkit-scrollbar,
