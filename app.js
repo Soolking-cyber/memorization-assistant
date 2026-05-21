@@ -35,6 +35,8 @@ const ICONS = {
 
 let cards = [];
 let customTypes = JSON.parse(localStorage.getItem('customTypes')) || ['mixed', 'Vocabulary', 'Memory Map'];
+// Filter out lowercase vocabulary type to migrate to capitalized Vocabulary
+customTypes = customTypes.filter(t => t !== 'vocabulary');
 if (!customTypes.includes('mixed')) customTypes.unshift('mixed');
 if (!customTypes.includes('Vocabulary')) customTypes.push('Vocabulary');
 if (!customTypes.includes('Memory Map')) customTypes.push('Memory Map');
@@ -439,10 +441,15 @@ function renderTypeTags() {
 function updateTypeDatalists() {
     const types = new Set(customTypes);
     let migrated = false;
+    let migratedVocab = false;
     cards.forEach(c => {
         if (!c.type || c.type === 'General') {
             c.type = 'mixed';
             migrated = true;
+        }
+        if (c.type === 'vocabulary') {
+            c.type = 'Vocabulary';
+            migratedVocab = true;
         }
         types.add(c.type);
     });
@@ -451,9 +458,14 @@ function updateTypeDatalists() {
         supabase.from('flashcards').update({ type: 'mixed' }).or('type.eq.General,type.is.null').eq('user_id', userSession.user.id).then();
     }
     
-    types.delete('General');
+    if (migratedVocab && userSession) {
+        supabase.from('flashcards').update({ type: 'Vocabulary' }).eq('type', 'vocabulary').eq('user_id', userSession.user.id).then();
+    }
     
-    customTypes = Array.from(types);
+    types.delete('General');
+    types.delete('vocabulary');
+    
+    customTypes = Array.from(types).filter(t => t !== 'vocabulary');
     localStorage.setItem('customTypes', JSON.stringify(customTypes));
     
     const populateSelect = (selectId, addMixed = false) => {
