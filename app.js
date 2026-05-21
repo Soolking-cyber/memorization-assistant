@@ -1152,6 +1152,9 @@ async function handleEditCardSubmit(e) {
     btn.textContent = "Saving Changes...";
     btn.disabled = true;
 
+    const frontImageFile = document.getElementById('edit-card-front-image') ? document.getElementById('edit-card-front-image').files[0] : null;
+    const backImageFile = document.getElementById('edit-card-back-image') ? document.getElementById('edit-card-back-image').files[0] : null;
+
     let new_image_front_url = existingCard.image_front_url;
     let new_image_back_url = existingCard.image_back_url;
 
