@@ -169,28 +169,62 @@
                             </select>
                             <div id="create-type-tags" class="type-tags-container" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;"></div>
                         </div>
-                        <div class="input-group">
-                            <label for="card-front">Concept (Front)</label>
-                            <textarea id="card-front" required placeholder="What is the powerhouse of the cell?"></textarea>
-                            <input type="file" id="card-front-image" class="file-input" accept="image/*">
-                        </div>
-                        <div class="input-group">
-                            <label for="card-back">Recall (Back / Target Word)</label>
-                            <textarea id="card-back" required placeholder="Mitochondria"></textarea>
-                            <input type="file" id="card-back-image" class="file-input" accept="image/*">
-                        </div>
-                        <div class="input-group" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
-                            <label>Example Sentences (Vocabulary Memory Clues)</label>
-                            <div id="create-sentences-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
-                                <!-- Drafted sentences will render here -->
+
+                        <!-- Vocabulary Form Fields -->
+                        <div id="create-vocab-fields">
+                            <div class="input-group">
+                                <label for="card-front">Concept (Front)</label>
+                                <textarea id="card-front" placeholder="What is the powerhouse of the cell?"></textarea>
+                                <input type="file" id="card-front-image" class="file-input" accept="image/*">
                             </div>
-                            <div style="display: flex; gap: 10px; align-items: center;">
-                                <input type="text" id="create-new-sentence" placeholder="e.g. The cells contain Mitochondria." style="flex: 1; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit;">
-                                <button type="button" id="btn-create-add-sentence" class="btn" style="padding: 12px 18px; border-radius: 8px;">+ Add</button>
+                            <div class="input-group">
+                                <label for="card-back">Recall (Back / Target Word)</label>
+                                <textarea id="card-back" placeholder="Mitochondria"></textarea>
+                                <input type="file" id="card-back-image" class="file-input" accept="image/*">
                             </div>
-                            <span id="create-sentence-error" style="color: #ef4444; font-size: 0.8rem; margin-top: 6px; display: none;"></span>
+                            <div class="input-group" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
+                                <label>Example Sentences (Vocabulary Memory Clues)</label>
+                                <div id="create-sentences-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
+                                    <!-- Drafted sentences will render here -->
+                                </div>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="text" id="create-new-sentence" placeholder="e.g. The cells contain Mitochondria." style="flex: 1; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit;">
+                                    <button type="button" id="btn-create-add-sentence" class="btn" style="padding: 12px 18px; border-radius: 8px;">+ Add</button>
+                                </div>
+                                <span id="create-sentence-error" style="color: #ef4444; font-size: 0.8rem; margin-top: 6px; display: none;"></span>
+                            </div>
                         </div>
-                        <button type="submit" class="btn primary full-width">Lock Memory</button>
+
+                        <!-- Memory Map Fields -->
+                        <div id="create-map-fields" class="hidden">
+                            <div class="input-group">
+                                <label for="create-map-title">Memory Map Title / Prompt</label>
+                                <input type="text" id="create-map-title" placeholder="e.g. Krebs Cycle Steps / Brain Anatomy" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); margin-bottom: 12px; font-family: inherit;">
+                            </div>
+                            <div class="input-group">
+                                <label>Visual Concept Map Editor</label>
+                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                    <button type="button" class="btn" id="btn-create-map-add-node" style="padding: 8px 14px; font-size: 0.85rem; font-weight: 700;">+ Add Node</button>
+                                    <button type="button" class="btn" id="btn-create-map-clear" style="padding: 8px 14px; font-size: 0.85rem; font-weight: 700; color: #ef4444;">Clear Canvas</button>
+                                </div>
+                                <div id="create-map-canvas-container" style="position: relative; width: 100%; height: 350px; background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: inset 0 -2px 0 var(--border-color); user-select: none;">
+                                    <div style="position: absolute; inset: 0; background-size: 20px 20px; background-image: radial-gradient(var(--border-color) 1px, transparent 0); opacity: 0.4; pointer-events: none;"></div>
+                                    <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;" id="create-map-svg">
+                                        <defs>
+                                            <marker id="create-arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                                                <polygon points="0 0, 10 3.5, 0 7" fill="var(--text-secondary)" />
+                                            </marker>
+                                        </defs>
+                                    </svg>
+                                    <div id="create-map-nodes-container" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2;"></div>
+                                </div>
+                                <small style="color: var(--text-secondary); display: block; margin-top: 8px; font-size: 0.8rem; line-height: 1.4;">
+                                    💡 <strong>Mind Map Guide:</strong> Double-click the canvas to spawn a node. Drag nodes by their handles. Set exactly one <strong>Root Node</strong> by clicking its radio badge (this node remains visible as a hint). Click 🔗 to trigger link-drawing mode, then click a target node to establish a directed arrow.
+                                </small>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn primary full-width" style="margin-top: 16px;">Lock Memory</button>
                     </form>
                 </div>
             </section>
@@ -213,36 +247,70 @@
                             </select>
                             <div id="edit-type-tags" class="type-tags-container" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;"></div>
                         </div>
-                        <div class="input-group">
-                            <label for="edit-card-front">Concept (Front)</label>
-                            <textarea id="edit-card-front" required></textarea>
-                            <div id="edit-front-img-preview" class="hidden" style="margin-top: 10px; margin-bottom: 10px;">
-                                <img src="" style="max-height: 100px; border-radius: 4px;" alt="Current Front Image">
+
+                        <!-- Vocabulary Form Fields for Edit -->
+                        <div id="edit-vocab-fields">
+                            <div class="input-group">
+                                <label for="edit-card-front">Concept (Front)</label>
+                                <textarea id="edit-card-front" placeholder="What is the powerhouse of the cell?"></textarea>
+                                <div id="edit-front-img-preview" class="hidden" style="margin-top: 10px; margin-bottom: 10px;">
+                                    <img src="" style="max-height: 100px; border-radius: 4px;" alt="Current Front Image">
+                                </div>
+                                <input type="file" id="edit-card-front-image" class="file-input" accept="image/*">
+                                <small style="color: var(--text-secondary);">Select a new image to replace the current one.</small>
                             </div>
-                            <input type="file" id="edit-card-front-image" class="file-input" accept="image/*">
-                            <small style="color: var(--text-secondary);">Select a new image to replace the current one.</small>
+                            <div class="input-group">
+                                <label for="edit-card-back">Recall (Back / Target Word)</label>
+                                <textarea id="edit-card-back" placeholder="Mitochondria"></textarea>
+                                <div id="edit-back-img-preview" class="hidden" style="margin-top: 10px; margin-bottom: 10px;">
+                                    <img src="" style="max-height: 100px; border-radius: 4px;" alt="Current Back Image">
+                                </div>
+                                <input type="file" id="edit-card-back-image" class="file-input" accept="image/*">
+                                <small style="color: var(--text-secondary);">Select a new image to replace the current one.</small>
+                            </div>
+                            <div class="input-group" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
+                                <label>Example Sentences (Vocabulary Memory Clues)</label>
+                                <div id="edit-sentences-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
+                                    <!-- Saved sentences will render here -->
+                                </div>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="text" id="edit-new-sentence" placeholder="e.g. The cells contain Mitochondria." style="flex: 1; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit;">
+                                    <button type="button" id="btn-edit-add-sentence" class="btn" style="padding: 12px 18px; border-radius: 8px;">+ Add</button>
+                                </div>
+                                <span id="edit-sentence-error" style="color: #ef4444; font-size: 0.8rem; margin-top: 6px; display: none;"></span>
+                            </div>
                         </div>
-                        <div class="input-group">
-                            <label for="edit-card-back">Recall (Back / Target Word)</label>
-                            <textarea id="edit-card-back" required></textarea>
-                            <div id="edit-back-img-preview" class="hidden" style="margin-top: 10px; margin-bottom: 10px;">
-                                <img src="" style="max-height: 100px; border-radius: 4px;" alt="Current Back Image">
+
+                        <!-- Memory Map Fields for Edit -->
+                        <div id="edit-map-fields" class="hidden">
+                            <div class="input-group">
+                                <label for="edit-map-title">Memory Map Title / Prompt</label>
+                                <input type="text" id="edit-map-title" placeholder="e.g. Krebs Cycle Steps / Brain Anatomy" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); margin-bottom: 12px; font-family: inherit;">
                             </div>
-                            <input type="file" id="edit-card-back-image" class="file-input" accept="image/*">
-                            <small style="color: var(--text-secondary);">Select a new image to replace the current one.</small>
+                            <div class="input-group">
+                                <label>Visual Concept Map Editor</label>
+                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                    <button type="button" class="btn" id="btn-edit-map-add-node" style="padding: 8px 14px; font-size: 0.85rem; font-weight: 700;">+ Add Node</button>
+                                    <button type="button" class="btn" id="btn-edit-map-clear" style="padding: 8px 14px; font-size: 0.85rem; font-weight: 700; color: #ef4444;">Clear Canvas</button>
+                                </div>
+                                <div id="edit-map-canvas-container" style="position: relative; width: 100%; height: 350px; background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: inset 0 -2px 0 var(--border-color); user-select: none;">
+                                    <div style="position: absolute; inset: 0; background-size: 20px 20px; background-image: radial-gradient(var(--border-color) 1px, transparent 0); opacity: 0.4; pointer-events: none;"></div>
+                                    <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;" id="edit-map-svg">
+                                        <defs>
+                                            <marker id="edit-arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                                                <polygon points="0 0, 10 3.5, 0 7" fill="var(--text-secondary)" />
+                                            </marker>
+                                        </defs>
+                                    </svg>
+                                    <div id="edit-map-nodes-container" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2;"></div>
+                                </div>
+                                <small style="color: var(--text-secondary); display: block; margin-top: 8px; font-size: 0.8rem; line-height: 1.4;">
+                                    💡 <strong>Mind Map Guide:</strong> Double-click the canvas to spawn a node. Drag nodes by their handles. Set exactly one <strong>Root Node</strong> by clicking its radio badge (this node remains visible as a hint). Click 🔗 to trigger link-drawing mode, then click a target node to establish a directed arrow.
+                                </small>
+                            </div>
                         </div>
-                        <div class="input-group" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
-                            <label>Example Sentences (Vocabulary Memory Clues)</label>
-                            <div id="edit-sentences-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
-                                <!-- Saved sentences will render here -->
-                            </div>
-                            <div style="display: flex; gap: 10px; align-items: center;">
-                                <input type="text" id="edit-new-sentence" placeholder="e.g. The cells contain Mitochondria." style="flex: 1; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit;">
-                                <button type="button" id="btn-edit-add-sentence" class="btn" style="padding: 12px 18px; border-radius: 8px;">+ Add</button>
-                            </div>
-                            <span id="edit-sentence-error" style="color: #ef4444; font-size: 0.8rem; margin-top: 6px; display: none;"></span>
-                        </div>
-                        <button type="submit" class="btn primary full-width">Save Changes</button>
+
+                        <button type="submit" class="btn primary full-width" style="margin-top: 16px;">Save Changes</button>
                     </form>
                 </div>
             </section>

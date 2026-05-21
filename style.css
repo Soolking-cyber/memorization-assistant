@@ -1149,3 +1149,80 @@ input.letter-box:focus {
     .card-face { padding: 20px; }
     .card-content { font-size: 1.15rem; }
 }
+
+/* Memory Map Premium Stylings */
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.02); opacity: 0.85; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.map-node {
+    transition: box-shadow 0.1s ease, border-color 0.1s ease;
+}
+.map-node:hover {
+    box-shadow: inset 0 -4px 0 var(--border-color);
+}
+.map-node:active {
+    box-shadow: inset 0 -1px 0 var(--border-color);
+}
+
+.practice-map-node-input:focus {
+    border-bottom: 2px solid var(--accent) !important;
+}
+
+.practice-map-node-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.5;
+}
+
+/* Memory Map Node Buttons & Inner Inputs */
+.node-btn {
+    background: none;
+    border: none;
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: color 0.2s, transform 0.1s;
+}
+.node-btn:hover {
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+.node-btn.root-btn.active {
+    color: var(--warning) !important;
+    filter: drop-shadow(0 0 2px var(--warning));
+}
+.node-input {
+    width: 100%;
+    border: none;
+    background: rgba(0,0,0,0.02);
+    border-radius: 4px;
+    padding: 2px 4px;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    box-sizing: border-box;
+    font-family: inherit;
+    text-align: center;
+}
+.node-input:focus {
+    outline: none;
+    background: rgba(0,0,0,0.05);
+}
+.correct-answer-label {
+    font-size: 0.7rem;
+    color: var(--success);
+    font-weight: 700;
+    display: block;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+

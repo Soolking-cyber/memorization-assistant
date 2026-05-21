@@ -12,7 +12,12 @@ try {
 }
 
 let cards = [];
-let customTypes = JSON.parse(localStorage.getItem('customTypes')) || ['mixed'];
+let customTypes = JSON.parse(localStorage.getItem('customTypes')) || ['mixed', 'Vocabulary', 'Memory Map'];
+if (!customTypes.includes('mixed')) customTypes.unshift('mixed');
+if (!customTypes.includes('Vocabulary')) customTypes.push('Vocabulary');
+if (!customTypes.includes('Memory Map')) customTypes.push('Memory Map');
+localStorage.setItem('customTypes', JSON.stringify(customTypes));
+
 let reviewQueue = [];
 let currentReviewIndex = 0;
 let userSession = null;
@@ -23,6 +28,13 @@ let exampleSentences = JSON.parse(localStorage.getItem('exampleSentences')) || {
 let activeCategoryTab = 'mixed';
 let draftCreateSentences = [];
 let editSentences = [];
+
+// Memory Map Global State Variables
+let createMapNodes = [];
+let createMapLinks = [];
+let editMapNodes = [];
+let editMapLinks = [];
+let linkingSourceNodeId = null;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -62,6 +74,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     window.deleteDraftCreateSentence = deleteDraftCreateSentence;
     window.deleteEditSentence = deleteEditSentence;
+
+    // Initialize Memory Map canvas and button click listeners
+    initMapCanvasListeners();
 
     if (supabase) {
         checkAuth();
@@ -321,7 +336,8 @@ async function removeType(typeToRemove) {
 }
 
 function handleTypeSelectChange(e) {
-    if (e.target.value === 'add_new') {
+    let val = e.target.value;
+    if (val === 'add_new') {
         const newType = prompt("Enter new memory type:");
         if (newType && newType.trim() !== '') {
             const cleanType = newType.trim();
@@ -331,8 +347,36 @@ function handleTypeSelectChange(e) {
             }
             updateTypeDatalists();
             e.target.value = cleanType;
+            val = cleanType;
         } else {
             e.target.value = 'mixed';
+            val = 'mixed';
+        }
+    }
+    
+    // Toggle the visible fields based on the selected type
+    const isEdit = e.target.id === 'edit-card-type';
+    const vocabFields = document.getElementById(isEdit ? 'edit-vocab-fields' : 'create-vocab-fields');
+    const mapFields = document.getElementById(isEdit ? 'edit-map-fields' : 'create-map-fields');
+    
+    if (vocabFields && mapFields) {
+        if (val === 'Memory Map') {
+            vocabFields.classList.add('hidden');
+            mapFields.classList.remove('hidden');
+            
+            // For Edit mode, if it's already rendered, we need to trigger links redraw
+            if (isEdit) {
+                setTimeout(() => {
+                    renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
+                }, 50);
+            } else {
+                setTimeout(() => {
+                    renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
+                }, 50);
+            }
+        } else {
+            vocabFields.classList.remove('hidden');
+            mapFields.classList.add('hidden');
         }
     }
 }
@@ -343,7 +387,7 @@ function renderTypeTags() {
     
     const tagHtml = customTypes.map(t => {
         const displayType = t === 'mixed' ? 'All Types (Mixed)' : t;
-        if (t === 'mixed') {
+        if (t === 'mixed' || t === 'Vocabulary' || t === 'Memory Map') {
             return `<span style="display: inline-flex; align-items: center; padding: 4px 10px; background: rgba(0,0,0,0.05); border-radius: 12px; font-size: 0.85rem; border: 1px solid var(--border-color);">${displayType}</span>`;
         }
         return `<span style="display: inline-flex; align-items: center; padding: 4px 10px; background: rgba(0,0,0,0.05); border-radius: 12px; font-size: 0.85rem; border: 1px solid var(--border-color);">${displayType} <button type="button" onclick="removeType('${t}')" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; margin-left:6px; font-size:0.9rem; padding:0; font-weight:bold;">×</button></span>`;
@@ -603,6 +647,18 @@ function renderManageView() {
             `;
         }
 
+        let displayFront = '';
+        if (card.front.startsWith('{"mode":"memory_map"')) {
+            try {
+                const mapData = JSON.parse(card.front);
+                displayFront = `<strong style="color:var(--accent);">[Memory Map]</strong> ${mapData.title} (${mapData.nodes.length} nodes, ${mapData.links.length} connections)`;
+            } catch (e) {
+                displayFront = card.front;
+            }
+        } else {
+            displayFront = card.front.replace(/\n/g, '<br>');
+        }
+
         cardEl.innerHTML = `
             <label class="manage-card-checkbox">
                 <input type="checkbox" class="card-checkbox" data-id="${card.id}">
@@ -610,7 +666,7 @@ function renderManageView() {
             </label>
             <div class="manage-card-content" style="flex: 1;">
                 <span class="type-tag">${card.type === 'mixed' ? 'All Types' : (card.type || 'All Types')}</span><br>
-                <strong>Front:</strong> <br> ${card.front.replace(/\n/g, '<br>')} ${frontImgHtml} <br><br>
+                <strong>Front:</strong> <br> ${displayFront} ${frontImgHtml} <br><br>
                 <strong>Back:</strong> <br> ${card.back.replace(/\n/g, '<br>')} ${backImgHtml}
                 ${sentencesHtml}
             </div>
@@ -766,12 +822,39 @@ async function handleCreateCard(e) {
     e.preventDefault();
     if (!userSession) return alert("Must be logged in to create cards.");
 
-    const frontText = document.getElementById('card-front').value.trim();
-    const backText = document.getElementById('card-back').value.trim();
-    const frontImageFile = document.getElementById('card-front-image').files[0];
-    const backImageFile = document.getElementById('card-back-image').files[0];
+    const activeType = document.getElementById('card-type').value.trim() || 'mixed';
+    let frontText = '';
+    let backText = '';
     
-    if (!frontText || !backText) return;
+    if (activeType === 'Memory Map') {
+        const title = document.getElementById('create-map-title').value.trim();
+        if (!title) {
+            alert("Please enter a Memory Map Title.");
+            return;
+        }
+        if (createMapNodes.length === 0) {
+            alert("Please add at least one node to your Memory Map.");
+            return;
+        }
+        const hasRoot = createMapNodes.some(n => n.isRoot);
+        if (!hasRoot) {
+            alert("Please designate exactly one Root Node (using the crown button).");
+            return;
+        }
+        
+        const mapData = {
+            mode: 'memory_map',
+            title: title,
+            nodes: createMapNodes,
+            links: createMapLinks
+        };
+        frontText = JSON.stringify(mapData);
+        backText = 'Memory Map';
+    } else {
+        frontText = document.getElementById('card-front').value.trim();
+        backText = document.getElementById('card-back').value.trim();
+        if (!frontText || !backText) return;
+    }
 
     const btn = document.querySelector('#create-card-form button[type="submit"]');
     const oldText = btn.textContent;
@@ -794,12 +877,15 @@ async function handleCreateCard(e) {
         return publicUrlData.publicUrl;
     };
 
+    const frontImageFile = document.getElementById('card-front-image').files[0];
+    const backImageFile = document.getElementById('card-back-image').files[0];
+
     if (frontImageFile) image_front_url = await uploadImage(frontImageFile, 'front');
     if (backImageFile) image_back_url = await uploadImage(backImageFile, 'back');
 
     const newCard = {
         user_id: userSession.user.id,
-        type: document.getElementById('card-type').value.trim() || 'mixed',
+        type: activeType,
         front: frontText,
         back: backText,
         image_front_url: image_front_url,
@@ -815,7 +901,7 @@ async function handleCreateCard(e) {
     if (!error && data) {
         const createdCard = data[0];
         cards.push(createdCard); 
-        if (draftCreateSentences.length > 0) {
+        if (draftCreateSentences.length > 0 && activeType !== 'Memory Map') {
             exampleSentences[createdCard.id] = [...draftCreateSentences];
             localStorage.setItem('exampleSentences', JSON.stringify(exampleSentences));
         }
@@ -830,6 +916,16 @@ async function handleCreateCard(e) {
     document.getElementById('card-front-image').value = '';
     document.getElementById('card-back-image').value = '';
     
+    // Clear Memory Map create fields
+    document.getElementById('create-map-title').value = '';
+    createMapNodes = [];
+    createMapLinks = [];
+    renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
+    
+    // Hide map fields and restore vocab fields visually
+    document.getElementById('create-vocab-fields').classList.remove('hidden');
+    document.getElementById('create-map-fields').classList.add('hidden');
+
     // Clear example sentences creation inputs and list
     const createSentencesInput = document.getElementById('create-new-sentence');
     if (createSentencesInput) createSentencesInput.value = '';
@@ -849,7 +945,7 @@ async function handleCreateCard(e) {
         btn.style.background = "";
         btn.style.borderColor = "";
         btn.style.color = "";
-        document.getElementById('card-front').focus();
+        if (document.getElementById('card-front')) document.getElementById('card-front').focus();
     }, 1500);
 }
 
@@ -859,8 +955,6 @@ function openEditView(cardId) {
 
     document.getElementById('edit-card-id').value = card.id;
     document.getElementById('edit-card-type').value = card.type || 'mixed';
-    document.getElementById('edit-card-front').value = card.front;
-    document.getElementById('edit-card-back').value = card.back;
     
     document.getElementById('edit-card-front-image').value = '';
     document.getElementById('edit-card-back-image').value = '';
@@ -881,21 +975,60 @@ function openEditView(cardId) {
         backPreviewDiv.classList.add('hidden');
     }
 
-    // Load example sentences clues
-    const savedSentences = exampleSentences[card.id];
-    if (Array.isArray(savedSentences)) {
-        editSentences = [...savedSentences];
-    } else if (typeof savedSentences === 'string') {
-        editSentences = [savedSentences];
+    // Toggle fields based on card type
+    const vocabFields = document.getElementById('edit-vocab-fields');
+    const mapFields = document.getElementById('edit-map-fields');
+    
+    let isMap = false;
+    try {
+        if (card.front.startsWith('{"mode":"memory_map"')) {
+            isMap = true;
+        }
+    } catch (e) {}
+    
+    if (isMap || card.type === 'Memory Map') {
+        document.getElementById('edit-card-type').value = 'Memory Map';
+        vocabFields.classList.add('hidden');
+        mapFields.classList.remove('hidden');
+        
+        let mapData = { title: '', nodes: [], links: [] };
+        try {
+            mapData = JSON.parse(card.front);
+        } catch (e) {
+            console.error("Error parsing memory map front text:", e);
+        }
+        
+        document.getElementById('edit-map-title').value = mapData.title || '';
+        editMapNodes = mapData.nodes || [];
+        editMapLinks = mapData.links || [];
+        
+        // Render edit nodes
+        setTimeout(() => {
+            renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
+        }, 100);
     } else {
-        editSentences = [];
-    }
+        vocabFields.classList.remove('hidden');
+        mapFields.classList.add('hidden');
+        
+        document.getElementById('edit-card-front').value = card.front;
+        document.getElementById('edit-card-back').value = card.back;
+        
+        // Load example sentences clues
+        const savedSentences = exampleSentences[card.id];
+        if (Array.isArray(savedSentences)) {
+            editSentences = [...savedSentences];
+        } else if (typeof savedSentences === 'string') {
+            editSentences = [savedSentences];
+        } else {
+            editSentences = [];
+        }
 
-    const editSentencesInput = document.getElementById('edit-new-sentence');
-    if (editSentencesInput) editSentencesInput.value = '';
-    const editError = document.getElementById('edit-sentence-error');
-    if (editError) editError.style.display = 'none';
-    renderEditSentencesList();
+        const editSentencesInput = document.getElementById('edit-new-sentence');
+        if (editSentencesInput) editSentencesInput.value = '';
+        const editError = document.getElementById('edit-sentence-error');
+        if (editError) editError.style.display = 'none';
+        renderEditSentencesList();
+    }
 
     switchView('edit');
 }
@@ -906,10 +1039,38 @@ async function handleEditCardSubmit(e) {
 
     const cardId = document.getElementById('edit-card-id').value;
     const typeText = document.getElementById('edit-card-type').value.trim() || 'mixed';
-    const frontText = document.getElementById('edit-card-front').value.trim();
-    const backText = document.getElementById('edit-card-back').value.trim();
-    const frontImageFile = document.getElementById('edit-card-front-image').files[0];
-    const backImageFile = document.getElementById('edit-card-back-image').files[0];
+    
+    let frontText = '';
+    let backText = '';
+    
+    if (typeText === 'Memory Map') {
+        const title = document.getElementById('edit-map-title').value.trim();
+        if (!title) {
+            alert("Please enter a Memory Map Title.");
+            return;
+        }
+        if (editMapNodes.length === 0) {
+            alert("Please add at least one node to your Memory Map.");
+            return;
+        }
+        const hasRoot = editMapNodes.some(n => n.isRoot);
+        if (!hasRoot) {
+            alert("Please designate exactly one Root Node (using the crown button).");
+            return;
+        }
+        
+        const mapData = {
+            mode: 'memory_map',
+            title: title,
+            nodes: editMapNodes,
+            links: editMapLinks
+        };
+        frontText = JSON.stringify(mapData);
+        backText = 'Memory Map';
+    } else {
+        frontText = document.getElementById('edit-card-front').value.trim();
+        backText = document.getElementById('edit-card-back').value.trim();
+    }
     
     if (!frontText || !backText || !cardId) return;
 
@@ -1061,6 +1222,64 @@ function renderCurrentCard() {
     const exerciseTitleEl = document.getElementById('practice-exercise-title');
     const backEl = document.getElementById('practice-back');
     const spellingArea = document.getElementById('spelling-indicator-area');
+
+    let isMap = false;
+    let mapData = null;
+    try {
+        if (card.front.startsWith('{"mode":"memory_map"')) {
+            mapData = JSON.parse(card.front);
+            isMap = true;
+        }
+    } catch (e) {}
+
+    if (isMap || card.type === 'Memory Map') {
+        exerciseTitleEl.textContent = "Recall the Memory Map";
+        spellingArea.classList.add('hidden');
+        
+        frontEl.innerHTML = `
+            <div class="practice-prompt-container" style="display: flex; flex-direction: column; gap: 12px; width: 100%; height: 100%;">
+                <div class="practice-explanation" style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); text-align: center;">
+                    ${mapData ? mapData.title : 'Recall this Memory Map'}
+                </div>
+                <div id="practice-map-canvas-container" style="position: relative; width: 100%; height: 350px; background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: inset 0 -2px 0 var(--border-color); user-select: none;">
+                    <div style="position: absolute; inset: 0; background-size: 20px 20px; background-image: radial-gradient(var(--border-color) 1px, transparent 0); opacity: 0.4; pointer-events: none;"></div>
+                    <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;" id="practice-map-svg">
+                        <defs>
+                            <marker id="practice-arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="var(--text-secondary)" />
+                            </marker>
+                        </defs>
+                    </svg>
+                    <div id="practice-map-nodes-container" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2;"></div>
+                </div>
+            </div>
+        `;
+        
+        if (mapData) {
+            renderPracticeNodes('practice-map-nodes-container', mapData.nodes, mapData.links, 'practice-map-svg', 'practice-arrowhead');
+        }
+        
+        backEl.innerHTML = `<strong style="color:var(--accent);">Memory Map Title:</strong> ${mapData ? mapData.title : ''}`;
+        
+        const frontImg = document.getElementById('practice-front-img');
+        if (frontImg) frontImg.classList.add('hidden');
+        const backImg = document.getElementById('practice-back-img');
+        if (backImg) backImg.classList.add('hidden');
+        
+        document.querySelector('.card-front').classList.remove('hidden');
+        document.querySelector('.card-back').classList.add('hidden');
+        
+        document.getElementById('typing-area').classList.remove('hidden');
+        document.getElementById('practice-input').classList.add('hidden');
+        document.getElementById('evaluation-area').classList.add('hidden');
+        
+        setTimeout(() => {
+            const firstInput = document.querySelector('.practice-map-node-input');
+            if (firstInput) firstInput.focus();
+        }, 100);
+        return;
+    }
+
     
     // Check if card has saved example sentences
     const savedSentences = exampleSentences[card.id];
@@ -1453,6 +1672,15 @@ function evaluateAnswer() {
     const card = reviewQueue[currentReviewIndex];
     if (!card) return;
 
+    let isMap = false;
+    let mapData = null;
+    try {
+        if (card.front.startsWith('{"mode":"memory_map"')) {
+            mapData = JSON.parse(card.front);
+            isMap = true;
+        }
+    } catch (e) {}
+
     let typed = '';
     let score = 0;
     const spellingInputs = document.querySelectorAll('.letter-input');
@@ -1468,41 +1696,86 @@ function evaluateAnswer() {
         }
     }
 
-    if (spellingInputs.length > 0) {
-        const enteredCount = Array.from(spellingInputs).filter(i => i.value.trim().length > 0).length;
-        if (enteredCount > 0) {
-            typed = 'attempted'; // dummy value to satisfy the (!typed) check
+    if (isMap || card.type === 'Memory Map') {
+        const practiceInputs = document.querySelectorAll('.practice-map-node-input');
+        const enteredCount = Array.from(practiceInputs).filter(i => i.value.trim().length > 0).length;
+        if (enteredCount === 0 && practiceInputs.length > 0) {
+            alert("Please attempt to fill in the mind map before submitting!");
+            return;
         }
         
-        if (sentences.length > 0) {
-            const typedWords = getTypedAnswersForSentences(card.back.trim(), sentences.length);
-            let allCorrect = true;
-            let totalScore = 0;
-            typedWords.forEach(word => {
-                const matchScore = calculateMatchPercentage(word, card.back);
-                if (matchScore < 100) {
-                    allCorrect = false;
-                }
-                totalScore += matchScore;
-            });
+        let totalScore = 0;
+        let nonRootNodesCount = 0;
+        
+        practiceInputs.forEach(input => {
+            const nodeId = input.dataset.nodeId;
+            const node = mapData.nodes.find(n => n.id === nodeId);
+            if (!node) return;
             
-            if (allCorrect) {
-                score = 100;
+            nonRootNodesCount++;
+            
+            const typedVal = input.value.trim();
+            const correctVal = node.text.trim();
+            
+            const matchScore = calculateMatchPercentage(typedVal, correctVal);
+            totalScore += matchScore;
+            
+            const nodeEl = input.parentNode;
+            input.disabled = true;
+            
+            if (matchScore === 100) {
+                nodeEl.style.borderColor = 'var(--success)';
+                input.style.color = 'var(--success)';
+                input.style.borderBottom = 'none';
             } else {
-                // If even one sentence is incorrect, force a failure score (< 75%)
-                const averageScore = Math.round(totalScore / sentences.length);
-                score = Math.min(74, averageScore);
+                nodeEl.style.borderColor = 'var(--danger)';
+                input.style.color = 'var(--danger)';
+                input.style.borderBottom = 'none';
+                
+                const label = document.createElement('span');
+                label.className = 'correct-answer-label';
+                label.textContent = node.text;
+                nodeEl.appendChild(label);
+            }
+        });
+        
+        score = nonRootNodesCount > 0 ? Math.round(totalScore / nonRootNodesCount) : 100;
+        typed = 'memory-map-attempt';
+    } else {
+        if (spellingInputs.length > 0) {
+            const enteredCount = Array.from(spellingInputs).filter(i => i.value.trim().length > 0).length;
+            if (enteredCount > 0) {
+                typed = 'attempted';
             }
             
-            // Reconstruct a user-facing string of what they typed
-            typed = typedWords.join(' | ');
+            if (sentences.length > 0) {
+                const typedWords = getTypedAnswersForSentences(card.back.trim(), sentences.length);
+                let allCorrect = true;
+                let totalScore = 0;
+                typedWords.forEach(word => {
+                    const matchScore = calculateMatchPercentage(word, card.back);
+                    if (matchScore < 100) {
+                        allCorrect = false;
+                    }
+                    totalScore += matchScore;
+                });
+                
+                if (allCorrect) {
+                    score = 100;
+                } else {
+                    const averageScore = Math.round(totalScore / sentences.length);
+                    score = Math.min(74, averageScore);
+                }
+                
+                typed = typedWords.join(' | ');
+            } else {
+                typed = getTypedSpellingAnswer(card.back.trim()).trim();
+                score = calculateMatchPercentage(typed, card.back);
+            }
         } else {
-            typed = getTypedSpellingAnswer(card.back.trim()).trim();
+            typed = document.getElementById('practice-input').value.trim();
             score = calculateMatchPercentage(typed, card.back);
         }
-    } else {
-        typed = document.getElementById('practice-input').value.trim();
-        score = calculateMatchPercentage(typed, card.back);
     }
 
     if (!typed) {
@@ -1542,7 +1815,7 @@ function evaluateAnswer() {
     
     // Manage Incorrect sentence collector logic
     const sentenceContainer = document.getElementById('incorrect-sentence-container');
-    if (score < 75) {
+    if (score < 75 && !(isMap || card.type === 'Memory Map')) {
         sentenceContainer.classList.remove('hidden');
         document.getElementById('incorrect-sentence-input').value = '';
         document.getElementById('incorrect-sentence-input').placeholder = `e.g. We are running ${card.back} on gas.`;
@@ -1555,6 +1828,7 @@ function evaluateAnswer() {
     
     document.getElementById('evaluation-area').classList.remove('hidden');
 }
+
 
 // SM-2 Algorithm mapping based on grade
 async function applySM2Grade(gradeInt) {
@@ -1810,3 +2084,466 @@ function deleteEditSentence(index) {
     editSentences.splice(index, 1);
     renderEditSentencesList();
 }
+
+// ------ Memory Map Core Engine & Interactive Canvas Handlers ------
+
+function getNodeBoundaryIntersection(src, tgt, w = 140, h = 55) {
+    const cx = src.x + w / 2;
+    const cy = src.y + h / 2;
+    const tx = tgt.x + w / 2;
+    const ty = tgt.y + h / 2;
+    const dx = tx - cx;
+    const dy = ty - cy;
+    if (dx === 0 && dy === 0) return { x: cx, y: cy };
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+    const w2 = w / 2;
+    const h2 = h / 2;
+    let scale = 1;
+    if (absDx * h2 > absDy * w2) {
+        // Intersects left or right boundary
+        scale = w2 / absDx;
+    } else {
+        // Intersects top or bottom boundary
+        scale = h2 / absDy;
+    }
+    return {
+        x: cx + dx * scale,
+        y: cy + dy * scale
+    };
+}
+
+function drawLinks(nodes, links, svgId, arrowheadId) {
+    const svg = document.getElementById(svgId);
+    if (!svg) return;
+    
+    // Clear all existing paths
+    const paths = svg.querySelectorAll('path');
+    paths.forEach(p => p.remove());
+    
+    links.forEach(link => {
+        const src = nodes.find(n => n.id === link.source);
+        const tgt = nodes.find(n => n.id === link.target);
+        
+        if (!src || !tgt) return;
+        
+        const sPt = getNodeBoundaryIntersection(src, tgt);
+        const tPtRaw = getNodeBoundaryIntersection(tgt, src);
+        
+        const dx = tPtRaw.x - sPt.x;
+        const dy = tPtRaw.y - sPt.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        let tPt = tPtRaw;
+        if (dist > 10) {
+            const lux = dx / dist;
+            const luy = dy / dist;
+            // Offset 8px back so arrowhead marker doesn't overlap the border
+            tPt = {
+                x: tPtRaw.x - lux * 8,
+                y: tPtRaw.y - luy * 8
+            };
+        }
+        
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', `M ${sPt.x} ${sPt.y} L ${tPt.x} ${tPt.y}`);
+        path.setAttribute('stroke', 'var(--text-secondary)');
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('fill', 'none');
+        path.setAttribute('marker-end', `url(#${arrowheadId})`);
+        path.style.opacity = '0.6';
+        
+        svg.appendChild(path);
+    });
+}
+
+function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit = false) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    
+    // Draw links first so they are behind the nodes
+    drawLinks(nodes, links, svgId, arrowheadId);
+    
+    nodes.forEach(node => {
+        const nodeEl = document.createElement('div');
+        nodeEl.className = 'map-node';
+        nodeEl.style.position = 'absolute';
+        nodeEl.style.left = `${node.x}px`;
+        nodeEl.style.top = `${node.y}px`;
+        nodeEl.style.width = '140px';
+        nodeEl.style.height = '55px';
+        nodeEl.style.background = 'var(--bg-card)';
+        nodeEl.style.border = node.isRoot ? '2px solid var(--warning)' : '2px solid var(--border-color)';
+        nodeEl.style.borderRadius = '8px';
+        nodeEl.style.display = 'flex';
+        nodeEl.style.flexDirection = 'column';
+        nodeEl.style.padding = '4px';
+        nodeEl.style.boxSizing = 'border-box';
+        nodeEl.style.zIndex = '5';
+        nodeEl.style.cursor = 'grab';
+        
+        // Node Header Row
+        const headerEl = document.createElement('div');
+        headerEl.style.display = 'flex';
+        headerEl.style.justifyContent = 'space-between';
+        headerEl.style.alignItems = 'center';
+        headerEl.style.marginBottom = '2px';
+        
+        // Root Toggle Button
+        const rootBtn = document.createElement('button');
+        rootBtn.type = 'button';
+        rootBtn.className = `node-btn root-btn ${node.isRoot ? 'active' : ''}`;
+        rootBtn.innerHTML = node.isRoot ? '👑' : '⚪';
+        rootBtn.title = node.isRoot ? 'Root Node (Static)' : 'Set as Root Node';
+        rootBtn.style.background = 'none';
+        rootBtn.style.border = 'none';
+        rootBtn.style.cursor = 'pointer';
+        rootBtn.style.fontSize = '0.75rem';
+        rootBtn.style.padding = '0';
+        if (node.isRoot) {
+            rootBtn.style.color = 'var(--warning)';
+        }
+        rootBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            nodes.forEach(n => n.isRoot = false);
+            node.isRoot = true;
+            renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
+        });
+        
+        // Link Button
+        const linkBtn = document.createElement('button');
+        linkBtn.type = 'button';
+        linkBtn.className = 'node-btn link-btn';
+        const isLinkingSource = (linkingSourceNodeId === node.id);
+        linkBtn.innerHTML = isLinkingSource ? '⚡' : '🔗';
+        linkBtn.title = isLinkingSource ? 'Click target node to connect' : 'Link from this node';
+        linkBtn.style.background = 'none';
+        linkBtn.style.border = 'none';
+        linkBtn.style.cursor = 'pointer';
+        linkBtn.style.fontSize = '0.75rem';
+        linkBtn.style.padding = '0';
+        if (isLinkingSource) {
+            linkBtn.style.color = 'var(--accent)';
+            nodeEl.style.boxShadow = '0 0 8px var(--accent)';
+        }
+        linkBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (linkingSourceNodeId === node.id) {
+                linkingSourceNodeId = null;
+            } else if (linkingSourceNodeId) {
+                // Connect link
+                const exists = links.some(l => l.source === linkingSourceNodeId && l.target === node.id);
+                if (!exists && linkingSourceNodeId !== node.id) {
+                    links.push({ source: linkingSourceNodeId, target: node.id });
+                }
+                linkingSourceNodeId = null;
+            } else {
+                linkingSourceNodeId = node.id;
+            }
+            renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
+        });
+        
+        // Delete Node Button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'node-btn delete-btn';
+        deleteBtn.innerHTML = '×';
+        deleteBtn.title = 'Delete Node';
+        deleteBtn.style.background = 'none';
+        deleteBtn.style.border = 'none';
+        deleteBtn.style.cursor = 'pointer';
+        deleteBtn.style.color = '#ef4444';
+        deleteBtn.style.fontSize = '0.9rem';
+        deleteBtn.style.fontWeight = 'bold';
+        deleteBtn.style.padding = '0';
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Remove node
+            const idx = nodes.findIndex(n => n.id === node.id);
+            if (idx !== -1) {
+                nodes.splice(idx, 1);
+            }
+            // Remove connected links
+            const filteredLinks = links.filter(l => l.source !== node.id && l.target !== node.id);
+            links.length = 0;
+            filteredLinks.forEach(l => links.push(l));
+            
+            // Set root fallback if deleted root
+            if (node.isRoot && nodes.length > 0) {
+                nodes[0].isRoot = true;
+            }
+            renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
+        });
+        
+        headerEl.appendChild(rootBtn);
+        headerEl.appendChild(linkBtn);
+        headerEl.appendChild(deleteBtn);
+        
+        // Node Concept Input
+        const inputEl = document.createElement('input');
+        inputEl.type = 'text';
+        inputEl.className = 'node-input';
+        inputEl.value = node.text || '';
+        inputEl.placeholder = 'Concept...';
+        inputEl.style.width = '100%';
+        inputEl.style.border = 'none';
+        inputEl.style.background = 'rgba(0,0,0,0.02)';
+        inputEl.style.borderRadius = '4px';
+        inputEl.style.padding = '2px 4px';
+        inputEl.style.fontSize = '0.8rem';
+        inputEl.style.color = 'var(--text-primary)';
+        inputEl.style.boxSizing = 'border-box';
+        inputEl.style.fontFamily = 'inherit';
+        inputEl.style.textAlign = 'center';
+        
+        inputEl.addEventListener('input', (e) => {
+            node.text = e.target.value;
+        });
+        inputEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                inputEl.blur();
+            }
+        });
+        
+        // Connect link when clicking node body in linking mode
+        nodeEl.addEventListener('click', (e) => {
+            if (linkingSourceNodeId && linkingSourceNodeId !== node.id) {
+                e.stopPropagation();
+                const exists = links.some(l => l.source === linkingSourceNodeId && l.target === node.id);
+                if (!exists) {
+                    links.push({ source: linkingSourceNodeId, target: node.id });
+                }
+                linkingSourceNodeId = null;
+                renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
+            }
+        });
+        
+        // Drag Events
+        let isDragging = false;
+        let startX, startY;
+        let startNodeX, startNodeY;
+        
+        nodeEl.addEventListener('mousedown', (e) => {
+            if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'button') {
+                return;
+            }
+            e.preventDefault();
+            isDragging = true;
+            nodeEl.style.cursor = 'grabbing';
+            startX = e.clientX;
+            startY = e.clientY;
+            startNodeX = node.x;
+            startNodeY = node.y;
+            
+            const onMouseMove = (moveEvent) => {
+                if (!isDragging) return;
+                const dx = moveEvent.clientX - startX;
+                const dy = moveEvent.clientY - startY;
+                
+                let nx = startNodeX + dx;
+                let ny = startNodeY + dy;
+                
+                const rect = container.getBoundingClientRect();
+                nx = Math.max(0, Math.min(rect.width - 140, nx));
+                ny = Math.max(0, Math.min(rect.height - 55, ny));
+                
+                node.x = nx;
+                node.y = ny;
+                
+                nodeEl.style.left = `${nx}px`;
+                nodeEl.style.top = `${ny}px`;
+                
+                drawLinks(nodes, links, svgId, arrowheadId);
+            };
+            
+            const onMouseUp = () => {
+                isDragging = false;
+                nodeEl.style.cursor = 'grab';
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            };
+            
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+        
+        nodeEl.appendChild(headerEl);
+        nodeEl.appendChild(inputEl);
+        
+        container.appendChild(nodeEl);
+    });
+}
+
+function initMapCanvasListeners() {
+    // Creation elements
+    const btnCreateAdd = document.getElementById('btn-create-map-add-node');
+    if (btnCreateAdd) {
+        btnCreateAdd.addEventListener('click', () => {
+            const id = 'node_' + Date.now();
+            createMapNodes.push({
+                id: id,
+                text: '',
+                x: 80 + Math.random() * 80,
+                y: 80 + Math.random() * 80,
+                isRoot: createMapNodes.length === 0
+            });
+            renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
+        });
+    }
+    
+    const btnCreateClear = document.getElementById('btn-create-map-clear');
+    if (btnCreateClear) {
+        btnCreateClear.addEventListener('click', () => {
+            if (confirm("Are you sure you want to clear the mind map canvas?")) {
+                createMapNodes = [];
+                createMapLinks = [];
+                linkingSourceNodeId = null;
+                renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
+            }
+        });
+    }
+    
+    const createCanvas = document.getElementById('create-map-canvas-container');
+    if (createCanvas) {
+        createCanvas.addEventListener('dblclick', (e) => {
+            if (e.target.id !== 'create-map-canvas-container' && e.target.id !== 'create-map-nodes-container') {
+                return;
+            }
+            const rect = createCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left - 70;
+            const y = e.clientY - rect.top - 27;
+            const boundedX = Math.max(0, Math.min(rect.width - 140, x));
+            const boundedY = Math.max(0, Math.min(rect.height - 55, y));
+            
+            const id = 'node_' + Date.now();
+            createMapNodes.push({
+                id: id,
+                text: '',
+                x: boundedX,
+                y: boundedY,
+                isRoot: createMapNodes.length === 0
+            });
+            renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
+        });
+    }
+    
+    // Editing elements
+    const btnEditAdd = document.getElementById('btn-edit-map-add-node');
+    if (btnEditAdd) {
+        btnEditAdd.addEventListener('click', () => {
+            const id = 'node_' + Date.now();
+            editMapNodes.push({
+                id: id,
+                text: '',
+                x: 80 + Math.random() * 80,
+                y: 80 + Math.random() * 80,
+                isRoot: editMapNodes.length === 0
+            });
+            renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
+        });
+    }
+    
+    const btnEditClear = document.getElementById('btn-edit-map-clear');
+    if (btnEditClear) {
+        btnEditClear.addEventListener('click', () => {
+            if (confirm("Are you sure you want to clear the mind map canvas?")) {
+                editMapNodes = [];
+                editMapLinks = [];
+                linkingSourceNodeId = null;
+                renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
+            }
+        });
+    }
+    
+    const editCanvas = document.getElementById('edit-map-canvas-container');
+    if (editCanvas) {
+        editCanvas.addEventListener('dblclick', (e) => {
+            if (e.target.id !== 'edit-map-canvas-container' && e.target.id !== 'edit-map-nodes-container') {
+                return;
+            }
+            const rect = editCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left - 70;
+            const y = e.clientY - rect.top - 27;
+            const boundedX = Math.max(0, Math.min(rect.width - 140, x));
+            const boundedY = Math.max(0, Math.min(rect.height - 55, y));
+            
+            const id = 'node_' + Date.now();
+            editMapNodes.push({
+                id: id,
+                text: '',
+                x: boundedX,
+                y: boundedY,
+                isRoot: editMapNodes.length === 0
+            });
+            renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
+        });
+    }
+}
+
+function renderPracticeNodes(containerId, nodes, links, svgId, arrowheadId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    
+    // Draw links
+    drawLinks(nodes, links, svgId, arrowheadId);
+    
+    nodes.forEach(node => {
+        const nodeEl = document.createElement('div');
+        nodeEl.className = 'map-node';
+        nodeEl.style.position = 'absolute';
+        nodeEl.style.left = `${node.x}px`;
+        nodeEl.style.top = `${node.y}px`;
+        nodeEl.style.width = '140px';
+        nodeEl.style.height = '55px';
+        nodeEl.style.background = 'var(--bg-card)';
+        nodeEl.style.borderRadius = '8px';
+        nodeEl.style.display = 'flex';
+        nodeEl.style.flexDirection = 'column';
+        nodeEl.style.alignItems = 'center';
+        nodeEl.style.justifyContent = 'center';
+        nodeEl.style.boxSizing = 'border-box';
+        nodeEl.style.padding = '6px';
+        nodeEl.style.zIndex = '5';
+        
+        if (node.isRoot) {
+            nodeEl.style.border = '2px solid var(--warning)';
+            nodeEl.style.fontWeight = '700';
+            nodeEl.style.color = 'var(--text-primary)';
+            
+            const badge = document.createElement('span');
+            badge.style = 'font-size: 0.7rem; color: var(--warning); margin-bottom: 2px; font-weight: 800;';
+            badge.textContent = '👑 ROOT';
+            
+            const textSpan = document.createElement('span');
+            textSpan.style = 'font-size: 0.85rem; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px; box-sizing: border-box;';
+            textSpan.textContent = node.text || '';
+            
+            nodeEl.appendChild(badge);
+            nodeEl.appendChild(textSpan);
+        } else {
+            nodeEl.style.border = '2px solid var(--border-color)';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'practice-map-node-input';
+            input.placeholder = 'Type concept...';
+            input.dataset.nodeId = node.id;
+            input.style = 'width: 100%; border: none; border-bottom: 2px dashed var(--border-color); background: transparent; text-align: center; font-size: 0.8rem; color: var(--text-primary); font-family: inherit; font-weight: 700; box-sizing: border-box; padding: 2px 0;';
+            
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.getElementById('btn-submit-answer').click();
+                }
+            });
+            
+            nodeEl.appendChild(input);
+        }
+        
+        container.appendChild(nodeEl);
+    });
+}
+
