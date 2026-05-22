@@ -3686,7 +3686,8 @@ function renderPracticeNodes(containerId, nodes, links, svgId, arrowheadId) {
         nodeEl.style.padding = '6px';
         nodeEl.style.zIndex = '5';
         
-        const isAnchor = node.isRoot || (idx === 0);
+        const hasAnyRoot = nodes.some(n => n.isRoot);
+        const isAnchor = hasAnyRoot ? !!node.isRoot : (idx === 0);
         
         if (isAnchor) {
             nodeEl.style.border = '2px solid var(--warning)';
