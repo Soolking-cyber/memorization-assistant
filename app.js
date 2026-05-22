@@ -3154,7 +3154,7 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         nodeEl.style.width = '180px';
         nodeEl.style.height = '90px';
         nodeEl.style.background = 'var(--bg-card)';
-        nodeEl.style.border = '2px solid var(--border-color)';
+        nodeEl.style.border = node.isRoot ? '2px solid var(--warning)' : '2px solid var(--border-color)';
         nodeEl.style.borderRadius = '8px';
         nodeEl.style.display = 'flex';
         nodeEl.style.flexDirection = 'column';
@@ -3242,9 +3242,41 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
             }
             renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
         });
+
+        // 3. Starting Node Button (Subtle macOS Yellow dot)
+        const rootBtn = document.createElement('button');
+        rootBtn.type = 'button';
+        rootBtn.className = 'node-btn root-btn';
+        rootBtn.title = node.isRoot ? 'Current Starting Card (Root)' : 'Set as Starting Card';
+        rootBtn.style.width = '10px';
+        rootBtn.style.height = '10px';
+        rootBtn.style.borderRadius = '50%';
+        rootBtn.style.background = node.isRoot ? '#ffbd2e' : '#cbd5e1'; // Yellow if root, gray if not
+        rootBtn.style.border = 'none';
+        rootBtn.style.cursor = 'pointer';
+        rootBtn.style.padding = '0';
+        rootBtn.style.opacity = node.isRoot ? '1.0' : '0.5';
+        rootBtn.style.transition = 'opacity 0.15s, transform 0.15s, background-color 0.15s';
+        rootBtn.style.outline = 'none';
+        rootBtn.addEventListener('mouseenter', () => {
+            rootBtn.style.opacity = '1.0';
+            rootBtn.style.transform = 'scale(1.1)';
+        });
+        rootBtn.addEventListener('mouseleave', () => {
+            rootBtn.style.opacity = node.isRoot ? '1.0' : '0.5';
+            rootBtn.style.transform = 'scale(1)';
+        });
+        rootBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            nodes.forEach(n => {
+                n.isRoot = (n.id === node.id);
+            });
+            renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
+        });
         
-        headerEl.appendChild(styleBtn);
         headerEl.appendChild(deleteBtn);
+        headerEl.appendChild(rootBtn);
+        headerEl.appendChild(styleBtn);
         
         // 4-Sided Plus Connectors (Top, Right, Bottom, Left)
         const sides = ['top', 'right', 'bottom', 'left'];
