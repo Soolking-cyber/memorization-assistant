@@ -2664,6 +2664,11 @@ function hideNodeToolbar(container) {
 }
 
 function showNodeToolbar(node, container, containerId, nodes, links, svgId, arrowheadId, isEdit) {
+    if (activeSelectedNode && activeSelectedNode.node.id === node.id) {
+        hideNodeToolbar(container);
+        return;
+    }
+    
     // Hide any existing node toolbar first
     hideNodeToolbar(container);
     
@@ -3336,7 +3341,6 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
             }
         });
         bodyEl.appendChild(inputEl);
-        nodeEl.appendChild(expRow);
         
         // Connect link when clicking node body in linking mode
         nodeEl.addEventListener('click', (e) => {
@@ -3406,6 +3410,7 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         });
         
         nodeEl.appendChild(headerEl);
+        nodeEl.appendChild(expRow);
         nodeEl.appendChild(bodyEl);
         
         container.appendChild(nodeEl);
