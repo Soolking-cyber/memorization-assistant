@@ -2323,6 +2323,11 @@ function hideLinkToolbar(container) {
 }
 
 function showLinkToolbar(midX, midY, container, link, nodes, links, svgId, arrowheadId, containerId, isEdit) {
+    if (activeSelectedLink && activeSelectedLink.link.source === link.source && activeSelectedLink.link.target === link.target) {
+        hideLinkToolbar(container);
+        return;
+    }
+    
     // Hide any existing toolbar first
     hideLinkToolbar(container);
     
