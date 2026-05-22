@@ -278,6 +278,20 @@ async function loadData() {
         console.error("Error loading cards:", error);
     } else {
         cards = data || [];
+        
+        // Populate exampleSentences from backend example_sentences column
+        cards.forEach(card => {
+            if (card.example_sentences) {
+                exampleSentences[card.id] = card.example_sentences;
+            } else {
+                // Backwards compatibility/fallback to local storage if not in DB yet
+                if (!exampleSentences[card.id]) {
+                    exampleSentences[card.id] = [];
+                }
+            }
+        });
+        localStorage.setItem('exampleSentences', JSON.stringify(exampleSentences));
+        
         updateDashboard();
     }
 }
@@ -836,7 +850,7 @@ function renderManageView() {
 
     // Inline delete sentence button handler
     document.querySelectorAll('.delete-sentence-bank-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             const cardId = e.currentTarget.dataset.cardId;
             const index = parseInt(e.currentTarget.dataset.index);
             
@@ -856,6 +870,28 @@ function renderManageView() {
                 delete exampleSentences[cardId];
             }
             localStorage.setItem('exampleSentences', JSON.stringify(exampleSentences));
+
+            // Sync to in-memory cards array
+            const cardIndex = cards.findIndex(c => c.id === cardId);
+            if (cardIndex !== -1) {
+                cards[cardIndex].example_sentences = sentencesArray;
+            }
+
+            // Sync to DB
+            if (userSession && supabase) {
+                try {
+                    const { error } = await supabase
+                        .from('flashcards')
+                        .update({ example_sentences: sentencesArray })
+                        .eq('id', cardId)
+                        .eq('user_id', userSession.user.id);
+                    if (error) {
+                        console.error('Error updating example sentences in Supabase:', error);
+                    }
+                } catch (err) {
+                    console.error('Error syncing example sentences update to DB:', err);
+                }
+            }
             
             renderManageView();
         });
@@ -1021,7 +1057,8 @@ async function handleCreateCard(e) {
         nextReview: Date.now(),
         ease: 2.5,
         interval: 0,
-        repetitions: 0
+        repetitions: 0,
+        example_sentences: activeType !== 'Memory Map' ? [...draftCreateSentences] : []
     };
 
     const { data, error } = await supabase.from('flashcards').insert([newCard]).select();
@@ -1252,7 +1289,8 @@ async function handleEditCardSubmit(e) {
             front: frontText,
             back: backText,
             image_front_url: new_image_front_url,
-            image_back_url: new_image_back_url
+            image_back_url: new_image_back_url,
+            example_sentences: typeText !== 'Memory Map' ? [...editSentences] : []
         })
         .eq('id', cardId)
         .eq('user_id', userSession.user.id)
@@ -2012,7 +2050,7 @@ async function applySM2Grade(gradeInt) {
 }
 
 // Incorrect answer example sentence saver
-function saveIncorrectExampleSentence() {
+async function saveIncorrectExampleSentence() {
     const card = reviewQueue[currentReviewIndex];
     if (!card) return;
     
@@ -2047,6 +2085,25 @@ function saveIncorrectExampleSentence() {
     sentencesArray.push(sentenceText);
     exampleSentences[card.id] = sentencesArray;
     localStorage.setItem('exampleSentences', JSON.stringify(exampleSentences));
+
+    // Update in-memory card object
+    card.example_sentences = sentencesArray;
+
+    // Sync to DB
+    if (userSession && supabase) {
+        try {
+            const { error } = await supabase
+                .from('flashcards')
+                .update({ example_sentences: sentencesArray })
+                .eq('id', card.id)
+                .eq('user_id', userSession.user.id);
+            if (error) {
+                console.error('Error updating example sentences in Supabase:', error);
+            }
+        } catch (err) {
+            console.error('Error syncing example sentences update to DB:', err);
+        }
+    }
     
     errorMsg.innerHTML = "Sentence saved as memory clue! " + ICONS.check;
     errorMsg.style.color = "#34a853";
@@ -2596,7 +2653,10 @@ function showLinkToolbar(midX, midY, container, link, nodes, links, svgId, arrow
 let activeSelectedNode = null;
 
 function hideNodeToolbar(container) {
-    const existing = container.querySelector('.map-node-toolbar');
+    if (!container) return;
+    const existing = container.querySelector('.map-node-toolbar') || 
+                     (container.parentNode && container.parentNode.querySelector('.map-node-toolbar')) ||
+                     document.querySelector('.map-node-toolbar');
     if (existing) {
         existing.remove();
     }
@@ -3093,39 +3153,67 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         nodeEl.style.zIndex = '5';
         nodeEl.style.cursor = 'grab';
         
-        // Node Header Row
+        // Node Header Row (Top Right Corner subtle controls)
         const headerEl = document.createElement('div');
         headerEl.style.display = 'flex';
-        headerEl.style.justifyContent = 'space-between';
+        headerEl.style.justifyContent = 'flex-end';
         headerEl.style.alignItems = 'center';
-        headerEl.style.marginBottom = '2px';
+        headerEl.style.gap = '6px';
+        headerEl.style.height = '10px';
+        headerEl.style.marginBottom = '4px';
+        headerEl.style.paddingRight = '4px';
         
-        // 1. Style Button (Palette)
+        // 1. Style Button (Subtle macOS Green dot)
         const styleBtn = document.createElement('button');
         styleBtn.type = 'button';
         styleBtn.className = 'node-btn style-btn';
-        styleBtn.innerHTML = ICONS.palette;
         styleBtn.title = 'Style Card Text';
-        styleBtn.style.background = 'none';
+        styleBtn.style.width = '10px';
+        styleBtn.style.height = '10px';
+        styleBtn.style.borderRadius = '50%';
+        styleBtn.style.background = '#27c93f'; // macOS Green
         styleBtn.style.border = 'none';
         styleBtn.style.cursor = 'pointer';
         styleBtn.style.padding = '0';
+        styleBtn.style.opacity = '0.5';
+        styleBtn.style.transition = 'opacity 0.15s, transform 0.15s';
+        styleBtn.style.outline = 'none';
+        styleBtn.addEventListener('mouseenter', () => {
+            styleBtn.style.opacity = '1';
+            styleBtn.style.transform = 'scale(1.1)';
+        });
+        styleBtn.addEventListener('mouseleave', () => {
+            styleBtn.style.opacity = '0.5';
+            styleBtn.style.transform = 'scale(1)';
+        });
         styleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             showNodeToolbar(node, container, containerId, nodes, links, svgId, arrowheadId, isEdit);
         });
         
-        // 2. Delete Node Button
+        // 2. Delete Node Button (Subtle macOS Red dot)
         const deleteBtn = document.createElement('button');
         deleteBtn.type = 'button';
         deleteBtn.className = 'node-btn delete-btn';
-        deleteBtn.innerHTML = ICONS.close;
-        deleteBtn.title = 'Delete Node';
-        deleteBtn.style.background = 'none';
+        deleteBtn.title = 'Delete Card';
+        deleteBtn.style.width = '10px';
+        deleteBtn.style.height = '10px';
+        deleteBtn.style.borderRadius = '50%';
+        deleteBtn.style.background = '#ff5f56'; // macOS Red
         deleteBtn.style.border = 'none';
         deleteBtn.style.cursor = 'pointer';
-        deleteBtn.style.color = '#ef4444';
         deleteBtn.style.padding = '0';
+        deleteBtn.style.opacity = '0.5';
+        deleteBtn.style.transition = 'opacity 0.15s, transform 0.15s';
+        deleteBtn.style.outline = 'none';
+        deleteBtn.addEventListener('mouseenter', () => {
+            deleteBtn.style.opacity = '1';
+            deleteBtn.style.transform = 'scale(1.1)';
+        });
+        deleteBtn.addEventListener('mouseleave', () => {
+            deleteBtn.style.opacity = '0.5';
+            deleteBtn.style.transform = 'scale(1)';
+        });
         deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             // Remove node
