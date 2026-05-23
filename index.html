@@ -414,6 +414,15 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                         </button>
                     </div>
+                    <!-- Filter cards by type/category select -->
+                    <div class="manage-filter-container" style="margin-bottom: 20px; display: flex; align-items: center; gap: 12px; width: 100%;">
+                        <label for="manage-type-select" style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px; white-space: nowrap;">Filter By Type:</label>
+                        <div class="input-group-select" style="flex: 1; max-width: 250px;">
+                            <select id="manage-type-select" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit; font-size: 0.9rem; outline: none; transition: border-color 0.15s ease;">
+                                <option value="mixed">All Types (Mixed)</option>
+                            </select>
+                        </div>
+                    </div>
                     <div id="manage-toolbar" class="manage-toolbar hidden">
                         <label class="manage-select-all">
                             <input type="checkbox" id="select-all-checkbox">

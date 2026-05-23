@@ -468,6 +468,7 @@ h1, h2, h3, h4 {
 .input-group textarea:focus,
 .input-group select:focus,
 #practice-type-select:focus,
+#manage-type-select:focus,
 #incorrect-sentence-input:focus,
 #create-new-sentence:focus,
 #edit-new-sentence:focus,

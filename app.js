@@ -134,6 +134,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('card-type').addEventListener('change', handleTypeSelectChange);
     document.getElementById('edit-card-type').addEventListener('change', handleTypeSelectChange);
     document.getElementById('practice-type-select').addEventListener('change', updateDashboard);
+    const manageSelect = document.getElementById('manage-type-select');
+    if (manageSelect) {
+        manageSelect.addEventListener('change', renderManageView);
+    }
     window.removeType = removeType;
 
     // Delegated event listeners for interactive spelling direct input boxes
@@ -590,6 +594,7 @@ function updateTypeDatalists() {
     populateSelect('card-type', false);
     populateSelect('edit-card-type', false);
     populateSelect('practice-type-select', true);
+    populateSelect('manage-type-select', true);
     
     renderTypeTags();
 }
@@ -761,11 +766,25 @@ function renderManageView() {
         return;
     }
 
+    const filterSelect = document.getElementById('manage-type-select');
+    const activeFilter = filterSelect ? filterSelect.value : 'mixed';
+    
+    let filteredCards = cards;
+    if (activeFilter !== 'mixed') {
+        filteredCards = cards.filter(c => c.type === activeFilter);
+    }
+    
+    if (filteredCards.length === 0) {
+        list.innerHTML = '<p class="status-msg">No memories found for this type.</p>';
+        toolbar.classList.add('hidden');
+        return;
+    }
+
     toolbar.classList.remove('hidden');
     selectAllCb.checked = false;
     updateBatchUI();
 
-    cards.forEach(card => {
+    filteredCards.forEach(card => {
         const cardEl = document.createElement('div');
         cardEl.className = 'glass manage-card';
         
