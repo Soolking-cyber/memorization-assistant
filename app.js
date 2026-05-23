@@ -433,6 +433,15 @@ function switchView(viewId) {
             const createError = document.getElementById('create-sentence-error');
             if (createError) createError.style.display = 'none';
             renderCreateSentencesList();
+            
+            // Default select type to 'Vocabulary'
+            const cardTypeSelect = document.getElementById('card-type');
+            if (cardTypeSelect) {
+                cardTypeSelect.value = 'Vocabulary';
+                // Trigger change toggle dynamically
+                handleTypeSelectChange({ target: cardTypeSelect });
+            }
+            
             document.getElementById('card-front').focus();
         }
         if (viewId === 'manage') {
