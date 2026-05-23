@@ -1077,6 +1077,17 @@ async function handleCreateCard(e) {
     if (frontImageFile) image_front_url = await uploadImage(frontImageFile, 'front');
     if (backImageFile) image_back_url = await uploadImage(backImageFile, 'back');
 
+    // Automatically capture pending example sentence if typed but not added
+    const sentenceInput = document.getElementById('create-new-sentence');
+    if (sentenceInput && sentenceInput.value.trim() !== '') {
+        const sentenceText = sentenceInput.value.trim();
+        if (validateExampleSentence(sentenceText, backText)) {
+            if (!draftCreateSentences.includes(sentenceText)) {
+                draftCreateSentences.push(sentenceText);
+            }
+        }
+    }
+
     const newCard = {
         user_id: userSession.user.id,
         type: activeType,
@@ -1310,6 +1321,17 @@ async function handleEditCardSubmit(e) {
             await deleteOldImage(existingCard.image_back_url);
         }
         new_image_back_url = await uploadImage(backImageFile, 'back');
+    }
+
+    // Automatically capture pending edit example sentence if typed but not added
+    const editSentenceInput = document.getElementById('edit-new-sentence');
+    if (editSentenceInput && editSentenceInput.value.trim() !== '') {
+        const sentenceText = editSentenceInput.value.trim();
+        if (validateExampleSentence(sentenceText, backText)) {
+            if (!editSentences.includes(sentenceText)) {
+                editSentences.push(sentenceText);
+            }
+        }
     }
 
     const { data, error } = await supabase
