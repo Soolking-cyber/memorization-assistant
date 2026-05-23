@@ -151,7 +151,7 @@ body {
 }
 .header-icon-btn:hover .theme-icon-light,
 .header-icon-btn:hover .theme-icon-dark {
-    transform: rotate(15deg);
+    transform: rotate(20deg) scale(1.15);
 }
 .user-avatar {
     width: 36px;
@@ -236,11 +236,13 @@ body.logged-out .app-container {
 .nav-btn:hover:not(.primary-nav-btn) { 
     color: var(--text-primary); 
     background: var(--bg-secondary); 
+    transform: translateX(4px); /* Playful micro-interaction sliding right */
 }
 .nav-btn.active:not(.primary-nav-btn) { 
     color: var(--text-primary); 
     background: var(--accent-light);
     border-color: var(--border-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
 }
 .primary-nav-btn { 
     background: var(--accent); 
@@ -280,9 +282,9 @@ body.logged-out .app-container {
 
 /* Typography */
 h1, h2, h3, h4 { 
-    font-weight: 700; 
-    line-height: 1.25; 
-    letter-spacing: -0.5px; 
+    font-weight: 800; 
+    line-height: 1.15; 
+    letter-spacing: -0.025em; /* Premium Header Spacing Hack (-2.5%) */
 }
 .logo { 
     font-size: 1.4rem; 
@@ -319,9 +321,10 @@ h1, h2, h3, h4 {
 }
 .btn:hover { 
     background: var(--bg-secondary); 
+    transform: scale(1.02); /* Premium scale expansion */
 }
 .btn:active {
-    transform: translateY(2px);
+    transform: scale(0.98) translateY(2px); /* Satisfying tactile depress */
     box-shadow: none;
 }
 .btn.primary { 
@@ -333,6 +336,10 @@ h1, h2, h3, h4 {
 .btn.primary:hover { 
     background: var(--accent-hover); 
     color: var(--btn-primary-text) !important; 
+    transform: scale(1.02); /* Primary button hover pop */
+}
+.btn.primary:active {
+    transform: scale(0.98) translateY(2px);
 }
 .btn-icon { 
     background: transparent; 
@@ -370,7 +377,9 @@ h1, h2, h3, h4 {
 }
 .view { 
     display: flex; flex-direction: column; gap: 30px; 
-    opacity: 1; transition: opacity 0.3s ease;
+    opacity: 0; 
+    transform: translateY(10px) scale(0.995);
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     width: 100%;
 }
 .hidden {
@@ -458,9 +467,14 @@ h1, h2, h3, h4 {
 }
 .input-group textarea:focus,
 .input-group select:focus,
-#practice-type-select:focus { 
+#practice-type-select:focus,
+#incorrect-sentence-input:focus,
+#create-new-sentence:focus,
+#edit-new-sentence:focus,
+#settings-new-type-input:focus { 
     outline: none; 
     border-color: var(--text-primary); 
+    box-shadow: 0 0 0 3px var(--border-color); /* Premium focus ring overlay */
 }
 .input-group textarea {
     min-height: 100px;
@@ -857,7 +871,13 @@ h1, h2, h3, h4 {
 #practice-progress { font-weight: 800; color: var(--text-primary); }
 
 .perspective { perspective: 1000px; width: 100%; }
-.flashcard { width: 100%; height: 350px; position: relative; margin-bottom: 24px; }
+.flashcard { 
+    width: 100%; 
+    height: 350px; 
+    position: relative; 
+    margin-bottom: 24px; 
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
 .card-face { 
     position: absolute; 
     width: 100%; 

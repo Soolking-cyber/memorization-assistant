@@ -395,6 +395,7 @@ function switchView(viewId) {
     document.querySelectorAll('.view').forEach(v => {
         if (!v.classList.contains('hidden')) {
             v.style.opacity = '0';
+            v.style.transform = 'translateY(10px) scale(0.995)';
             setTimeout(() => {
                 v.classList.add('hidden');
             }, 300);
@@ -407,6 +408,7 @@ function switchView(viewId) {
         // trigger reflow
         void target.offsetWidth;
         target.style.opacity = '1';
+        target.style.transform = 'translateY(0) scale(1)';
         
         // Update nav active states
         document.querySelectorAll('.nav-btn').forEach(btn => {
