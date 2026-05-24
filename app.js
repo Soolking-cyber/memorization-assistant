@@ -809,6 +809,11 @@ function switchView(viewId) {
     });
     document.body.style.overflow = '';
 
+    const activeCard = document.getElementById('active-card');
+    if (activeCard) {
+        activeCard.style.height = '';
+    }
+
     if (viewId === 'auth') {
         document.body.classList.add('logged-out');
         document.body.classList.remove('logged-in');
@@ -1873,6 +1878,12 @@ function renderCurrentCard() {
         exerciseTitleEl.textContent = "Recall the Memory Map";
         spellingArea.classList.add('hidden');
         
+        // Dynamically adjust card height for memory map to fit without nested scrollbar
+        const activeCard = document.getElementById('active-card');
+        if (activeCard) {
+            activeCard.style.height = '600px';
+        }
+        
         // Reset practice zoom level
         practiceMapZoom = 1.0;
         
@@ -1881,7 +1892,7 @@ function renderCurrentCard() {
                 <div class="practice-explanation" style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); text-align: center;">
                     ${mapData ? mapData.title : 'Recall this Memory Map'}
                 </div>
-                <div id="practice-map-canvas-container" style="position: relative; width: 100%; height: 500px; background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 12px; overflow: auto; box-shadow: inset 0 -2px 0 var(--border-color); user-select: none;">
+                <div id="practice-map-canvas-container" style="position: relative; width: 100%; height: 460px; background: transparent; border: none; overflow: auto; box-shadow: none; user-select: none;">
                     <div id="practice-map-viewport" style="position: absolute; left: 0; top: 0; width: 2500px; height: 2000px; transform-origin: 0 0;">
                         <div style="position: absolute; inset: 0; background-size: 20px 20px; background-image: radial-gradient(var(--border-color) 1px, transparent 0); opacity: 0.4; pointer-events: none;"></div>
                         <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;" id="practice-map-svg">
@@ -1941,7 +1952,12 @@ function renderCurrentCard() {
         return;
     }
 
-    
+    // Reset dynamically adjusted card height for standard cards
+    const activeCard = document.getElementById('active-card');
+    if (activeCard) {
+        activeCard.style.height = '';
+    }
+
     // Check if card has saved example sentences
     const savedSentences = exampleSentences[card.id];
     let sentences = [];
