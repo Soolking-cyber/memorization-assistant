@@ -3646,9 +3646,9 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
             renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
         });
         
-        headerEl.appendChild(deleteBtn);
         headerEl.appendChild(rootBtn);
         headerEl.appendChild(styleBtn);
+        headerEl.appendChild(deleteBtn);
         
         // 4-Sided Plus Connectors (Top, Right, Bottom, Left)
         const sides = ['top', 'right', 'bottom', 'left'];
