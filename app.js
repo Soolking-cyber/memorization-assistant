@@ -242,6 +242,24 @@ function setPracticeMapZoom(level) {
     }
 }
 
+function toggleFullscreen(containerId, buttonId) {
+    const container = document.getElementById(containerId);
+    const btn = document.getElementById(buttonId);
+    if (!container || !btn) return;
+    
+    const isFullscreen = container.classList.toggle('canvas-container-fullscreen');
+    
+    if (isFullscreen) {
+        btn.classList.add('fullscreen-active');
+        btn.title = "Exit Fullscreen";
+        document.body.style.overflow = 'hidden';
+    } else {
+        btn.classList.remove('fullscreen-active');
+        btn.title = "Toggle Fullscreen";
+        document.body.style.overflow = '';
+    }
+}
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
     initThemeSystem();
@@ -297,6 +315,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnCreateZoomOut) btnCreateZoomOut.addEventListener('click', () => setCreateMapZoom(createMapZoom - 0.1));
     const btnCreateZoomReset = document.getElementById('btn-create-zoom-reset');
     if (btnCreateZoomReset) btnCreateZoomReset.addEventListener('click', () => setCreateMapZoom(1.0));
+    const btnCreateFullscreen = document.getElementById('btn-create-fullscreen');
+    if (btnCreateFullscreen) {
+        btnCreateFullscreen.addEventListener('click', () => toggleFullscreen('create-map-canvas-container', 'btn-create-fullscreen'));
+    }
 
     const btnEditZoomIn = document.getElementById('btn-edit-zoom-in');
     if (btnEditZoomIn) btnEditZoomIn.addEventListener('click', () => setEditMapZoom(editMapZoom + 0.1));
@@ -304,10 +326,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnEditZoomOut) btnEditZoomOut.addEventListener('click', () => setEditMapZoom(editMapZoom - 0.1));
     const btnEditZoomReset = document.getElementById('btn-edit-zoom-reset');
     if (btnEditZoomReset) btnEditZoomReset.addEventListener('click', () => setEditMapZoom(1.0));
+    const btnEditFullscreen = document.getElementById('btn-edit-fullscreen');
+    if (btnEditFullscreen) {
+        btnEditFullscreen.addEventListener('click', () => toggleFullscreen('edit-map-canvas-container', 'btn-edit-fullscreen'));
+    }
 
-    // Cancel active linking mode on Escape click
+    // Cancel active linking mode on Escape click & exit fullscreens
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+            const fullscreens = document.querySelectorAll('.canvas-container-fullscreen');
+            if (fullscreens.length > 0) {
+                fullscreens.forEach(el => {
+                    el.classList.remove('canvas-container-fullscreen');
+                });
+                const btns = document.querySelectorAll('.zoom-ctrl-btn.fullscreen-active');
+                btns.forEach(btn => {
+                    btn.classList.remove('fullscreen-active');
+                    btn.title = "Toggle Fullscreen";
+                });
+                document.body.style.overflow = '';
+            }
+
             if (linkingSourceNodeId) {
                 linkingSourceNodeId = null;
                 linkingSourceSide = null;
@@ -520,6 +559,18 @@ function initNavigation() {
 }
 
 function switchView(viewId) {
+    // Reset any active fullscreen canvas containers when switching views
+    const fullscreens = document.querySelectorAll('.canvas-container-fullscreen');
+    fullscreens.forEach(el => {
+        el.classList.remove('canvas-container-fullscreen');
+    });
+    const btns = document.querySelectorAll('.zoom-ctrl-btn.fullscreen-active');
+    btns.forEach(btn => {
+        btn.classList.remove('fullscreen-active');
+        btn.title = "Toggle Fullscreen";
+    });
+    document.body.style.overflow = '';
+
     if (viewId === 'auth') {
         document.body.classList.add('logged-out');
         document.body.classList.remove('logged-in');
@@ -1609,6 +1660,7 @@ function renderCurrentCard() {
                         <span class="zoom-percent" id="practice-zoom-label">100%</span>
                         <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-in">+</button>
                         <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-reset" style="font-size: 0.65rem; margin-left: 2px;">R</button>
+                        <button type="button" class="zoom-ctrl-btn" id="btn-practice-fullscreen" style="font-size: 0.65rem; margin-left: 2px;" title="Toggle Fullscreen">⛶</button>
                     </div>
                 </div>
             </div>
@@ -1625,6 +1677,10 @@ function renderCurrentCard() {
         if (btnPracticeZoomOut) btnPracticeZoomOut.addEventListener('click', () => setPracticeMapZoom(practiceMapZoom - 0.1));
         const btnPracticeZoomReset = document.getElementById('btn-practice-zoom-reset');
         if (btnPracticeZoomReset) btnPracticeZoomReset.addEventListener('click', () => setPracticeMapZoom(1.0));
+        const btnPracticeFullscreen = document.getElementById('btn-practice-fullscreen');
+        if (btnPracticeFullscreen) {
+            btnPracticeFullscreen.addEventListener('click', () => toggleFullscreen('practice-map-canvas-container', 'btn-practice-fullscreen'));
+        }
         
         backEl.innerHTML = `<strong style="color:var(--accent);">Memory Map Title:</strong> ${mapData ? mapData.title : ''}`;
         

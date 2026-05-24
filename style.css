@@ -1767,9 +1767,26 @@ input.letter-box:focus {
     text-align: center;
     font-family: monospace;
 }
+/* Fullscreen Canvas Styling */
+.canvas-container-fullscreen {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    border-radius: 0 !important;
+    background: var(--bg-primary) !important;
+    border: none !important;
+    box-shadow: none !important;
+}
 
+#create-map-canvas-container,
+#edit-map-canvas-container,
+#practice-map-canvas-container {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-
-
-
-
+.zoom-ctrl-btn.fullscreen-active {
+    background: var(--warning) !important;
+    color: var(--bg-card) !important;
+}
