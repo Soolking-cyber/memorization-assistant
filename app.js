@@ -75,6 +75,136 @@ let createMapZoom = 1.0;
 let editMapZoom = 1.0;
 let practiceMapZoom = 1.0;
 
+let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+let audioCtx = null;
+
+function getAudioContext() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    return audioCtx;
+}
+
+function playUISound(type) {
+    if (!soundEnabled) return;
+    try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+        
+        if (type === 'click') {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.exponentialRampToValueAtTime(100, now + 0.08);
+            
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+            
+            osc.start(now);
+            osc.stop(now + 0.08);
+        } else if (type === 'success') {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(523.25, now); // C5
+            osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+            
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.15, now + 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+            
+            osc.start(now);
+            osc.stop(now + 0.25);
+        } else if (type === 'fail') {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(164.81, now); // E3
+            osc.frequency.exponentialRampToValueAtTime(130.81, now + 0.2); // C3
+            
+            gain.gain.setValueAtTime(0.18, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+            
+            osc.start(now);
+            osc.stop(now + 0.25);
+        } else if (type === 'complete') {
+            const notes = [261.63, 329.63, 392.00, 523.25];
+            notes.forEach((freq, idx) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                
+                gain.gain.setValueAtTime(0.0, now + idx * 0.08);
+                gain.gain.linearRampToValueAtTime(0.12, now + idx * 0.08 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.3);
+                
+                osc.start(now + idx * 0.08);
+                osc.stop(now + idx * 0.08 + 0.3);
+            });
+        }
+    } catch (e) {
+        console.warn("Failed to play synthesized sound:", e);
+    }
+}
+
+function initSoundSystem() {
+    const btnSoundToggle = document.getElementById('btn-sound-toggle');
+    if (!btnSoundToggle) return;
+    
+    const onIcon = btnSoundToggle.querySelector('.sound-icon-on');
+    const offIcon = btnSoundToggle.querySelector('.sound-icon-off');
+    
+    const updateSoundUI = () => {
+        if (soundEnabled) {
+            onIcon.classList.remove('hidden');
+            offIcon.classList.add('hidden');
+        } else {
+            onIcon.classList.add('hidden');
+            offIcon.classList.remove('hidden');
+        }
+    };
+    
+    updateSoundUI();
+    
+    btnSoundToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        soundEnabled = !soundEnabled;
+        localStorage.setItem('soundEnabled', soundEnabled);
+        updateSoundUI();
+        if (soundEnabled) {
+            playUISound('click');
+        }
+    });
+
+    // Global capture-phase click listener for micro-interaction sounds
+    document.addEventListener('click', (e) => {
+        const interactive = e.target.closest('button, .btn, .nav-btn, .header-icon-btn, [role="button"], .user-avatar, .card-type-tab, .node-btn, .toolbar-close-btn, .link-toolbar-btn, .color-swatch');
+        if (interactive) {
+            if (interactive.id === 'btn-sound-toggle') {
+                return;
+            }
+            playUISound('click');
+        }
+    }, true);
+}
+
 function setCreateMapZoom(level) {
     createMapZoom = Math.min(1.5, Math.max(0.5, level));
     const viewport = document.getElementById('create-map-viewport');
@@ -114,6 +244,7 @@ function setPracticeMapZoom(level) {
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
     initThemeSystem();
+    initSoundSystem();
     initNavigation();
     initProfileMenu();
     
@@ -2034,6 +2165,12 @@ function evaluateAnswer() {
         gradeInt = 0; gradeText = "Again"; gradeColor = "var(--danger)";
     }
 
+    if (score >= 75) {
+        playUISound('success');
+    } else {
+        playUISound('fail');
+    }
+
     applySM2Grade(gradeInt);
 
     // Show Evaluation
@@ -2190,6 +2327,19 @@ function proceedToNextCard() {
 }
 
 function finishSession() {
+    playUISound('complete');
+    try {
+        if (typeof confetti === 'function') {
+            confetti({
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.6 }
+            });
+        }
+    } catch (err) {
+        console.warn("Confetti call failed:", err);
+    }
+
     updateDashboard(); // Re-calculate due
     document.getElementById('active-card').style.display = 'none';
     document.querySelector('.practice-controls').style.display = 'none';
