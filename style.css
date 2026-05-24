@@ -1723,6 +1723,9 @@ input.letter-box:focus {
     margin-right: 12px;
     margin-bottom: 12px;
     z-index: 10;
+    width: -webkit-max-content;
+    width: -moz-max-content;
+    width: max-content;
     display: flex;
     align-items: center;
     gap: 4px;
