@@ -3879,7 +3879,7 @@ function initMapCanvasListeners() {
     const createCanvas = document.getElementById('create-map-canvas-container');
     if (createCanvas) {
         createCanvas.addEventListener('dblclick', (e) => {
-            if (e.target.id !== 'create-map-canvas-container' && e.target.id !== 'create-map-nodes-container' && e.target.id !== 'create-map-svg') {
+            if (e.target.closest('.map-node') || e.target.closest('.canvas-zoom-controls')) {
                 return;
             }
             const viewport = document.getElementById('create-map-viewport');
@@ -3912,7 +3912,7 @@ function initMapCanvasListeners() {
         });
         
         createCanvas.addEventListener('mouseup', (e) => {
-            if (linkingSourceNodeId && (e.target.id === 'create-map-canvas-container' || e.target.id === 'create-map-nodes-container' || e.target.id === 'create-map-svg')) {
+            if (linkingSourceNodeId && !e.target.closest('.map-node') && !e.target.closest('.canvas-zoom-controls')) {
                 const viewport = document.getElementById('create-map-viewport');
                 const rect = viewport.getBoundingClientRect();
                 const x = (e.clientX - rect.left) / createMapZoom - 90;
@@ -3943,7 +3943,7 @@ function initMapCanvasListeners() {
         });
         
         createCanvas.addEventListener('click', (e) => {
-            if (e.target.id === 'create-map-canvas-container' || e.target.id === 'create-map-nodes-container' || e.target.id === 'create-map-svg') {
+            if (!e.target.closest('.map-node') && !e.target.closest('.canvas-zoom-controls')) {
                 if (!linkingSourceNodeId) {
                     hideLinkToolbar(createCanvas);
                     hideNodeToolbar(createCanvas);
@@ -4000,7 +4000,7 @@ function initMapCanvasListeners() {
     const editCanvas = document.getElementById('edit-map-canvas-container');
     if (editCanvas) {
         editCanvas.addEventListener('dblclick', (e) => {
-            if (e.target.id !== 'edit-map-canvas-container' && e.target.id !== 'edit-map-nodes-container' && e.target.id !== 'edit-map-svg') {
+            if (e.target.closest('.map-node') || e.target.closest('.canvas-zoom-controls')) {
                 return;
             }
             const viewport = document.getElementById('edit-map-viewport');
@@ -4033,7 +4033,7 @@ function initMapCanvasListeners() {
         });
         
         editCanvas.addEventListener('mouseup', (e) => {
-            if (linkingSourceNodeId && (e.target.id === 'edit-map-canvas-container' || e.target.id === 'edit-map-nodes-container' || e.target.id === 'edit-map-svg')) {
+            if (linkingSourceNodeId && !e.target.closest('.map-node') && !e.target.closest('.canvas-zoom-controls')) {
                 const viewport = document.getElementById('edit-map-viewport');
                 const rect = viewport.getBoundingClientRect();
                 const x = (e.clientX - rect.left) / editMapZoom - 90;
@@ -4064,7 +4064,7 @@ function initMapCanvasListeners() {
         });
         
         editCanvas.addEventListener('click', (e) => {
-            if (e.target.id === 'edit-map-canvas-container' || e.target.id === 'edit-map-nodes-container' || e.target.id === 'edit-map-svg') {
+            if (!e.target.closest('.map-node') && !e.target.closest('.canvas-zoom-controls')) {
                 if (!linkingSourceNodeId) {
                     hideLinkToolbar(editCanvas);
                     hideNodeToolbar(editCanvas);
