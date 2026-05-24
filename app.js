@@ -101,7 +101,7 @@ function playUISound(type) {
             osc.connect(gain);
             gain.connect(ctx.destination);
             
-            // Ultra-short, elegant high-frequency haptic tick/pop
+            // Ultra-short, elegant high-frequency haptic haptic tick/pop
             osc.type = 'sine';
             osc.frequency.setValueAtTime(1400, now);
             osc.frequency.exponentialRampToValueAtTime(800, now + 0.015);
@@ -111,6 +111,21 @@ function playUISound(type) {
             
             osc.start(now);
             osc.stop(now + 0.015);
+        } else if (type === 'tooltip') {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(2000, now);
+            osc.frequency.exponentialRampToValueAtTime(1600, now + 0.012);
+            
+            gain.gain.setValueAtTime(0.02, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.012);
+            
+            osc.start(now);
+            osc.stop(now + 0.012);
         } else if (type === 'success') {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
@@ -4450,6 +4465,9 @@ function initMapCanvasListeners() {
 function showExplanationTooltip(nodeEl, text) {
     hideExplanationTooltip();
     
+    // Play delicate, high-frequency haptic tick sound on tooltip reveal
+    playUISound('tooltip');
+    
     const tooltip = document.createElement('div');
     tooltip.className = 'node-explanation-tooltip';
     tooltip.textContent = text;
@@ -4789,6 +4807,9 @@ function buildCustomDropdownUI(selectId) {
         item.addEventListener('click', (e) => {
             e.stopPropagation();
             
+            // Play synthesized selection click sound
+            playUISound('click');
+            
             // Update hidden native select value
             select.value = opt.value;
             
@@ -4810,6 +4831,9 @@ function buildCustomDropdownUI(selectId) {
     // Toggle opening/closing on trigger click
     trigger.addEventListener('click', (e) => {
         e.stopPropagation();
+        
+        // Play synthesized haptic pop sound
+        playUISound('click');
         
         // Close other open custom dropdowns first
         document.querySelectorAll('.custom-dropdown').forEach(d => {
