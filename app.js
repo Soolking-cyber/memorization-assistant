@@ -512,9 +512,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (linkingSourceNodeId) {
                 linkingSourceNodeId = null;
                 linkingSourceSide = null;
-                if (document.getElementById('view-create').classList.contains('active')) {
+                if (!document.getElementById('view-create').classList.contains('hidden')) {
                     renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
-                } else if (document.getElementById('view-edit').classList.contains('active')) {
+                } else if (!document.getElementById('view-edit').classList.contains('hidden')) {
                     renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
                 }
                 return; // Stop here!
