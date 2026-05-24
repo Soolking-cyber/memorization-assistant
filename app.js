@@ -505,9 +505,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnEditFullscreen.addEventListener('click', () => toggleFullscreen('edit-map-canvas-container', 'btn-edit-fullscreen'));
     }
 
-    // Cancel active linking mode on Escape click & exit fullscreens
+    // Cancel active linking mode, close settings toolbars, or exit fullscreens on Escape click
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+            // 1. If actively drawing a connection/link, cancel it first
+            if (linkingSourceNodeId) {
+                linkingSourceNodeId = null;
+                linkingSourceSide = null;
+                if (document.getElementById('view-create').classList.contains('active')) {
+                    renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
+                } else if (document.getElementById('view-edit').classList.contains('active')) {
+                    renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
+                }
+                return; // Stop here!
+            }
+
+            // 2. If any settings popup, link toolbar, or icon picker is open, close them next
+            const nodeToolbar = document.querySelector('.map-node-toolbar');
+            const linkToolbar = document.querySelector('.map-link-toolbar');
+            const iconPickers = document.querySelectorAll('.icon-picker-dropdown');
+            
+            if (nodeToolbar || linkToolbar || iconPickers.length > 0) {
+                if (nodeToolbar) nodeToolbar.remove();
+                if (linkToolbar) linkToolbar.remove();
+                iconPickers.forEach(p => p.remove());
+                activeSelectedNode = null;
+                activeSelectedLink = null;
+                return; // Stop here!
+            }
+
+            // 3. Otherwise (or on second Escape press), exit fullscreen if active
             const fullscreens = document.querySelectorAll('.canvas-container-fullscreen');
             if (fullscreens.length > 0) {
                 fullscreens.forEach(el => {
@@ -522,16 +549,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     btn.title = "Toggle Fullscreen";
                 });
                 document.body.style.overflow = '';
-            }
-
-            if (linkingSourceNodeId) {
-                linkingSourceNodeId = null;
-                linkingSourceSide = null;
-                if (document.getElementById('view-create').classList.contains('active')) {
-                    renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
-                } else if (document.getElementById('view-edit').classList.contains('active')) {
-                    renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
-                }
             }
         }
     });
