@@ -1793,7 +1793,8 @@ input.letter-box:focus {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.zoom-ctrl-btn.fullscreen-active {
+.zoom-ctrl-btn.fullscreen-active,
+.zoom-ctrl-btn.grid-active {
     background: var(--warning) !important;
     color: var(--bg-card) !important;
 }

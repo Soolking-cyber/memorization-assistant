@@ -73,6 +73,7 @@ let linkingMousePos = { x: 0, y: 0 };
 // Global Canvas Zoom States
 let createMapZoom = 1.0;
 let editMapZoom = 1.0;
+let mapGridActive = false;
 let practiceMapZoom = 1.0;
 
 let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
@@ -434,6 +435,37 @@ function toggleFullscreen(containerId, buttonId) {
     }
 }
 
+function updateGridButtonsUI() {
+    const createBtn = document.getElementById('btn-create-grid');
+    const editBtn = document.getElementById('btn-edit-grid');
+    if (mapGridActive) {
+        if (createBtn) createBtn.classList.add('grid-active');
+        if (editBtn) editBtn.classList.add('grid-active');
+    } else {
+        if (createBtn) createBtn.classList.remove('grid-active');
+        if (editBtn) editBtn.classList.remove('grid-active');
+    }
+}
+
+function toggleGridSnapping() {
+    mapGridActive = !mapGridActive;
+    updateGridButtonsUI();
+    
+    if (mapGridActive) {
+        createMapNodes.forEach(node => {
+            node.x = Math.round(node.x / 20) * 20;
+            node.y = Math.round(node.y / 20) * 20;
+        });
+        editMapNodes.forEach(node => {
+            node.x = Math.round(node.x / 20) * 20;
+            node.y = Math.round(node.y / 20) * 20;
+        });
+    }
+    
+    renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
+    renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
+}
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
     initThemeSystem();
@@ -493,6 +525,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnCreateFullscreen) {
         btnCreateFullscreen.addEventListener('click', () => toggleFullscreen('create-map-canvas-container', 'btn-create-fullscreen'));
     }
+    const btnCreateGrid = document.getElementById('btn-create-grid');
+    if (btnCreateGrid) {
+        btnCreateGrid.addEventListener('click', toggleGridSnapping);
+    }
 
     const btnEditZoomIn = document.getElementById('btn-edit-zoom-in');
     if (btnEditZoomIn) btnEditZoomIn.addEventListener('click', () => setEditMapZoom(editMapZoom + 0.1));
@@ -504,6 +540,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnEditFullscreen) {
         btnEditFullscreen.addEventListener('click', () => toggleFullscreen('edit-map-canvas-container', 'btn-edit-fullscreen'));
     }
+    const btnEditGrid = document.getElementById('btn-edit-grid');
+    if (btnEditGrid) {
+        btnEditGrid.addEventListener('click', toggleGridSnapping);
+    }
+    updateGridButtonsUI();
 
     // Cancel active linking mode, close settings toolbars, or exit fullscreens on Escape click
     document.addEventListener('keydown', (e) => {
@@ -3887,6 +3928,11 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
                 nx = Math.max(0, Math.min(2500 - 180, nx));
                 ny = Math.max(0, Math.min(2000 - 90, ny));
                 
+                if (mapGridActive) {
+                    nx = Math.round(nx / 20) * 20;
+                    ny = Math.round(ny / 20) * 20;
+                }
+                
                 node.x = nx;
                 node.y = ny;
                 
@@ -3931,8 +3977,13 @@ function initMapCanvasListeners() {
             cy = (scrollTop + height / 2) / createMapZoom - 45;
         }
         
-        const boundedX = Math.max(0, Math.min(2500 - 180, cx));
-        const boundedY = Math.max(0, Math.min(2000 - 90, cy));
+        let boundedX = Math.max(0, Math.min(2500 - 180, cx));
+        let boundedY = Math.max(0, Math.min(2000 - 90, cy));
+        
+        if (mapGridActive) {
+            boundedX = Math.round(boundedX / 20) * 20;
+            boundedY = Math.round(boundedY / 20) * 20;
+        }
         
         createMapNodes.push({
             id: id,
@@ -3970,8 +4021,13 @@ function initMapCanvasListeners() {
             const rect = viewport.getBoundingClientRect();
             const x = (e.clientX - rect.left) / createMapZoom - 90;
             const y = (e.clientY - rect.top) / createMapZoom - 45;
-            const boundedX = Math.max(0, Math.min(2500 - 180, x));
-            const boundedY = Math.max(0, Math.min(2000 - 90, y));
+            let boundedX = Math.max(0, Math.min(2500 - 180, x));
+            let boundedY = Math.max(0, Math.min(2000 - 90, y));
+            
+            if (mapGridActive) {
+                boundedX = Math.round(boundedX / 20) * 20;
+                boundedY = Math.round(boundedY / 20) * 20;
+            }
             
             const id = 'node_' + Date.now();
             createMapNodes.push({
@@ -4001,8 +4057,13 @@ function initMapCanvasListeners() {
                 const rect = viewport.getBoundingClientRect();
                 const x = (e.clientX - rect.left) / createMapZoom - 90;
                 const y = (e.clientY - rect.top) / createMapZoom - 45;
-                const boundedX = Math.max(0, Math.min(2500 - 180, x));
-                const boundedY = Math.max(0, Math.min(2000 - 90, y));
+                let boundedX = Math.max(0, Math.min(2500 - 180, x));
+                let boundedY = Math.max(0, Math.min(2000 - 90, y));
+                
+                if (mapGridActive) {
+                    boundedX = Math.round(boundedX / 20) * 20;
+                    boundedY = Math.round(boundedY / 20) * 20;
+                }
                 
                 const newId = 'node_' + Date.now();
                 createMapNodes.push({
@@ -4052,8 +4113,13 @@ function initMapCanvasListeners() {
             cy = (scrollTop + height / 2) / editMapZoom - 45;
         }
         
-        const boundedX = Math.max(0, Math.min(2500 - 180, cx));
-        const boundedY = Math.max(0, Math.min(2000 - 90, cy));
+        let boundedX = Math.max(0, Math.min(2500 - 180, cx));
+        let boundedY = Math.max(0, Math.min(2000 - 90, cy));
+        
+        if (mapGridActive) {
+            boundedX = Math.round(boundedX / 20) * 20;
+            boundedY = Math.round(boundedY / 20) * 20;
+        }
         
         editMapNodes.push({
             id: id,
@@ -4091,8 +4157,13 @@ function initMapCanvasListeners() {
             const rect = viewport.getBoundingClientRect();
             const x = (e.clientX - rect.left) / editMapZoom - 90;
             const y = (e.clientY - rect.top) / editMapZoom - 45;
-            const boundedX = Math.max(0, Math.min(2500 - 180, x));
-            const boundedY = Math.max(0, Math.min(2000 - 90, y));
+            let boundedX = Math.max(0, Math.min(2500 - 180, x));
+            let boundedY = Math.max(0, Math.min(2000 - 90, y));
+            
+            if (mapGridActive) {
+                boundedX = Math.round(boundedX / 20) * 20;
+                boundedY = Math.round(boundedY / 20) * 20;
+            }
             
             const id = 'node_' + Date.now();
             editMapNodes.push({
@@ -4122,8 +4193,13 @@ function initMapCanvasListeners() {
                 const rect = viewport.getBoundingClientRect();
                 const x = (e.clientX - rect.left) / editMapZoom - 90;
                 const y = (e.clientY - rect.top) / editMapZoom - 45;
-                const boundedX = Math.max(0, Math.min(2500 - 180, x));
-                const boundedY = Math.max(0, Math.min(2000 - 90, y));
+                let boundedX = Math.max(0, Math.min(2500 - 180, x));
+                let boundedY = Math.max(0, Math.min(2000 - 90, y));
+                
+                if (mapGridActive) {
+                    boundedX = Math.round(boundedX / 20) * 20;
+                    boundedY = Math.round(boundedY / 20) * 20;
+                }
                 
                 const newId = 'node_' + Date.now();
                 editMapNodes.push({
