@@ -1189,6 +1189,43 @@ input.letter-box:focus {
     .flashcard { height: 320px; }
     .card-face { padding: 20px; }
     .card-content { font-size: 1.15rem; }
+
+    /* Canvas specific mobile styles */
+    #create-map-canvas-container,
+    #edit-map-canvas-container {
+        height: 380px !important;
+        margin-top: 8px;
+    }
+    .canvas-zoom-controls {
+        left: 50% !important;
+        top: calc(100% - 8px) !important;
+        transform: translate(-50%, -100%) !important;
+        margin-right: 0 !important;
+        margin-bottom: 8px !important;
+        padding: 4px 6px !important;
+        gap: 2px !important;
+        width: max-content !important;
+    }
+    .zoom-ctrl-text-btn {
+        font-size: 0.65rem !important;
+        padding: 2px 4px !important;
+    }
+    .zoom-ctrl-btn {
+        width: 22px !important;
+        height: 22px !important;
+        font-size: 0.65rem !important;
+    }
+    .zoom-divider {
+        margin: 0 1px !important;
+        font-size: 0.6rem !important;
+    }
+    .zoom-percent {
+        font-size: 0.6rem !important;
+        min-width: 24px !important;
+    }
+    .mobile-hide {
+        display: none !important;
+    }
 }
 
 /* Memory Map Premium Stylings */

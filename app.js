@@ -1888,7 +1888,8 @@ function renderCurrentCard() {
         // Dynamically adjust card size and remove padding for seamless map canvas
         const activeCard = document.getElementById('active-card');
         if (activeCard) {
-            activeCard.style.height = '600px';
+            const isMobile = window.innerWidth <= 768;
+            activeCard.style.height = isMobile ? '460px' : '600px';
             const cardFront = activeCard.querySelector('.card-front');
             if (cardFront) cardFront.style.padding = '0';
             const cardBack = activeCard.querySelector('.card-back');
@@ -3933,51 +3934,63 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         let startX, startY;
         let startNodeX, startNodeY;
         
-        nodeEl.addEventListener('mousedown', (e) => {
-            if (linkingSourceNodeId) {
-                // Do not allow dragging the node when in linking/connecting mode
-                return;
+        const handleStart = (clientX, clientY, e) => {
+            if (linkingSourceNodeId) return;
+            if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'button' || e.target.closest('.icon-picker-dropdown')) return;
+            
+            if (e.target.tagName.toLowerCase() !== 'input') {
+                e.preventDefault();
             }
-            if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'button' || e.target.closest('.icon-picker-dropdown')) {
-                return;
-            }
-            e.preventDefault();
+            
             isDragging = true;
             nodeEl.style.cursor = 'grabbing';
-            startX = e.clientX;
-            startY = e.clientY;
+            startX = clientX;
+            startY = clientY;
             startNodeX = node.x;
             startNodeY = node.y;
-            
+        };
+
+        const handleMove = (clientX, clientY) => {
+            if (!isDragging) return;
             const activeZoom = isEdit ? editMapZoom : createMapZoom;
+            const dx = (clientX - startX) / activeZoom;
+            const dy = (clientY - startY) / activeZoom;
+            
+            let nx = startNodeX + dx;
+            let ny = startNodeY + dy;
+            
+            nx = Math.max(0, Math.min(2500 - 180, nx));
+            ny = Math.max(0, Math.min(2000 - 90, ny));
+            
+            if (mapGridActive) {
+                nx = Math.round(nx / 20) * 20;
+                ny = Math.round(ny / 20) * 20;
+            }
+            
+            node.x = nx;
+            node.y = ny;
+            
+            nodeEl.style.left = `${nx}px`;
+            nodeEl.style.top = `${ny}px`;
+            
+            drawLinks(nodes, links, svgId, arrowheadId, true, containerId, isEdit);
+        };
+
+        const handleEnd = () => {
+            isDragging = false;
+            nodeEl.style.cursor = 'grab';
+        };
+
+        // Mouse Events
+        nodeEl.addEventListener('mousedown', (e) => {
+            handleStart(e.clientX, e.clientY, e);
+            
             const onMouseMove = (moveEvent) => {
-                if (!isDragging) return;
-                const dx = (moveEvent.clientX - startX) / activeZoom;
-                const dy = (moveEvent.clientY - startY) / activeZoom;
-                
-                let nx = startNodeX + dx;
-                let ny = startNodeY + dy;
-                
-                nx = Math.max(0, Math.min(2500 - 180, nx));
-                ny = Math.max(0, Math.min(2000 - 90, ny));
-                
-                if (mapGridActive) {
-                    nx = Math.round(nx / 20) * 20;
-                    ny = Math.round(ny / 20) * 20;
-                }
-                
-                node.x = nx;
-                node.y = ny;
-                
-                nodeEl.style.left = `${nx}px`;
-                nodeEl.style.top = `${ny}px`;
-                
-                drawLinks(nodes, links, svgId, arrowheadId, true, containerId, isEdit);
+                handleMove(moveEvent.clientX, moveEvent.clientY);
             };
             
             const onMouseUp = () => {
-                isDragging = false;
-                nodeEl.style.cursor = 'grab';
+                handleEnd();
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
             };
@@ -3985,6 +3998,28 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
         });
+
+        // Touch Events
+        nodeEl.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                handleStart(e.touches[0].clientX, e.touches[0].clientY, e);
+            }
+            
+            const onTouchMove = (moveEvent) => {
+                if (moveEvent.touches.length > 0) {
+                    handleMove(moveEvent.touches[0].clientX, moveEvent.touches[0].clientY);
+                }
+            };
+            
+            const onTouchEnd = () => {
+                handleEnd();
+                document.removeEventListener('touchmove', onTouchMove);
+                document.removeEventListener('touchend', onTouchEnd);
+            };
+            
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+        }, { passive: false });
         
         nodeEl.appendChild(headerEl);
         nodeEl.appendChild(expRow);
