@@ -257,8 +257,75 @@ function showConfirm(message) {
     });
 }
 
+function showPrompt(message, defaultValue = '') {
+    playUISound('click');
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'custom-modal-overlay';
+        modal.innerHTML = `
+            <div class="custom-modal-content glass animate-pop-in">
+                <div class="custom-modal-body">
+                    <p style="margin-bottom: 12px; font-weight: 700;">${message}</p>
+                    <input type="text" class="custom-modal-prompt-input" value="${defaultValue}" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; box-sizing: border-box; outline: none; transition: border-color 0.15s ease;">
+                </div>
+                <div class="custom-modal-footer" style="display: flex; gap: 12px; justify-content: center; width: 100%; margin-top: 16px;">
+                    <button class="btn modal-cancel-btn" style="flex: 1; background: var(--bg-secondary); color: var(--text-primary); border: 2px solid var(--border-color);">Cancel</button>
+                    <button class="btn primary modal-ok-btn" style="flex: 1;">OK</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        const inputEl = modal.querySelector('.custom-modal-prompt-input');
+        
+        // Focus the input field automatically
+        setTimeout(() => {
+            if (inputEl) {
+                inputEl.focus();
+                inputEl.select();
+            }
+        }, 50);
+        
+        void modal.offsetWidth;
+        modal.classList.add('active');
+        
+        const close = (result) => {
+            modal.classList.remove('active');
+            modal.querySelector('.custom-modal-content').classList.remove('animate-pop-in');
+            modal.querySelector('.custom-modal-content').classList.add('animate-pop-out');
+            setTimeout(() => {
+                modal.remove();
+                resolve(result);
+            }, 200);
+        };
+        
+        modal.querySelector('.modal-ok-btn').addEventListener('click', () => close(inputEl.value));
+        modal.querySelector('.modal-cancel-btn').addEventListener('click', () => close(null));
+        
+        inputEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                close(inputEl.value);
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                close(null);
+            }
+        });
+        
+        const handleKey = (e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                document.removeEventListener('keydown', handleKey);
+                close(null);
+            }
+        };
+        document.addEventListener('keydown', handleKey);
+    });
+}
+
 window.alert = showAlert;
 window.confirm = showConfirm;
+window.prompt = showPrompt;
 
 function initSoundSystem() {
     const btnSoundToggle = document.getElementById('btn-sound-toggle');
@@ -778,10 +845,10 @@ async function removeType(typeToRemove) {
     }
 }
 
-function handleTypeSelectChange(e) {
+async function handleTypeSelectChange(e) {
     let val = e.target.value;
     if (val === 'add_new') {
-        const newType = prompt("Enter new memory type:");
+        const newType = await prompt("Enter new memory type:");
         if (newType && newType.trim() !== '') {
             const cleanType = newType.trim();
             if (!customTypes.includes(cleanType)) {
