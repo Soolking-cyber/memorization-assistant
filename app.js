@@ -1082,6 +1082,9 @@ function updateTypeDatalists() {
         } else if (!addMixed) {
             select.value = 'mixed';
         }
+        
+        // Synchronize and build the premium custom dropdown UI
+        buildCustomDropdownUI(selectId);
     };
     
     populateSelect('card-type', false);
@@ -1719,6 +1722,9 @@ function openEditView(cardId) {
         if (editError) editError.style.display = 'none';
         renderEditSentencesList();
     }
+
+    // Refresh custom dropdown UI to reflect the newly loaded card type
+    buildCustomDropdownUI('edit-card-type');
 
     switchView('edit');
 }
@@ -4668,5 +4674,120 @@ async function handleSettingsAddType() {
     updateTypeDatalists();
     input.value = '';
 }
+
+// ------ Premium Custom Dropdown Component ------
+
+function buildCustomDropdownUI(selectId) {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    
+    // Hide the native select cleanly
+    select.style.display = 'none';
+    
+    // Check if we already created the custom dropdown wrapper
+    let customWrapper = document.getElementById(`custom-dropdown-${selectId}`);
+    if (!customWrapper) {
+        customWrapper = document.createElement('div');
+        customWrapper.id = `custom-dropdown-${selectId}`;
+        customWrapper.className = 'custom-dropdown';
+        select.parentNode.insertBefore(customWrapper, select);
+    }
+    
+    // Clear and build the trigger and menu elements
+    customWrapper.innerHTML = '';
+    
+    const trigger = document.createElement('div');
+    trigger.className = 'custom-dropdown-trigger';
+    trigger.tabIndex = 0; // support keyboard focus
+    
+    const triggerText = document.createElement('span');
+    triggerText.className = 'custom-dropdown-text';
+    
+    // Find text of current selected option
+    const activeOpt = [...select.options].find(o => o.value === select.value) || select.options[0];
+    triggerText.textContent = activeOpt ? activeOpt.textContent : '';
+    
+    const arrowSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    arrowSvg.setAttribute('viewBox', '0 0 24 24');
+    arrowSvg.setAttribute('fill', 'none');
+    arrowSvg.setAttribute('stroke', 'currentColor');
+    arrowSvg.setAttribute('stroke-width', '2.5');
+    arrowSvg.setAttribute('stroke-linecap', 'round');
+    arrowSvg.setAttribute('stroke-linejoin', 'round');
+    arrowSvg.className.baseVal = 'custom-dropdown-arrow';
+    arrowSvg.style.width = '14px';
+    arrowSvg.style.height = '14px';
+    arrowSvg.innerHTML = '<polyline points="6 9 12 15 18 9"></polyline>';
+    
+    trigger.appendChild(triggerText);
+    trigger.appendChild(arrowSvg);
+    customWrapper.appendChild(trigger);
+    
+    const menu = document.createElement('div');
+    menu.className = 'custom-dropdown-menu';
+    
+    [...select.options].forEach(opt => {
+        const item = document.createElement('div');
+        item.className = 'custom-dropdown-item';
+        item.dataset.value = opt.value;
+        item.textContent = opt.textContent;
+        
+        if (opt.value === select.value) {
+            item.classList.add('active');
+            
+            // Add a checkmark icon to the active item for visual excellence
+            const check = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            check.setAttribute('viewBox', '0 0 24 24');
+            check.setAttribute('fill', 'none');
+            check.setAttribute('stroke', 'currentColor');
+            check.setAttribute('stroke-width', '3');
+            check.setAttribute('stroke-linecap', 'round');
+            check.setAttribute('stroke-linejoin', 'round');
+            check.style.width = '14px';
+            check.style.height = '14px';
+            check.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+            item.appendChild(check);
+        }
+        
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            // Update hidden native select value
+            select.value = opt.value;
+            
+            // Dispatch dynamic change event so standard app triggers fire cleanly!
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            
+            // Re-render custom dropdown elements to sync state
+            buildCustomDropdownUI(selectId);
+            
+            // Close the menu
+            customWrapper.classList.remove('open');
+        });
+        
+        menu.appendChild(item);
+    });
+    
+    customWrapper.appendChild(menu);
+    
+    // Toggle opening/closing on trigger click
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        
+        // Close other open custom dropdowns first
+        document.querySelectorAll('.custom-dropdown').forEach(d => {
+            if (d !== customWrapper) d.classList.remove('open');
+        });
+        
+        customWrapper.classList.toggle('open');
+    });
+}
+
+// Close all custom dropdown menus when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.custom-dropdown')) {
+        document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.remove('open'));
+    }
+});
 
 
