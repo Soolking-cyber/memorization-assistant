@@ -3670,10 +3670,6 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
             
             plusBtn.addEventListener('mousedown', (e) => {
                 e.stopPropagation();
-            });
-            
-            plusBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
                 if (linkingSourceNodeId === node.id && linkingSourceSide === side) {
                     linkingSourceNodeId = null;
                     linkingSourceSide = null;
@@ -3683,10 +3679,15 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
                     
                     const canvasEl = container.parentNode;
                     const rect = canvasEl.getBoundingClientRect();
-                    linkingMousePos.x = e.clientX - rect.left;
-                    linkingMousePos.y = e.clientY - rect.top;
+                    const activeZoom = isEdit ? editMapZoom : createMapZoom;
+                    linkingMousePos.x = (e.clientX - rect.left) / activeZoom;
+                    linkingMousePos.y = (e.clientY - rect.top) / activeZoom;
                 }
                 renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit);
+            });
+            
+            plusBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
             });
             
             nodeEl.appendChild(plusBtn);
@@ -3751,8 +3752,8 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         });
         bodyEl.appendChild(inputEl);
         
-        // Connect link when clicking node body in linking mode
-        nodeEl.addEventListener('click', (e) => {
+        // Connect link when releasing mouse on node body in linking mode
+        nodeEl.addEventListener('mouseup', (e) => {
             if (linkingSourceNodeId && linkingSourceNodeId !== node.id) {
                 e.stopPropagation();
                 const exists = links.some(l => l.source === linkingSourceNodeId && l.target === node.id);
@@ -3775,6 +3776,10 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         let startNodeX, startNodeY;
         
         nodeEl.addEventListener('mousedown', (e) => {
+            if (linkingSourceNodeId) {
+                // Do not allow dragging the node when in linking/connecting mode
+                return;
+            }
             if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'button' || e.target.closest('.icon-picker-dropdown')) {
                 return;
             }
@@ -3827,15 +3832,30 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
 }
 
 function initMapCanvasListeners() {
-    // Creation elements
     const handleAddCreateNode = () => {
         const id = 'node_' + Date.now();
+        
+        let cx = 150;
+        let cy = 150;
+        const canvas = document.getElementById('create-map-canvas-container');
+        if (canvas) {
+            const scrollLeft = canvas.scrollLeft;
+            const scrollTop = canvas.scrollTop;
+            const width = canvas.clientWidth || canvas.offsetWidth || 800;
+            const height = canvas.clientHeight || canvas.offsetHeight || 500;
+            cx = (scrollLeft + width / 2) / createMapZoom - 90;
+            cy = (scrollTop + height / 2) / createMapZoom - 45;
+        }
+        
+        const boundedX = Math.max(0, Math.min(2500 - 180, cx));
+        const boundedY = Math.max(0, Math.min(2000 - 90, cy));
+        
         createMapNodes.push({
             id: id,
             text: '',
             explanation: '',
-            x: 80 + Math.random() * 80,
-            y: 80 + Math.random() * 80,
+            x: boundedX,
+            y: boundedY,
             isRoot: createMapNodes.length === 0
         });
         renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
@@ -3891,36 +3911,40 @@ function initMapCanvasListeners() {
             }
         });
         
+        createCanvas.addEventListener('mouseup', (e) => {
+            if (linkingSourceNodeId && (e.target.id === 'create-map-canvas-container' || e.target.id === 'create-map-nodes-container' || e.target.id === 'create-map-svg')) {
+                const viewport = document.getElementById('create-map-viewport');
+                const rect = viewport.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / createMapZoom - 90;
+                const y = (e.clientY - rect.top) / createMapZoom - 45;
+                const boundedX = Math.max(0, Math.min(2500 - 180, x));
+                const boundedY = Math.max(0, Math.min(2000 - 90, y));
+                
+                const newId = 'node_' + Date.now();
+                createMapNodes.push({
+                    id: newId,
+                    text: '',
+                    explanation: '',
+                    x: boundedX,
+                    y: boundedY,
+                    isRoot: createMapNodes.length === 0
+                });
+                
+                createMapLinks.push({
+                    source: linkingSourceNodeId,
+                    target: newId,
+                    sourceSide: linkingSourceSide
+                });
+                
+                linkingSourceNodeId = null;
+                linkingSourceSide = null;
+                renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead', false);
+            }
+        });
+        
         createCanvas.addEventListener('click', (e) => {
             if (e.target.id === 'create-map-canvas-container' || e.target.id === 'create-map-nodes-container' || e.target.id === 'create-map-svg') {
-                if (linkingSourceNodeId) {
-                    const viewport = document.getElementById('create-map-viewport');
-                    const rect = viewport.getBoundingClientRect();
-                    const x = (e.clientX - rect.left) / createMapZoom - 90;
-                    const y = (e.clientY - rect.top) / createMapZoom - 45;
-                    const boundedX = Math.max(0, Math.min(2500 - 180, x));
-                    const boundedY = Math.max(0, Math.min(2000 - 90, y));
-                    
-                    const newId = 'node_' + Date.now();
-                    createMapNodes.push({
-                        id: newId,
-                        text: '',
-                        explanation: '',
-                        x: boundedX,
-                        y: boundedY,
-                        isRoot: createMapNodes.length === 0
-                    });
-                    
-                    createMapLinks.push({
-                        source: linkingSourceNodeId,
-                        target: newId,
-                        sourceSide: linkingSourceSide
-                    });
-                    
-                    linkingSourceNodeId = null;
-                    linkingSourceSide = null;
-                    renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead', false);
-                } else {
+                if (!linkingSourceNodeId) {
                     hideLinkToolbar(createCanvas);
                     hideNodeToolbar(createCanvas);
                     createCanvas.querySelectorAll('.icon-picker-dropdown').forEach(p => p.remove());
@@ -3929,15 +3953,30 @@ function initMapCanvasListeners() {
         });
     }
     
-    // Editing elements
     const handleAddEditNode = () => {
         const id = 'node_' + Date.now();
+        
+        let cx = 150;
+        let cy = 150;
+        const canvas = document.getElementById('edit-map-canvas-container');
+        if (canvas) {
+            const scrollLeft = canvas.scrollLeft;
+            const scrollTop = canvas.scrollTop;
+            const width = canvas.clientWidth || canvas.offsetWidth || 800;
+            const height = canvas.clientHeight || canvas.offsetHeight || 500;
+            cx = (scrollLeft + width / 2) / editMapZoom - 90;
+            cy = (scrollTop + height / 2) / editMapZoom - 45;
+        }
+        
+        const boundedX = Math.max(0, Math.min(2500 - 180, cx));
+        const boundedY = Math.max(0, Math.min(2000 - 90, cy));
+        
         editMapNodes.push({
             id: id,
             text: '',
             explanation: '',
-            x: 80 + Math.random() * 80,
-            y: 80 + Math.random() * 80,
+            x: boundedX,
+            y: boundedY,
             isRoot: editMapNodes.length === 0
         });
         renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
@@ -3993,36 +4032,40 @@ function initMapCanvasListeners() {
             }
         });
         
+        editCanvas.addEventListener('mouseup', (e) => {
+            if (linkingSourceNodeId && (e.target.id === 'edit-map-canvas-container' || e.target.id === 'edit-map-nodes-container' || e.target.id === 'edit-map-svg')) {
+                const viewport = document.getElementById('edit-map-viewport');
+                const rect = viewport.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / editMapZoom - 90;
+                const y = (e.clientY - rect.top) / editMapZoom - 45;
+                const boundedX = Math.max(0, Math.min(2500 - 180, x));
+                const boundedY = Math.max(0, Math.min(2000 - 90, y));
+                
+                const newId = 'node_' + Date.now();
+                editMapNodes.push({
+                    id: newId,
+                    text: '',
+                    explanation: '',
+                    x: boundedX,
+                    y: boundedY,
+                    isRoot: editMapNodes.length === 0
+                });
+                
+                editMapLinks.push({
+                    source: linkingSourceNodeId,
+                    target: newId,
+                    sourceSide: linkingSourceSide
+                });
+                
+                linkingSourceNodeId = null;
+                linkingSourceSide = null;
+                renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
+            }
+        });
+        
         editCanvas.addEventListener('click', (e) => {
             if (e.target.id === 'edit-map-canvas-container' || e.target.id === 'edit-map-nodes-container' || e.target.id === 'edit-map-svg') {
-                if (linkingSourceNodeId) {
-                    const viewport = document.getElementById('edit-map-viewport');
-                    const rect = viewport.getBoundingClientRect();
-                    const x = (e.clientX - rect.left) / editMapZoom - 90;
-                    const y = (e.clientY - rect.top) / editMapZoom - 45;
-                    const boundedX = Math.max(0, Math.min(2500 - 180, x));
-                    const boundedY = Math.max(0, Math.min(2000 - 90, y));
-                    
-                    const newId = 'node_' + Date.now();
-                    editMapNodes.push({
-                        id: newId,
-                        text: '',
-                        explanation: '',
-                        x: boundedX,
-                        y: boundedY,
-                        isRoot: editMapNodes.length === 0
-                    });
-                    
-                    editMapLinks.push({
-                        source: linkingSourceNodeId,
-                        target: newId,
-                        sourceSide: linkingSourceSide
-                    });
-                    
-                    linkingSourceNodeId = null;
-                    linkingSourceSide = null;
-                    renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
-                } else {
+                if (!linkingSourceNodeId) {
                     hideLinkToolbar(editCanvas);
                     hideNodeToolbar(editCanvas);
                     editCanvas.querySelectorAll('.icon-picker-dropdown').forEach(p => p.remove());
