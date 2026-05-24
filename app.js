@@ -398,10 +398,45 @@ function setPracticeMapZoom(level) {
     const viewport = document.getElementById('practice-map-viewport');
     if (viewport) {
         viewport.style.transform = `scale(${practiceMapZoom})`;
+        adjustPracticeViewportCentering();
     }
     const label = document.getElementById('practice-zoom-label');
     if (label) {
         label.textContent = `${Math.round(practiceMapZoom * 100)}%`;
+    }
+}
+
+function adjustPracticeViewportCentering(viewportWidth, viewportHeight) {
+    const viewport = document.getElementById('practice-map-viewport');
+    const scrollContainer = document.getElementById('practice-map-canvas-container');
+    if (!viewport || !scrollContainer) return;
+    
+    if (viewportWidth !== undefined && viewportHeight !== undefined) {
+        viewport.dataset.originalWidth = viewportWidth;
+        viewport.dataset.originalHeight = viewportHeight;
+    } else {
+        viewportWidth = parseFloat(viewport.dataset.originalWidth) || parseFloat(viewport.style.width) || 2500;
+        viewportHeight = parseFloat(viewport.dataset.originalHeight) || parseFloat(viewport.style.height) || 2000;
+    }
+    
+    const containerWidth = scrollContainer.clientWidth || 400;
+    const containerHeight = scrollContainer.clientHeight || 400;
+    
+    const scaledWidth = viewportWidth * practiceMapZoom;
+    const scaledHeight = viewportHeight * practiceMapZoom;
+    
+    const leftMargin = Math.max(0, (containerWidth - scaledWidth) / 2);
+    const topMargin = Math.max(0, (containerHeight - scaledHeight) / 2);
+    
+    viewport.style.left = `${leftMargin}px`;
+    viewport.style.top = `${topMargin}px`;
+    
+    // Auto-scroll to center if larger
+    if (scaledWidth > containerWidth) {
+        scrollContainer.scrollLeft = (scaledWidth - containerWidth) / 2;
+    }
+    if (scaledHeight > containerHeight) {
+        scrollContainer.scrollTop = (scaledHeight - containerHeight) / 2;
     }
 }
 
@@ -1915,12 +1950,12 @@ function renderCurrentCard() {
         frontEl.innerHTML = `
             <div style="display: flex; flex-direction: column; width: 100%; height: 100%; position: absolute; inset: 0;">
                 <!-- Out-of-Canvas Dynamic Header Row -->
-                <div class="practice-header-outside" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-card); border-bottom: 2px solid var(--border-color); padding: 12px 16px; text-align: center; width: 100%; box-sizing: border-box; flex-shrink: 0; border-top-left-radius: 14px; border-top-right-radius: 14px;">
+                <div class="practice-header-outside" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-card); border-bottom: 2px solid var(--border-color); padding: 12px 16px; text-align: center; width: 100%; box-sizing: border-box; flex-shrink: 0; border-top-left-radius: 14px; border-top-right-radius: 14px; z-index: 10; position: relative;">
                     <span style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-secondary); margin-bottom: 2px;">Recall the Memory Map</span>
                     <span style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">${mapData ? mapData.title : 'Recall this Memory Map'}</span>
                 </div>
                 
-                <div id="practice-map-canvas-container" style="position: relative; width: 100%; height: 100%; background: transparent; border: none; overflow: auto; box-shadow: none; border-bottom-left-radius: 14px; border-bottom-right-radius: 14px; user-select: none; flex-grow: 1;">
+                <div id="practice-map-canvas-container" style="position: relative; width: 100%; height: 100%; background: transparent; border: none; overflow: auto; box-shadow: none; border-bottom-left-radius: 14px; border-bottom-right-radius: 14px; user-select: none; flex-grow: 1; z-index: 1;">
                     <!-- Exit Fullscreen Button -->
                     <button type="button" class="fullscreen-close-btn hidden" title="Exit Fullscreen">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -1952,10 +1987,11 @@ function renderCurrentCard() {
             renderPracticeNodes('practice-map-nodes-container', mapData.nodes, mapData.links, 'practice-map-svg', 'practice-arrowhead');
         }
         
-        // Auto-center scroll container onto the nodes' bounding box area
+        // Auto-center scroll container onto the nodes' bounding box area and scale dynamically
         setTimeout(() => {
             const scrollContainer = document.getElementById('practice-map-canvas-container');
-            if (scrollContainer && mapData && mapData.nodes && mapData.nodes.length > 0) {
+            const viewport = document.getElementById('practice-map-viewport');
+            if (scrollContainer && viewport && mapData && mapData.nodes && mapData.nodes.length > 0) {
                 let minX = Infinity;
                 let maxX = -Infinity;
                 let minY = Infinity;
@@ -1972,15 +2008,21 @@ function renderCurrentCard() {
                 
                 const mapWidth = maxX - minX + 180;
                 const mapHeight = maxY - minY + 90;
-                
-                const centerX = minX + mapWidth / 2;
-                const centerY = minY + mapHeight / 2;
+                const viewportWidth = mapWidth + 80;
+                const viewportHeight = mapHeight + 80;
                 
                 const containerWidth = scrollContainer.clientWidth || 400;
                 const containerHeight = scrollContainer.clientHeight || 400;
                 
-                scrollContainer.scrollLeft = centerX - containerWidth / 2;
-                scrollContainer.scrollTop = centerY - containerHeight / 2;
+                // Set optimal initial zoom level to fit the bounding area elegantly
+                let initialZoom = Math.min(1.0, Math.min(containerWidth / viewportWidth, containerHeight / viewportHeight));
+                initialZoom = Math.max(0.6, initialZoom);
+                
+                // Initialize the zoom state & update UI
+                setPracticeMapZoom(initialZoom);
+                
+                // Recalculate margins and adjust scroll positions
+                adjustPracticeViewportCentering(viewportWidth, viewportHeight);
             }
         }, 120);
         
@@ -4359,12 +4401,37 @@ function initMapCanvasListeners() {
     }
 }
 
-function renderPracticeNodes(containerId, nodes, links, svgId, arrowheadId) {
+function renderPracticeNodes(containerId, originalNodes, links, svgId, arrowheadId) {
     const container = document.getElementById(containerId);
     if (!container) return;
     container.innerHTML = '';
     
-    // Draw links (interactive = false)
+    if (!originalNodes || originalNodes.length === 0) return;
+    
+    // Calculate the bounding box of originalNodes
+    let minX = Infinity;
+    let minY = Infinity;
+    
+    originalNodes.forEach(node => {
+        const nx = Number(node.x) || 0;
+        const ny = Number(node.y) || 0;
+        if (nx < minX) minX = nx;
+        if (ny < minY) minY = ny;
+    });
+    
+    if (minX === Infinity) {
+        minX = 0;
+        minY = 0;
+    }
+    
+    // Clone and shift nodes to start at (40, 40)
+    const nodes = originalNodes.map(node => ({
+        ...node,
+        x: (Number(node.x) || 0) - minX + 40,
+        y: (Number(node.y) || 0) - minY + 40
+    }));
+    
+    // Draw links using the shifted coordinates (interactive = false)
     drawLinks(nodes, links, svgId, arrowheadId, false);
     
     nodes.forEach((node, idx) => {
