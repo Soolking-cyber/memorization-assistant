@@ -250,10 +250,22 @@ function toggleFullscreen(containerId, buttonId) {
     const isFullscreen = container.classList.toggle('canvas-container-fullscreen');
     
     if (isFullscreen) {
+        // Save original parent and next sibling to restore position on exit
+        container._originalParent = container.parentNode;
+        container._originalNextSibling = container.nextSibling;
+        
+        // Append to body so it displays outside of any transformed/absolute parents
+        document.body.appendChild(container);
+        
         btn.classList.add('fullscreen-active');
         btn.title = "Exit Fullscreen";
         document.body.style.overflow = 'hidden';
     } else {
+        // Restore to its original spot in the form
+        if (container._originalParent) {
+            container._originalParent.insertBefore(container, container._originalNextSibling);
+        }
+        
         btn.classList.remove('fullscreen-active');
         btn.title = "Toggle Fullscreen";
         document.body.style.overflow = '';
@@ -338,6 +350,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (fullscreens.length > 0) {
                 fullscreens.forEach(el => {
                     el.classList.remove('canvas-container-fullscreen');
+                    if (el._originalParent) {
+                        el._originalParent.insertBefore(el, el._originalNextSibling);
+                    }
                 });
                 const btns = document.querySelectorAll('.zoom-ctrl-btn.fullscreen-active');
                 btns.forEach(btn => {
@@ -563,6 +578,9 @@ function switchView(viewId) {
     const fullscreens = document.querySelectorAll('.canvas-container-fullscreen');
     fullscreens.forEach(el => {
         el.classList.remove('canvas-container-fullscreen');
+        if (el._originalParent) {
+            el._originalParent.insertBefore(el, el._originalNextSibling);
+        }
     });
     const btns = document.querySelectorAll('.zoom-ctrl-btn.fullscreen-active');
     btns.forEach(btn => {
