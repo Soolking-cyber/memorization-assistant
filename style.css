@@ -1775,7 +1775,7 @@ input.letter-box:focus {
     height: 100vh !important;
     z-index: 9999 !important;
     border-radius: 0 !important;
-    background: var(--bg-primary) !important;
+    background: var(--bg-page) !important;
     border: none !important;
     box-shadow: none !important;
 }
