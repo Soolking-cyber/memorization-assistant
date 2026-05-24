@@ -3733,33 +3733,37 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
 
 function initMapCanvasListeners() {
     // Creation elements
-    const btnCreateAdd = document.getElementById('btn-create-map-add-node');
-    if (btnCreateAdd) {
-        btnCreateAdd.addEventListener('click', () => {
-            const id = 'node_' + Date.now();
-            createMapNodes.push({
-                id: id,
-                text: '',
-                explanation: '',
-                x: 80 + Math.random() * 80,
-                y: 80 + Math.random() * 80,
-                isRoot: createMapNodes.length === 0
-            });
-            renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
+    const handleAddCreateNode = () => {
+        const id = 'node_' + Date.now();
+        createMapNodes.push({
+            id: id,
+            text: '',
+            explanation: '',
+            x: 80 + Math.random() * 80,
+            y: 80 + Math.random() * 80,
+            isRoot: createMapNodes.length === 0
         });
-    }
+        renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
+    };
+    
+    const btnCreateAdd = document.getElementById('btn-create-map-add-node');
+    if (btnCreateAdd) btnCreateAdd.addEventListener('click', handleAddCreateNode);
+    const btnCreateAddBar = document.getElementById('btn-create-map-add-node-bar');
+    if (btnCreateAddBar) btnCreateAddBar.addEventListener('click', handleAddCreateNode);
+    
+    const handleClearCreate = () => {
+        if (confirm("Are you sure you want to clear the mind map canvas?")) {
+            createMapNodes = [];
+            createMapLinks = [];
+            linkingSourceNodeId = null;
+            renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
+        }
+    };
     
     const btnCreateClear = document.getElementById('btn-create-map-clear');
-    if (btnCreateClear) {
-        btnCreateClear.addEventListener('click', () => {
-            if (confirm("Are you sure you want to clear the mind map canvas?")) {
-                createMapNodes = [];
-                createMapLinks = [];
-                linkingSourceNodeId = null;
-                renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
-            }
-        });
-    }
+    if (btnCreateClear) btnCreateClear.addEventListener('click', handleClearCreate);
+    const btnCreateClearBar = document.getElementById('btn-create-map-clear-bar');
+    if (btnCreateClearBar) btnCreateClearBar.addEventListener('click', handleClearCreate);
     
     const createCanvas = document.getElementById('create-map-canvas-container');
     if (createCanvas) {
@@ -3835,33 +3839,37 @@ function initMapCanvasListeners() {
     }
     
     // Editing elements
-    const btnEditAdd = document.getElementById('btn-edit-map-add-node');
-    if (btnEditAdd) {
-        btnEditAdd.addEventListener('click', () => {
-            const id = 'node_' + Date.now();
-            editMapNodes.push({
-                id: id,
-                text: '',
-                explanation: '',
-                x: 80 + Math.random() * 80,
-                y: 80 + Math.random() * 80,
-                isRoot: editMapNodes.length === 0
-            });
-            renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
+    const handleAddEditNode = () => {
+        const id = 'node_' + Date.now();
+        editMapNodes.push({
+            id: id,
+            text: '',
+            explanation: '',
+            x: 80 + Math.random() * 80,
+            y: 80 + Math.random() * 80,
+            isRoot: editMapNodes.length === 0
         });
-    }
+        renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
+    };
+    
+    const btnEditAdd = document.getElementById('btn-edit-map-add-node');
+    if (btnEditAdd) btnEditAdd.addEventListener('click', handleAddEditNode);
+    const btnEditAddBar = document.getElementById('btn-edit-map-add-node-bar');
+    if (btnEditAddBar) btnEditAddBar.addEventListener('click', handleAddEditNode);
+    
+    const handleClearEdit = () => {
+        if (confirm("Are you sure you want to clear the mind map canvas?")) {
+            editMapNodes = [];
+            editMapLinks = [];
+            linkingSourceNodeId = null;
+            renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
+        }
+    };
     
     const btnEditClear = document.getElementById('btn-edit-map-clear');
-    if (btnEditClear) {
-        btnEditClear.addEventListener('click', () => {
-            if (confirm("Are you sure you want to clear the mind map canvas?")) {
-                editMapNodes = [];
-                editMapLinks = [];
-                linkingSourceNodeId = null;
-                renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
-            }
-        });
-    }
+    if (btnEditClear) btnEditClear.addEventListener('click', handleClearEdit);
+    const btnEditClearBar = document.getElementById('btn-edit-map-clear-bar');
+    if (btnEditClearBar) btnEditClearBar.addEventListener('click', handleClearEdit);
     
     const editCanvas = document.getElementById('edit-map-canvas-container');
     if (editCanvas) {

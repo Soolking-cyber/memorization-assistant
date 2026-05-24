@@ -1790,3 +1790,33 @@ input.letter-box:focus {
     background: var(--warning) !important;
     color: var(--bg-card) !important;
 }
+
+.zoom-ctrl-text-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.72rem;
+    font-weight: 800;
+    cursor: pointer;
+    padding: 3px 7px;
+    border-radius: 10px;
+    transition: background 0.15s, transform 0.1s;
+    font-family: inherit;
+    outline: none;
+}
+
+.zoom-ctrl-text-btn:hover {
+    background: var(--bg-secondary);
+    transform: scale(1.05);
+}
+
+.zoom-ctrl-text-btn:active {
+    transform: scale(0.95);
+}
+
+.zoom-divider {
+    color: var(--border-color);
+    font-size: 0.75rem;
+    margin: 0 4px;
+    user-select: none;
+}
