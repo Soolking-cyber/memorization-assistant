@@ -100,15 +100,16 @@ function playUISound(type) {
             osc.connect(gain);
             gain.connect(ctx.destination);
             
+            // Ultra-short, elegant high-frequency haptic tick/pop
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, now);
-            osc.frequency.exponentialRampToValueAtTime(100, now + 0.08);
+            osc.frequency.setValueAtTime(1400, now);
+            osc.frequency.exponentialRampToValueAtTime(800, now + 0.015);
             
-            gain.gain.setValueAtTime(0.15, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+            gain.gain.setValueAtTime(0.06, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.015);
             
             osc.start(now);
-            osc.stop(now + 0.08);
+            osc.stop(now + 0.015);
         } else if (type === 'success') {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
