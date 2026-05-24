@@ -840,6 +840,9 @@ function initNavigation() {
 }
 
 function switchView(viewId) {
+    // Hide any active explanation tooltips
+    hideExplanationTooltip();
+
     // Reset any active fullscreen canvas containers when switching views
     const fullscreens = document.querySelectorAll('.canvas-container-fullscreen');
     fullscreens.forEach(el => {
@@ -4401,6 +4404,31 @@ function initMapCanvasListeners() {
     }
 }
 
+function showExplanationTooltip(nodeEl, text) {
+    hideExplanationTooltip();
+    
+    const tooltip = document.createElement('div');
+    tooltip.className = 'node-explanation-tooltip';
+    tooltip.textContent = text;
+    
+    const nx = parseFloat(nodeEl.style.left) || 0;
+    const ny = parseFloat(nodeEl.style.top) || 0;
+    
+    // Center horizontally relative to 180px width, and offset 10px above the top
+    tooltip.style.left = `${nx + 90}px`;
+    tooltip.style.top = `${ny - 10}px`;
+    
+    const container = document.getElementById('practice-map-nodes-container');
+    if (container) {
+        container.appendChild(tooltip);
+    }
+}
+
+function hideExplanationTooltip() {
+    const existing = document.querySelectorAll('.node-explanation-tooltip');
+    existing.forEach(t => t.remove());
+}
+
 function renderPracticeNodes(containerId, originalNodes, links, svgId, arrowheadId) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -4521,6 +4549,14 @@ function renderPracticeNodes(containerId, originalNodes, links, svgId, arrowhead
             } else {
                 input.style.color = 'var(--text-primary)';
             }
+            
+            // Premium Floating explanation tooltips on focus
+            input.addEventListener('focus', () => {
+                showExplanationTooltip(nodeEl, node.explanation || 'No explanation');
+            });
+            input.addEventListener('blur', () => {
+                hideExplanationTooltip();
+            });
             
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
