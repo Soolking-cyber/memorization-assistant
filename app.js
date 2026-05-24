@@ -412,6 +412,7 @@ function toggleFullscreen(containerId, buttonId) {
     
     const isFullscreen = container.classList.toggle('canvas-container-fullscreen');
     
+    const closeBtn = container.querySelector('.fullscreen-close-btn');
     if (isFullscreen) {
         // Save original parent and next sibling to restore position on exit
         container._originalParent = container.parentNode;
@@ -422,6 +423,7 @@ function toggleFullscreen(containerId, buttonId) {
         
         btn.classList.add('fullscreen-active');
         btn.title = "Exit Fullscreen";
+        if (closeBtn) closeBtn.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     } else {
         // Restore to its original spot in the form
@@ -431,6 +433,7 @@ function toggleFullscreen(containerId, buttonId) {
         
         btn.classList.remove('fullscreen-active');
         btn.title = "Toggle Fullscreen";
+        if (closeBtn) closeBtn.classList.add('hidden');
         document.body.style.overflow = '';
     }
 }
@@ -525,6 +528,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnCreateFullscreen) {
         btnCreateFullscreen.addEventListener('click', () => toggleFullscreen('create-map-canvas-container', 'btn-create-fullscreen'));
     }
+    const btnCreateClose = document.querySelector('#create-map-canvas-container .fullscreen-close-btn');
+    if (btnCreateClose) {
+        btnCreateClose.addEventListener('click', () => toggleFullscreen('create-map-canvas-container', 'btn-create-fullscreen'));
+    }
     const btnCreateGrid = document.getElementById('btn-create-grid');
     if (btnCreateGrid) {
         btnCreateGrid.addEventListener('click', toggleGridSnapping);
@@ -539,6 +546,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnEditFullscreen = document.getElementById('btn-edit-fullscreen');
     if (btnEditFullscreen) {
         btnEditFullscreen.addEventListener('click', () => toggleFullscreen('edit-map-canvas-container', 'btn-edit-fullscreen'));
+    }
+    const btnEditClose = document.querySelector('#edit-map-canvas-container .fullscreen-close-btn');
+    if (btnEditClose) {
+        btnEditClose.addEventListener('click', () => toggleFullscreen('edit-map-canvas-container', 'btn-edit-fullscreen'));
     }
     const btnEditGrid = document.getElementById('btn-edit-grid');
     if (btnEditGrid) {
@@ -798,6 +809,8 @@ function switchView(viewId) {
     const fullscreens = document.querySelectorAll('.canvas-container-fullscreen');
     fullscreens.forEach(el => {
         el.classList.remove('canvas-container-fullscreen');
+        const closeBtn = el.querySelector('.fullscreen-close-btn');
+        if (closeBtn) closeBtn.classList.add('hidden');
         if (el._originalParent) {
             el._originalParent.insertBefore(el, el._originalNextSibling);
         }
@@ -1901,6 +1914,11 @@ function renderCurrentCard() {
         
         frontEl.innerHTML = `
             <div id="practice-map-canvas-container" style="position: absolute; inset: 0; width: 100%; height: 100%; background: transparent; border: none; overflow: auto; box-shadow: none; border-radius: 14px; user-select: none;">
+                <!-- Exit Fullscreen Button -->
+                <button type="button" class="fullscreen-close-btn hidden" title="Exit Fullscreen">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+                
                 <!-- Floating Header Panel inside the canvas viewport -->
                 <div class="practice-floating-header" style="position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; flex-direction: column; align-items: center; background: var(--bg-card); border: 1px solid var(--border-color); padding: 6px 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); backdrop-filter: blur(8px); text-align: center; width: max-content; max-width: 90%; pointer-events: none;">
                     <span style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-secondary); margin-bottom: 2px;">Recall the Memory Map</span>
@@ -1942,6 +1960,10 @@ function renderCurrentCard() {
         const btnPracticeFullscreen = document.getElementById('btn-practice-fullscreen');
         if (btnPracticeFullscreen) {
             btnPracticeFullscreen.addEventListener('click', () => toggleFullscreen('practice-map-canvas-container', 'btn-practice-fullscreen'));
+        }
+        const btnPracticeClose = document.querySelector('#practice-map-canvas-container .fullscreen-close-btn');
+        if (btnPracticeClose) {
+            btnPracticeClose.addEventListener('click', () => toggleFullscreen('practice-map-canvas-container', 'btn-practice-fullscreen'));
         }
         
         backEl.innerHTML = `<strong style="color:var(--accent);">Memory Map Title:</strong> ${mapData ? mapData.title : ''}`;
