@@ -894,9 +894,15 @@ function switchView(viewId) {
     if (viewId === 'auth') {
         document.body.classList.add('logged-out');
         document.body.classList.remove('logged-in');
+        
+        const nav = document.getElementById('nav-buttons');
+        if (nav) nav.classList.add('hidden');
     } else {
         document.body.classList.add('logged-in');
         document.body.classList.remove('logged-out');
+        
+        const nav = document.getElementById('nav-buttons');
+        if (nav) nav.classList.remove('hidden');
     }
 
     document.querySelectorAll('.view').forEach(v => {
