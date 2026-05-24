@@ -219,11 +219,7 @@
                             </div>
                             <div class="input-group">
                                 <label>Visual Concept Map Editor</label>
-                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                                    <button type="button" class="btn" id="btn-create-map-add-node" style="padding: 8px 14px; font-size: 0.85rem; font-weight: 700;">+ Add Node</button>
-                                    <button type="button" class="btn" id="btn-create-map-clear" style="padding: 8px 14px; font-size: 0.85rem; font-weight: 700; color: #ef4444;">Clear Canvas</button>
-                                </div>
-                                <div id="create-map-canvas-container" style="position: relative; width: 100%; height: 500px; background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 12px; overflow: auto; box-shadow: inset 0 -2px 0 var(--border-color); user-select: none;">
+                                <div id="create-map-canvas-container" style="position: relative; width: 100%; height: 500px; background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 12px; overflow: auto; box-shadow: inset 0 -2px 0 var(--border-color); user-select: none; margin-top: 8px;">
                                     <div id="create-map-viewport" style="position: absolute; left: 0; top: 0; width: 2500px; height: 2000px; transform-origin: 0 0;">
                                         <div style="position: absolute; inset: 0; background-size: 20px 20px; background-image: radial-gradient(var(--border-color) 1px, transparent 0); opacity: 0.4; pointer-events: none;"></div>
                                         <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;" id="create-map-svg">
@@ -317,11 +313,7 @@
                             </div>
                             <div class="input-group">
                                 <label>Visual Concept Map Editor</label>
-                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                                    <button type="button" class="btn" id="btn-edit-map-add-node" style="padding: 8px 14px; font-size: 0.85rem; font-weight: 700;">+ Add Node</button>
-                                    <button type="button" class="btn" id="btn-edit-map-clear" style="padding: 8px 14px; font-size: 0.85rem; font-weight: 700; color: #ef4444;">Clear Canvas</button>
-                                </div>
-                                <div id="edit-map-canvas-container" style="position: relative; width: 100%; height: 500px; background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 12px; overflow: auto; box-shadow: inset 0 -2px 0 var(--border-color); user-select: none;">
+                                <div id="edit-map-canvas-container" style="position: relative; width: 100%; height: 500px; background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 12px; overflow: auto; box-shadow: inset 0 -2px 0 var(--border-color); user-select: none; margin-top: 8px;">
                                     <div id="edit-map-viewport" style="position: absolute; left: 0; top: 0; width: 2500px; height: 2000px; transform-origin: 0 0;">
                                         <div style="position: absolute; inset: 0; background-size: 20px 20px; background-image: radial-gradient(var(--border-color) 1px, transparent 0); opacity: 0.4; pointer-events: none;"></div>
                                         <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;" id="edit-map-svg">

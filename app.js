@@ -3841,8 +3841,6 @@ function initMapCanvasListeners() {
         renderEditorNodes('create-map-nodes-container', createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead');
     };
     
-    const btnCreateAdd = document.getElementById('btn-create-map-add-node');
-    if (btnCreateAdd) btnCreateAdd.addEventListener('click', handleAddCreateNode);
     const btnCreateAddBar = document.getElementById('btn-create-map-add-node-bar');
     if (btnCreateAddBar) btnCreateAddBar.addEventListener('click', handleAddCreateNode);
     
@@ -3855,8 +3853,6 @@ function initMapCanvasListeners() {
         }
     };
     
-    const btnCreateClear = document.getElementById('btn-create-map-clear');
-    if (btnCreateClear) btnCreateClear.addEventListener('click', handleClearCreate);
     const btnCreateClearBar = document.getElementById('btn-create-map-clear-bar');
     if (btnCreateClearBar) btnCreateClearBar.addEventListener('click', handleClearCreate);
     
@@ -3947,8 +3943,6 @@ function initMapCanvasListeners() {
         renderEditorNodes('edit-map-nodes-container', editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
     };
     
-    const btnEditAdd = document.getElementById('btn-edit-map-add-node');
-    if (btnEditAdd) btnEditAdd.addEventListener('click', handleAddEditNode);
     const btnEditAddBar = document.getElementById('btn-edit-map-add-node-bar');
     if (btnEditAddBar) btnEditAddBar.addEventListener('click', handleAddEditNode);
     
@@ -3961,8 +3955,6 @@ function initMapCanvasListeners() {
         }
     };
     
-    const btnEditClear = document.getElementById('btn-edit-map-clear');
-    if (btnEditClear) btnEditClear.addEventListener('click', handleClearEdit);
     const btnEditClearBar = document.getElementById('btn-edit-map-clear-bar');
     if (btnEditClearBar) btnEditClearBar.addEventListener('click', handleClearEdit);
     
