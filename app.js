@@ -809,9 +809,16 @@ function switchView(viewId) {
     });
     document.body.style.overflow = '';
 
+    const exerciseTitleEl = document.getElementById('practice-exercise-title');
+    if (exerciseTitleEl) exerciseTitleEl.style.display = '';
+
     const activeCard = document.getElementById('active-card');
     if (activeCard) {
         activeCard.style.height = '';
+        const cardFront = activeCard.querySelector('.card-front');
+        if (cardFront) cardFront.style.padding = '';
+        const cardBack = activeCard.querySelector('.card-back');
+        if (cardBack) cardBack.style.padding = '';
     }
 
     if (viewId === 'auth') {
@@ -1875,42 +1882,47 @@ function renderCurrentCard() {
     } catch (e) {}
 
     if (isMap || card.type === 'Memory Map') {
-        exerciseTitleEl.textContent = "Recall the Memory Map";
+        if (exerciseTitleEl) exerciseTitleEl.style.display = 'none';
         spellingArea.classList.add('hidden');
         
-        // Dynamically adjust card height for memory map to fit without nested scrollbar
+        // Dynamically adjust card size and remove padding for seamless map canvas
         const activeCard = document.getElementById('active-card');
         if (activeCard) {
             activeCard.style.height = '600px';
+            const cardFront = activeCard.querySelector('.card-front');
+            if (cardFront) cardFront.style.padding = '0';
+            const cardBack = activeCard.querySelector('.card-back');
+            if (cardBack) cardBack.style.padding = '0';
         }
         
         // Reset practice zoom level
         practiceMapZoom = 1.0;
         
         frontEl.innerHTML = `
-            <div class="practice-prompt-container" style="display: flex; flex-direction: column; gap: 12px; width: 100%; height: 100%;">
-                <div class="practice-explanation" style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); text-align: center;">
-                    ${mapData ? mapData.title : 'Recall this Memory Map'}
+            <div id="practice-map-canvas-container" style="position: absolute; inset: 0; width: 100%; height: 100%; background: transparent; border: none; overflow: auto; box-shadow: none; border-radius: 14px; user-select: none;">
+                <!-- Floating Header Panel inside the canvas viewport -->
+                <div class="practice-floating-header" style="position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; flex-direction: column; align-items: center; background: var(--bg-card); border: 1px solid var(--border-color); padding: 6px 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); backdrop-filter: blur(8px); text-align: center; width: max-content; max-width: 90%; pointer-events: none;">
+                    <span style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-secondary); margin-bottom: 2px;">Recall the Memory Map</span>
+                    <span style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary);">${mapData ? mapData.title : 'Recall this Memory Map'}</span>
                 </div>
-                <div id="practice-map-canvas-container" style="position: relative; width: 100%; height: 460px; background: transparent; border: none; overflow: auto; box-shadow: none; user-select: none;">
-                    <div id="practice-map-viewport" style="position: absolute; left: 0; top: 0; width: 2500px; height: 2000px; transform-origin: 0 0;">
-                        <div style="position: absolute; inset: 0; background-size: 20px 20px; background-image: radial-gradient(var(--border-color) 1px, transparent 0); opacity: 0.4; pointer-events: none;"></div>
-                        <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;" id="practice-map-svg">
-                            <defs>
-                                <marker id="practice-arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                                    <polygon points="0 1.5, 5 3.5, 0 5.5" fill="currentColor" />
-                                </marker>
-                            </defs>
-                        </svg>
-                        <div id="practice-map-nodes-container" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2;"></div>
-                    </div>
-                    <div class="canvas-zoom-controls">
-                        <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-out">−</button>
-                        <span class="zoom-percent" id="practice-zoom-label">100%</span>
-                        <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-in">+</button>
-                        <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-reset" style="font-size: 0.65rem; margin-left: 2px;">R</button>
-                        <button type="button" class="zoom-ctrl-btn" id="btn-practice-fullscreen" style="font-size: 0.65rem; margin-left: 2px;" title="Toggle Fullscreen">⛶</button>
-                    </div>
+                
+                <div id="practice-map-viewport" style="position: absolute; left: 0; top: 0; width: 2500px; height: 2000px; transform-origin: 0 0;">
+                    <div style="position: absolute; inset: 0; background-size: 20px 20px; background-image: radial-gradient(var(--border-color) 1px, transparent 0); opacity: 0.4; pointer-events: none;"></div>
+                    <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;" id="practice-map-svg">
+                        <defs>
+                            <marker id="practice-arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                                <polygon points="0 1.5, 5 3.5, 0 5.5" fill="currentColor" />
+                            </marker>
+                        </defs>
+                    </svg>
+                    <div id="practice-map-nodes-container" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2;"></div>
+                </div>
+                <div class="canvas-zoom-controls">
+                    <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-out">−</button>
+                    <span class="zoom-percent" id="practice-zoom-label">100%</span>
+                    <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-in">+</button>
+                    <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-reset" style="font-size: 0.65rem; margin-left: 2px;">R</button>
+                    <button type="button" class="zoom-ctrl-btn" id="btn-practice-fullscreen" style="font-size: 0.65rem; margin-left: 2px;" title="Toggle Fullscreen">⛶</button>
                 </div>
             </div>
         `;
@@ -1952,10 +1964,15 @@ function renderCurrentCard() {
         return;
     }
 
-    // Reset dynamically adjusted card height for standard cards
+    // Reset dynamically adjusted card layout, height and padding for standard cards
+    if (exerciseTitleEl) exerciseTitleEl.style.display = '';
     const activeCard = document.getElementById('active-card');
     if (activeCard) {
         activeCard.style.height = '';
+        const cardFront = activeCard.querySelector('.card-front');
+        if (cardFront) cardFront.style.padding = '';
+        const cardBack = activeCard.querySelector('.card-back');
+        if (cardBack) cardBack.style.padding = '';
     }
 
     // Check if card has saved example sentences
