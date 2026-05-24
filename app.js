@@ -1913,35 +1913,37 @@ function renderCurrentCard() {
         practiceMapZoom = 1.0;
         
         frontEl.innerHTML = `
-            <div id="practice-map-canvas-container" style="position: absolute; inset: 0; width: 100%; height: 100%; background: transparent; border: none; overflow: auto; box-shadow: none; border-radius: 14px; user-select: none;">
-                <!-- Exit Fullscreen Button -->
-                <button type="button" class="fullscreen-close-btn hidden" title="Exit Fullscreen">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-                
-                <!-- Floating Header Panel inside the canvas viewport -->
-                <div class="practice-floating-header" style="position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; flex-direction: column; align-items: center; background: var(--bg-card); border: 1px solid var(--border-color); padding: 6px 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); backdrop-filter: blur(8px); text-align: center; width: max-content; max-width: 90%; pointer-events: none;">
+            <div style="display: flex; flex-direction: column; width: 100%; height: 100%; position: absolute; inset: 0;">
+                <!-- Out-of-Canvas Dynamic Header Row -->
+                <div class="practice-header-outside" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-card); border-bottom: 2px solid var(--border-color); padding: 12px 16px; text-align: center; width: 100%; box-sizing: border-box; flex-shrink: 0; border-top-left-radius: 14px; border-top-right-radius: 14px;">
                     <span style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-secondary); margin-bottom: 2px;">Recall the Memory Map</span>
-                    <span style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary);">${mapData ? mapData.title : 'Recall this Memory Map'}</span>
+                    <span style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">${mapData ? mapData.title : 'Recall this Memory Map'}</span>
                 </div>
                 
-                <div id="practice-map-viewport" style="position: absolute; left: 0; top: 0; width: 2500px; height: 2000px; transform-origin: 0 0;">
-                    <div style="position: absolute; inset: 0; background-size: 20px 20px; background-image: radial-gradient(var(--border-color) 1px, transparent 0); opacity: 0.4; pointer-events: none;"></div>
-                    <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;" id="practice-map-svg">
-                        <defs>
-                            <marker id="practice-arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                                <polygon points="0 1.5, 5 3.5, 0 5.5" fill="currentColor" />
-                            </marker>
-                        </defs>
-                    </svg>
-                    <div id="practice-map-nodes-container" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2;"></div>
-                </div>
-                <div class="canvas-zoom-controls">
-                    <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-out">−</button>
-                    <span class="zoom-percent" id="practice-zoom-label">100%</span>
-                    <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-in">+</button>
-                    <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-reset" style="font-size: 0.65rem; margin-left: 2px;">R</button>
-                    <button type="button" class="zoom-ctrl-btn" id="btn-practice-fullscreen" style="font-size: 0.65rem; margin-left: 2px;" title="Toggle Fullscreen">⛶</button>
+                <div id="practice-map-canvas-container" style="position: relative; width: 100%; height: 100%; background: transparent; border: none; overflow: auto; box-shadow: none; border-bottom-left-radius: 14px; border-bottom-right-radius: 14px; user-select: none; flex-grow: 1;">
+                    <!-- Exit Fullscreen Button -->
+                    <button type="button" class="fullscreen-close-btn hidden" title="Exit Fullscreen">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                    
+                    <div id="practice-map-viewport" style="position: absolute; left: 0; top: 0; width: 2500px; height: 2000px; transform-origin: 0 0;">
+                        <div style="position: absolute; inset: 0; background-size: 20px 20px; background-image: radial-gradient(var(--border-color) 1px, transparent 0); opacity: 0.4; pointer-events: none;"></div>
+                        <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;" id="practice-map-svg">
+                            <defs>
+                                <marker id="practice-arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                                    <polygon points="0 1.5, 5 3.5, 0 5.5" fill="currentColor" />
+                                </marker>
+                            </defs>
+                        </svg>
+                        <div id="practice-map-nodes-container" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2;"></div>
+                    </div>
+                    <div class="canvas-zoom-controls">
+                        <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-out">−</button>
+                        <span class="zoom-percent" id="practice-zoom-label">100%</span>
+                        <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-in">+</button>
+                        <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-reset" style="font-size: 0.65rem; margin-left: 2px;">R</button>
+                        <button type="button" class="zoom-ctrl-btn" id="btn-practice-fullscreen" style="font-size: 0.65rem; margin-left: 2px;" title="Toggle Fullscreen">⛶</button>
+                    </div>
                 </div>
             </div>
         `;
@@ -1949,6 +1951,38 @@ function renderCurrentCard() {
         if (mapData) {
             renderPracticeNodes('practice-map-nodes-container', mapData.nodes, mapData.links, 'practice-map-svg', 'practice-arrowhead');
         }
+        
+        // Auto-center scroll container onto the nodes' bounding box area
+        setTimeout(() => {
+            const scrollContainer = document.getElementById('practice-map-canvas-container');
+            if (scrollContainer && mapData && mapData.nodes && mapData.nodes.length > 0) {
+                let minX = Infinity;
+                let maxX = -Infinity;
+                let minY = Infinity;
+                let maxY = -Infinity;
+                
+                mapData.nodes.forEach(node => {
+                    const nx = Number(node.x) || 0;
+                    const ny = Number(node.y) || 0;
+                    if (nx < minX) minX = nx;
+                    if (nx > maxX) maxX = nx;
+                    if (ny < minY) minY = ny;
+                    if (ny > maxY) maxY = ny;
+                });
+                
+                const mapWidth = maxX - minX + 180;
+                const mapHeight = maxY - minY + 90;
+                
+                const centerX = minX + mapWidth / 2;
+                const centerY = minY + mapHeight / 2;
+                
+                const containerWidth = scrollContainer.clientWidth || 400;
+                const containerHeight = scrollContainer.clientHeight || 400;
+                
+                scrollContainer.scrollLeft = centerX - containerWidth / 2;
+                scrollContainer.scrollTop = centerY - containerHeight / 2;
+            }
+        }, 120);
         
         // Bind practice zoom click handlers dynamically
         const btnPracticeZoomIn = document.getElementById('btn-practice-zoom-in');
