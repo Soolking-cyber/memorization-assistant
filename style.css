@@ -2146,3 +2146,9 @@ input.letter-box:focus {
     background: var(--warning);
     color: var(--bg-card);
 }
+
+/* Premium Search Input Focus State */
+#manage-search-input:focus {
+    border-color: var(--warning) !important;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}

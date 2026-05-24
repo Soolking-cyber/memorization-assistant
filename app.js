@@ -532,6 +532,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (manageSelect) {
         manageSelect.addEventListener('change', renderManageView);
     }
+    const manageSearch = document.getElementById('manage-search-input');
+    if (manageSearch) {
+        manageSearch.addEventListener('input', renderManageView);
+    }
     window.removeType = removeType;
 
     // Delegated event listeners for interactive spelling direct input boxes
@@ -929,6 +933,8 @@ function switchView(viewId) {
             document.getElementById('card-front').focus();
         }
         if (viewId === 'manage') {
+            const searchInput = document.getElementById('manage-search-input');
+            if (searchInput) searchInput.value = '';
             renderManageView();
         }
     }, 300);
@@ -1269,9 +1275,40 @@ function renderManageView() {
     if (activeFilter !== 'mixed') {
         filteredCards = cards.filter(c => c.type === activeFilter);
     }
+
+    const searchInput = document.getElementById('manage-search-input');
+    const searchQuery = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    if (searchQuery) {
+        filteredCards = filteredCards.filter(c => {
+            let frontMatchText = c.front.toLowerCase();
+            if (c.front.startsWith('{"mode":"memory_map"')) {
+                try {
+                    const mapData = JSON.parse(c.front);
+                    frontMatchText = `${mapData.title || ''} ${mapData.nodes ? mapData.nodes.map(n => n.text + ' ' + (n.explanation || '')).join(' ') : ''}`.toLowerCase();
+                } catch (e) {}
+            }
+            const backMatchText = (c.back || '').toLowerCase();
+            
+            const savedSentences = exampleSentences[c.id];
+            let sentencesString = '';
+            if (Array.isArray(savedSentences)) {
+                sentencesString = savedSentences.join(' ').toLowerCase();
+            } else if (typeof savedSentences === 'string') {
+                sentencesString = savedSentences.toLowerCase();
+            }
+            
+            return frontMatchText.includes(searchQuery) || 
+                   backMatchText.includes(searchQuery) || 
+                   sentencesString.includes(searchQuery);
+        });
+    }
     
     if (filteredCards.length === 0) {
-        list.innerHTML = '<p class="status-msg">No memories found for this type.</p>';
+        if (searchQuery) {
+            list.innerHTML = '<p class="status-msg">No memories found matching your search query.</p>';
+        } else {
+            list.innerHTML = '<p class="status-msg">No memories found for this type.</p>';
+        }
         toolbar.classList.add('hidden');
         return;
     }
