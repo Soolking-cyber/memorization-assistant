@@ -165,6 +165,101 @@ function playUISound(type) {
     }
 }
 
+function showAlert(message) {
+    playUISound('click');
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'custom-modal-overlay';
+        modal.innerHTML = `
+            <div class="custom-modal-content glass animate-pop-in">
+                <div class="custom-modal-body">
+                    <p>${message}</p>
+                </div>
+                <div class="custom-modal-footer">
+                    <button class="btn primary modal-ok-btn" style="min-width: 100px;">OK</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        void modal.offsetWidth;
+        modal.classList.add('active');
+        
+        const close = () => {
+            modal.classList.remove('active');
+            modal.querySelector('.custom-modal-content').classList.remove('animate-pop-in');
+            modal.querySelector('.custom-modal-content').classList.add('animate-pop-out');
+            setTimeout(() => {
+                modal.remove();
+                resolve();
+            }, 200);
+        };
+        
+        modal.querySelector('.modal-ok-btn').addEventListener('click', close);
+        
+        const handleKey = (e) => {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+                e.preventDefault();
+                document.removeEventListener('keydown', handleKey);
+                close();
+            }
+        };
+        document.addEventListener('keydown', handleKey);
+    });
+}
+
+function showConfirm(message) {
+    playUISound('click');
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'custom-modal-overlay';
+        modal.innerHTML = `
+            <div class="custom-modal-content glass animate-pop-in">
+                <div class="custom-modal-body">
+                    <p>${message}</p>
+                </div>
+                <div class="custom-modal-footer" style="display: flex; gap: 12px; justify-content: center; width: 100%;">
+                    <button class="btn modal-cancel-btn" style="flex: 1; background: var(--bg-secondary); color: var(--text-primary); border: 2px solid var(--border-color);">Cancel</button>
+                    <button class="btn primary modal-confirm-btn" style="flex: 1;">Confirm</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        void modal.offsetWidth;
+        modal.classList.add('active');
+        
+        const close = (result) => {
+            modal.classList.remove('active');
+            modal.querySelector('.custom-modal-content').classList.remove('animate-pop-in');
+            modal.querySelector('.custom-modal-content').classList.add('animate-pop-out');
+            setTimeout(() => {
+                modal.remove();
+                resolve(result);
+            }, 200);
+        };
+        
+        modal.querySelector('.modal-confirm-btn').addEventListener('click', () => close(true));
+        modal.querySelector('.modal-cancel-btn').addEventListener('click', () => close(false));
+        
+        const handleKey = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.removeEventListener('keydown', handleKey);
+                close(true);
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                document.removeEventListener('keydown', handleKey);
+                close(false);
+            }
+        };
+        document.addEventListener('keydown', handleKey);
+    });
+}
+
+window.alert = showAlert;
+window.confirm = showConfirm;
+
 function initSoundSystem() {
     const btnSoundToggle = document.getElementById('btn-sound-toggle');
     if (!btnSoundToggle) return;
@@ -445,8 +540,8 @@ function handleSessionStart() {
     }
 }
 
-function handleLogin() {
-    if (!supabase) return alert("Supabase URL and Key are required in app.js");
+async function handleLogin() {
+    if (!supabase) return await alert("Supabase URL and Key are required in app.js");
     supabase.auth.signInWithOAuth({ provider: 'google' });
 }
 
@@ -653,7 +748,7 @@ function switchView(viewId) {
 
 async function removeType(typeToRemove) {
     if (typeToRemove === 'mixed') return;
-    if (!confirm(`Are you sure you want to delete the "${typeToRemove}" type? All cards with this type will be reassigned to "All Types".`)) return;
+    if (!await confirm(`Are you sure you want to delete the "${typeToRemove}" type? All cards with this type will be reassigned to "All Types".`)) return;
     
     if (userSession) {
         const { error } = await supabase
@@ -664,7 +759,7 @@ async function removeType(typeToRemove) {
             
         if (error) {
             console.error("Error removing type:", error);
-            alert("Failed to remove type.");
+            await alert("Failed to remove type.");
             return;
         }
     }
@@ -1071,7 +1166,7 @@ function renderManageView() {
     document.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             const id = e.currentTarget.dataset.id;
-            if (confirm('Permanently delete this memory?')) {
+            if (await confirm('Permanently delete this memory?')) {
                 await batchDeleteCards([id]);
             }
         });
@@ -1149,7 +1244,7 @@ function renderManageView() {
     deleteBtn.onclick = async () => {
         const selected = [...document.querySelectorAll('.card-checkbox:checked')].map(cb => cb.dataset.id);
         if (selected.length === 0) return;
-        if (!confirm(`Permanently delete ${selected.length} ${selected.length === 1 ? 'memory' : 'memories'}?`)) return;
+        if (!await confirm(`Permanently delete ${selected.length} ${selected.length === 1 ? 'memory' : 'memories'}?`)) return;
         await batchDeleteCards(selected);
     };
 }
@@ -1197,7 +1292,7 @@ async function batchDeleteCards(ids) {
         
     if (error) {
         console.error("Error deleting:", error);
-        alert("Failed to delete memories.");
+        await alert("Failed to delete memories.");
         deleteBtn.textContent = 'Delete Selected';
         deleteBtn.disabled = false;
     } else {
@@ -1220,7 +1315,7 @@ async function batchDeleteCards(ids) {
 
 async function handleCreateCard(e) {
     e.preventDefault();
-    if (!userSession) return alert("Must be logged in to create cards.");
+    if (!userSession) return await alert("Must be logged in to create cards.");
 
     const activeType = document.getElementById('card-type').value.trim() || 'mixed';
     let frontText = '';
@@ -1229,11 +1324,11 @@ async function handleCreateCard(e) {
     if (activeType === 'Memory Map') {
         const title = document.getElementById('create-map-title').value.trim();
         if (!title) {
-            alert("Please enter a Memory Map Title.");
+            await alert("Please enter a Memory Map Title.");
             return;
         }
         if (createMapNodes.length === 0) {
-            alert("Please add at least one card to your Memory Map.");
+            await alert("Please add at least one card to your Memory Map.");
             return;
         }
         
@@ -1442,7 +1537,7 @@ function openEditView(cardId) {
 
 async function handleEditCardSubmit(e) {
     e.preventDefault();
-    if (!userSession) return alert("Must be logged in to edit cards.");
+    if (!userSession) return await alert("Must be logged in to edit cards.");
 
     const cardId = document.getElementById('edit-card-id').value;
     const typeText = document.getElementById('edit-card-type').value.trim() || 'mixed';
@@ -1453,11 +1548,11 @@ async function handleEditCardSubmit(e) {
     if (typeText === 'Memory Map') {
         const title = document.getElementById('edit-map-title').value.trim();
         if (!title) {
-            alert("Please enter a Memory Map Title.");
+            await alert("Please enter a Memory Map Title.");
             return;
         }
         if (editMapNodes.length === 0) {
-            alert("Please add at least one card to your Memory Map.");
+            await alert("Please add at least one card to your Memory Map.");
             return;
         }
         
@@ -1578,7 +1673,7 @@ async function handleEditCardSubmit(e) {
         }, 1000);
     } else {
         console.error("Failed to update memory:", error);
-        alert("Failed to update memory.");
+        await alert("Failed to update memory.");
         btn.textContent = oldText;
         btn.disabled = false;
     }
@@ -2109,7 +2204,7 @@ function calculateMatchPercentage(typed, actual) {
     return Math.round((totalMatchScore / actualWords.length) * 100);
 }
 
-function evaluateAnswer() {
+async function evaluateAnswer() {
     const card = reviewQueue[currentReviewIndex];
     if (!card) return;
 
@@ -2141,7 +2236,7 @@ function evaluateAnswer() {
         const practiceInputs = document.querySelectorAll('.practice-map-node-input');
         const enteredCount = Array.from(practiceInputs).filter(i => i.value.trim().length > 0).length;
         if (enteredCount === 0 && practiceInputs.length > 0) {
-            alert("Please attempt to fill in the mind map before submitting!");
+            await alert("Please attempt to fill in the mind map before submitting!");
             return;
         }
         
@@ -2217,7 +2312,7 @@ function evaluateAnswer() {
     }
 
     if (!typed) {
-        alert("Please attempt an answer before submitting!");
+        await alert("Please attempt an answer before submitting!");
         return;
     }
 
@@ -2911,9 +3006,9 @@ function showLinkToolbar(midX, midY, container, link, nodes, links, svgId, arrow
     delBtn.innerHTML = ICONS.trash;
     delBtn.title = 'Delete Connection';
     delBtn.style = 'border: none; background: none; cursor: pointer; color: #ef4444; display: flex; align-items: center; justify-content: center; padding: 2px; transition: transform 0.1s;';
-    delBtn.addEventListener('click', (e) => {
+    delBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
-        if (confirm("Are you sure you want to delete this connection?")) {
+        if (await confirm("Are you sure you want to delete this connection?")) {
             const idx = links.indexOf(link);
             if (idx !== -1) {
                 links.splice(idx, 1);
@@ -3751,8 +3846,8 @@ function initMapCanvasListeners() {
     const btnCreateAddBar = document.getElementById('btn-create-map-add-node-bar');
     if (btnCreateAddBar) btnCreateAddBar.addEventListener('click', handleAddCreateNode);
     
-    const handleClearCreate = () => {
-        if (confirm("Are you sure you want to clear the mind map canvas?")) {
+    const handleClearCreate = async () => {
+        if (await confirm("Are you sure you want to clear the mind map canvas?")) {
             createMapNodes = [];
             createMapLinks = [];
             linkingSourceNodeId = null;
@@ -3857,8 +3952,8 @@ function initMapCanvasListeners() {
     const btnEditAddBar = document.getElementById('btn-edit-map-add-node-bar');
     if (btnEditAddBar) btnEditAddBar.addEventListener('click', handleAddEditNode);
     
-    const handleClearEdit = () => {
-        if (confirm("Are you sure you want to clear the mind map canvas?")) {
+    const handleClearEdit = async () => {
+        if (await confirm("Are you sure you want to clear the mind map canvas?")) {
             editMapNodes = [];
             editMapLinks = [];
             linkingSourceNodeId = null;
@@ -4121,28 +4216,28 @@ function initProfileMenu() {
 
     if (btnSettingsAddType && settingsNewTypeInput) {
         btnSettingsAddType.addEventListener('click', handleSettingsAddType);
-        settingsNewTypeInput.addEventListener('keydown', (e) => {
+        settingsNewTypeInput.addEventListener('keydown', async (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                handleSettingsAddType();
+                await handleSettingsAddType();
             }
         });
     }
 }
 
-function handleSettingsAddType() {
+async function handleSettingsAddType() {
     const input = document.getElementById('settings-new-type-input');
     if (!input) return;
     let newType = input.value.trim();
     if (newType === '') return;
     
     if (newType.toLowerCase() === 'vocabulary') {
-        alert("The Vocabulary category must be capitalized. It has been auto-corrected.");
+        await alert("The Vocabulary category must be capitalized. It has been auto-corrected.");
         newType = 'Vocabulary';
     }
     
     if (customTypes.includes(newType)) {
-        alert("This category type already exists.");
+        await alert("This category type already exists.");
         return;
     }
     
