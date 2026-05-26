@@ -4624,17 +4624,6 @@ function renderPracticeNodes(containerId, originalNodes, links, svgId, arrowhead
             
             const sizeStyles = fontSizeMap[node.fontSize || 'medium'];
             
-            const expLabel = document.createElement('span');
-            expLabel.style = 'font-size: 0.75rem; color: var(--text-secondary); text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; font-weight: 500; flex-shrink: 0;';
-            expLabel.textContent = node.explanation || 'No explanation';
-            expLabel.title = node.explanation || '';
-            expLabel.style.fontSize = sizeStyles.exp;
-            if (node.textColor) {
-                expLabel.style.color = node.textColor;
-            } else {
-                expLabel.style.color = 'var(--text-secondary)';
-            }
-            
             const bodyEl = document.createElement('div');
             bodyEl.style = 'display: flex; align-items: center; gap: 4px; width: 100%; box-sizing: border-box; justify-content: center;';
             
@@ -4668,7 +4657,6 @@ function renderPracticeNodes(containerId, originalNodes, links, svgId, arrowhead
             });
             
             bodyEl.appendChild(input);
-            nodeEl.appendChild(expLabel);
             nodeEl.appendChild(bodyEl);
         }
         
