@@ -4594,7 +4594,7 @@ function renderPracticeNodes(containerId, originalNodes, links, svgId, arrowhead
             badge.textContent = 'START';
             
             const textSpan = document.createElement('span');
-            textSpan.style = 'font-size: 0.85rem; font-weight: 700; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;';
+            textSpan.style = 'font-size: 0.85rem; font-weight: 700; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0; cursor: help;';
             textSpan.textContent = node.text || '';
             
             // Apply text styling
@@ -4606,19 +4606,25 @@ function renderPracticeNodes(containerId, originalNodes, links, svgId, arrowhead
                 textSpan.style.color = 'var(--text-primary)';
             }
  
-            const expSpan = document.createElement('span');
-            expSpan.style = 'font-size: 0.7rem; color: var(--text-secondary); text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; margin-top: 2px; flex-shrink: 0;';
-            expSpan.textContent = node.explanation || 'Anchor';
-            expSpan.style.fontSize = sizeStyles.exp;
-            if (node.textColor) {
-                expSpan.style.color = node.textColor;
-            } else {
-                expSpan.style.color = 'var(--text-secondary)';
-            }
+            // Hover (Desktop) & Tap (Mobile) tooltips for starting node name
+            textSpan.addEventListener('mouseenter', () => {
+                showExplanationTooltip(nodeEl, node.explanation || 'No explanation');
+            });
+            textSpan.addEventListener('mouseleave', () => {
+                hideExplanationTooltip();
+            });
+            textSpan.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const existing = document.querySelector('.node-explanation-tooltip');
+                if (existing) {
+                    hideExplanationTooltip();
+                } else {
+                    showExplanationTooltip(nodeEl, node.explanation || 'No explanation');
+                }
+            });
             
             nodeEl.appendChild(badge);
             nodeEl.appendChild(textSpan);
-            nodeEl.appendChild(expSpan);
         } else {
             nodeEl.style.border = '2px solid var(--border-color)';
             
