@@ -2155,3 +2155,17 @@ input.letter-box:focus {
     border-color: var(--warning) !important;
     box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
 }
+
+/* Performance Optimizations & GPU Compositing Layer Promotion */
+#create-map-viewport,
+#edit-map-viewport,
+#practice-map-viewport,
+.map-node,
+.node-connector-plus,
+.node-explanation-tooltip {
+    will-change: left, top, transform;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+

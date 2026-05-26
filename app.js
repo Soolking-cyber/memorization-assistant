@@ -4098,6 +4098,7 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
         let isDragging = false;
         let startX, startY;
         let startNodeX, startNodeY;
+        let dragRafId = null;
         
         const handleStart = (clientX, clientY, e) => {
             if (linkingSourceNodeId) return;
@@ -4117,33 +4118,44 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
 
         const handleMove = (clientX, clientY) => {
             if (!isDragging) return;
-            const activeZoom = isEdit ? editMapZoom : createMapZoom;
-            const dx = (clientX - startX) / activeZoom;
-            const dy = (clientY - startY) / activeZoom;
             
-            let nx = startNodeX + dx;
-            let ny = startNodeY + dy;
-            
-            nx = Math.max(0, Math.min(2500 - 180, nx));
-            ny = Math.max(0, Math.min(2000 - 90, ny));
-            
-            if (mapGridActive) {
-                nx = Math.round(nx / 20) * 20;
-                ny = Math.round(ny / 20) * 20;
+            if (dragRafId) {
+                cancelAnimationFrame(dragRafId);
             }
             
-            node.x = nx;
-            node.y = ny;
-            
-            nodeEl.style.left = `${nx}px`;
-            nodeEl.style.top = `${ny}px`;
-            
-            drawLinks(nodes, links, svgId, arrowheadId, true, containerId, isEdit);
+            dragRafId = requestAnimationFrame(() => {
+                const activeZoom = isEdit ? editMapZoom : createMapZoom;
+                const dx = (clientX - startX) / activeZoom;
+                const dy = (clientY - startY) / activeZoom;
+                
+                let nx = startNodeX + dx;
+                let ny = startNodeY + dy;
+                
+                nx = Math.max(0, Math.min(2500 - 180, nx));
+                ny = Math.max(0, Math.min(2000 - 90, ny));
+                
+                if (mapGridActive) {
+                    nx = Math.round(nx / 20) * 20;
+                    ny = Math.round(ny / 20) * 20;
+                }
+                
+                node.x = nx;
+                node.y = ny;
+                
+                nodeEl.style.left = `${nx}px`;
+                nodeEl.style.top = `${ny}px`;
+                
+                drawLinks(nodes, links, svgId, arrowheadId, true, containerId, isEdit);
+            });
         };
 
         const handleEnd = () => {
             isDragging = false;
             nodeEl.style.cursor = 'grab';
+            if (dragRafId) {
+                cancelAnimationFrame(dragRafId);
+                dragRafId = null;
+            }
         };
 
         // Mouse Events
@@ -4195,6 +4207,9 @@ function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit
 }
 
 function initMapCanvasListeners() {
+    let createCanvasRafId = null;
+    let editCanvasRafId = null;
+    
     const handleAddCreateNode = () => {
         const id = 'node_' + Date.now();
         
@@ -4276,15 +4291,25 @@ function initMapCanvasListeners() {
         
         createCanvas.addEventListener('mousemove', (e) => {
             if (linkingSourceNodeId) {
-                const viewport = document.getElementById('create-map-viewport');
-                const rect = viewport.getBoundingClientRect();
-                linkingMousePos.x = (e.clientX - rect.left) / createMapZoom;
-                linkingMousePos.y = (e.clientY - rect.top) / createMapZoom;
-                drawLinks(createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead', true, 'create-map-nodes-container', false);
+                if (createCanvasRafId) {
+                    cancelAnimationFrame(createCanvasRafId);
+                }
+                createCanvasRafId = requestAnimationFrame(() => {
+                    const viewport = document.getElementById('create-map-viewport');
+                    if (!viewport) return;
+                    const rect = viewport.getBoundingClientRect();
+                    linkingMousePos.x = (e.clientX - rect.left) / createMapZoom;
+                    linkingMousePos.y = (e.clientY - rect.top) / createMapZoom;
+                    drawLinks(createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead', true, 'create-map-nodes-container', false);
+                });
             }
         });
         
         createCanvas.addEventListener('mouseup', (e) => {
+            if (createCanvasRafId) {
+                cancelAnimationFrame(createCanvasRafId);
+                createCanvasRafId = null;
+            }
             if (linkingSourceNodeId && !e.target.closest('.map-node') && !e.target.closest('.canvas-zoom-controls')) {
                 const viewport = document.getElementById('create-map-viewport');
                 const rect = viewport.getBoundingClientRect();
@@ -4412,15 +4437,25 @@ function initMapCanvasListeners() {
         
         editCanvas.addEventListener('mousemove', (e) => {
             if (linkingSourceNodeId) {
-                const viewport = document.getElementById('edit-map-viewport');
-                const rect = viewport.getBoundingClientRect();
-                linkingMousePos.x = (e.clientX - rect.left) / editMapZoom;
-                linkingMousePos.y = (e.clientY - rect.top) / editMapZoom;
-                drawLinks(editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true, 'edit-map-nodes-container', true);
+                if (editCanvasRafId) {
+                    cancelAnimationFrame(editCanvasRafId);
+                }
+                editCanvasRafId = requestAnimationFrame(() => {
+                    const viewport = document.getElementById('edit-map-viewport');
+                    if (!viewport) return;
+                    const rect = viewport.getBoundingClientRect();
+                    linkingMousePos.x = (e.clientX - rect.left) / editMapZoom;
+                    linkingMousePos.y = (e.clientY - rect.top) / editMapZoom;
+                    drawLinks(editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true, 'edit-map-nodes-container', true);
+                });
             }
         });
         
         editCanvas.addEventListener('mouseup', (e) => {
+            if (editCanvasRafId) {
+                cancelAnimationFrame(editCanvasRafId);
+                editCanvasRafId = null;
+            }
             if (linkingSourceNodeId && !e.target.closest('.map-node') && !e.target.closest('.canvas-zoom-controls')) {
                 const viewport = document.getElementById('edit-map-viewport');
                 const rect = viewport.getBoundingClientRect();
