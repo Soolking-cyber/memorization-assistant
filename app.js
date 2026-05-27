@@ -2230,8 +2230,8 @@ function renderCurrentCard() {
                     ${explanationHtml}
                 </div>
                 ${card.image_front_url ? `
-                    <div style="position: relative; overflow: hidden; border-radius: 16px; border: 2px solid var(--border-color); background: rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; max-width: 100%; max-height: 280px; width: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
-                        <img src="${card.image_front_url}" style="max-height: 280px; width: auto; max-width: 100%; object-fit: contain; display: block;" alt="Image Card Prompt">
+                    <div style="position: relative; overflow: hidden; border-radius: 16px; border: 2px solid var(--border-color); background: rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; max-width: 100%; max-height: 320px; width: auto; align-self: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+                        <img src="${card.image_front_url}" style="max-height: 320px; width: auto; max-width: 100%; object-fit: contain; display: block;" alt="Image Card Prompt">
                     </div>
                 ` : ''}
             </div>
