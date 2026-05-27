@@ -21,9 +21,9 @@
     --btn-primary-shadow: #000000; /* Flat 3D tactile button shadow */
     --bg-mobile-nav: rgba(245, 244, 240, 0.98); /* Translucent soft cream bg for mobile nav */
     
-    --danger: #ea4335;
-    --warning: #fbbc05;
-    --success: #34a853;
+    --danger: #b0524b;
+    --warning: #b38815;
+    --success: #4a805a;
 }
 
 body.dark-theme {
@@ -49,9 +49,9 @@ body.dark-theme {
     --btn-primary-shadow: #9e9b90; /* Beveled dark cream shadow for 3D buttons in dark mode */
     --bg-mobile-nav: rgba(22, 22, 21, 0.98); /* Translucent dark slate bg for mobile nav */
     
-    --danger: #f87171;
-    --warning: #fbbf24;
-    --success: #34d399;
+    --danger: #b55e5e;
+    --warning: #ab9351;
+    --success: #488b72;
 }
 
 /* Global Premium Transition Rules for Seamless Color/Background Switching */
@@ -1039,15 +1039,15 @@ input.letter-box:focus {
 
 .btn-delete-batch {
     background: transparent !important; 
-    border: 2px solid #ef4444 !important;
-    box-shadow: inset 0 -2px 0 #ef4444 !important;
-    color: #ef4444 !important; 
+    border: 2px solid var(--danger) !important;
+    box-shadow: inset 0 -2px 0 var(--danger) !important;
+    color: var(--danger) !important; 
     padding: 8px 16px !important; 
     font-size: 0.8rem !important;
     font-weight: 700 !important; 
     border-radius: 10px;
 }
-.btn-delete-batch:hover { background: rgba(239, 68, 68, 0.05) !important; }
+.btn-delete-batch:hover { background: rgba(181, 94, 94, 0.08) !important; }
 .btn-delete-batch:active {
     transform: translateY(2px);
     box-shadow: none !important;
@@ -1346,7 +1346,7 @@ input.letter-box:focus {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: #22c55e;
+    background: var(--success);
     color: white;
     display: flex;
     align-items: center;
@@ -2190,11 +2190,11 @@ input.letter-box:focus {
 
 /* Pulsing Due Today badge halo when 0 due (Daily Streak Complete) */
 .stat-pill.active.streak-completed {
-    box-shadow: 0 0 20px rgba(39, 201, 63, 0.4) !important;
-    border-color: #27c93f !important;
+    box-shadow: 0 0 10px rgba(72, 139, 114, 0.15) !important;
+    border-color: var(--success) !important;
 }
 .stat-pill.active.streak-completed .pill-value {
-    color: #27c93f !important;
+    color: var(--success) !important;
 }
 
 
