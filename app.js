@@ -2217,23 +2217,34 @@ function renderCurrentCard() {
     }
 
     if (card.type === 'Image Card') {
-        exerciseTitleEl.textContent = "Recall the Steps in Sequence Order";
+        if (exerciseTitleEl) exerciseTitleEl.style.display = 'none';
         if (activeCard) {
             const isMobile = window.innerWidth <= 768;
-            activeCard.style.height = isMobile ? '420px' : '500px';
+            activeCard.style.height = isMobile ? '450px' : '550px';
+            const cardFront = activeCard.querySelector('.card-front');
+            if (cardFront) cardFront.style.padding = '0';
         }
         
-        const explanationHtml = card.front.replace(/\n/g, '<br>');
         frontEl.innerHTML = `
-            <div class="practice-image-card-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; margin: auto 0; width: 100%;">
-                <div class="practice-explanation" style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); text-align: center; max-width: 100%; line-height: 1.5; word-break: normal; overflow-wrap: break-word;">
-                    ${explanationHtml}
+            <div class="practice-image-card-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; width: 100%; height: 100%; position: relative; box-sizing: border-box; padding: 24px;">
+                <!-- Absolute Header & Title Clue Overlays -->
+                <div class="image-card-clue-header" style="position: absolute; top: 16px; left: 24px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-secondary); opacity: 0.15; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease; z-index: 10; pointer-events: none;">
+                    Recall the Steps in Sequence Order
                 </div>
+                
+                <div class="image-card-clue-title" style="position: absolute; top: 12px; right: 24px; font-size: 0.85rem; font-weight: 800; color: var(--accent); background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 6px 14px; border-radius: 20px; backdrop-filter: blur(10px); opacity: 0.15; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease; z-index: 10; pointer-events: none; max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    ${card.front}
+                </div>
+                
                 ${card.image_front_url ? `
-                    <div style="position: relative; overflow: hidden; border-radius: 16px; border: 2px solid var(--border-color); background: rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; max-width: 100%; max-height: 320px; width: auto; align-self: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
-                        <img src="${card.image_front_url}" style="max-height: 320px; width: auto; max-width: 100%; object-fit: contain; display: block;" alt="Image Card Prompt">
+                    <div class="image-card-frame" style="position: relative; overflow: hidden; border-radius: 16px; border: 2px solid var(--border-color); background: rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; width: auto; max-width: 100%; height: 100%; max-height: 420px; align-self: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3); transition: border-color 0.3s ease; flex-grow: 1;">
+                        <img src="${card.image_front_url}" style="height: 100%; max-height: 420px; width: auto; max-width: 100%; object-fit: contain; display: block;" alt="Image Card Prompt">
                     </div>
-                ` : ''}
+                ` : `
+                    <div class="practice-explanation" style="font-size: 1.45rem; font-weight: 700; color: var(--text-primary); text-align: center; max-width: 100%; line-height: 1.5; word-break: normal; overflow-wrap: break-word; margin: auto 0;">
+                        ${card.front.replace(/\n/g, '<br>')}
+                    </div>
+                `}
             </div>
         `;
         
