@@ -699,9 +699,18 @@ function updateUserAvatarBadge() {
         const userId = userSession.user.id;
         const email = userSession.user.email || 'User';
         
-        // Retrieve custom details from local storage
-        const savedUsername = localStorage.getItem(`profile_username_${userId}`) || '';
-        const savedAvatarUrl = localStorage.getItem(`profile_avatar_url_${userId}`) || '';
+        // Retrieve custom details from local storage, fallback to Supabase DB metadata for cross-device syncing
+        let savedUsername = localStorage.getItem(`profile_username_${userId}`) || '';
+        if (!savedUsername && userSession.user.user_metadata && userSession.user.user_metadata.display_name) {
+            savedUsername = userSession.user.user_metadata.display_name;
+            localStorage.setItem(`profile_username_${userId}`, savedUsername);
+        }
+        
+        let savedAvatarUrl = localStorage.getItem(`profile_avatar_url_${userId}`) || '';
+        if (!savedAvatarUrl && userSession.user.user_metadata && userSession.user.user_metadata.avatar_url) {
+            savedAvatarUrl = userSession.user.user_metadata.avatar_url;
+            localStorage.setItem(`profile_avatar_url_${userId}`, savedAvatarUrl);
+        }
         
         const displayName = savedUsername || email;
         const initial = displayName.charAt(0).toUpperCase();
@@ -4841,7 +4850,7 @@ function initProfileMenu() {
             try {
                 if (supabase) {
                     const fileExt = file.name.split('.').pop();
-                    const filePath = `${userId}.${fileExt}`;
+                    const filePath = `${userId}/avatar.${fileExt}`;
                     
                     // Upload to Supabase avatars bucket
                     const { error: uploadError } = await supabase.storage
