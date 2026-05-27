@@ -2197,4 +2197,17 @@ input.letter-box:focus {
     color: var(--success) !important;
 }
 
+/* Profile Preset Avatars styling */
+.avatar-preset {
+    box-sizing: border-box;
+}
+.avatar-preset:hover {
+    transform: scale(1.15);
+}
+.avatar-preset.active {
+    border-color: var(--accent) !important;
+    transform: scale(1.1);
+}
+
+
 

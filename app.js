@@ -696,22 +696,54 @@ async function checkAuth() {
 
 function updateUserAvatarBadge() {
     if (userSession && userSession.user) {
+        const userId = userSession.user.id;
         const email = userSession.user.email || 'User';
-        const initial = email.charAt(0).toUpperCase();
-        const badge = document.getElementById('user-avatar-badge');
-        if (badge) badge.textContent = initial;
-
+        
+        // Retrieve custom details from local storage
+        const savedUsername = localStorage.getItem(`profile_username_${userId}`) || '';
+        const savedColor = localStorage.getItem(`profile_avatar_color_${userId}`) || '#4a805a';
+        const savedAvatarUrl = localStorage.getItem(`profile_avatar_url_${userId}`) || '';
+        
+        const displayName = savedUsername || email;
+        const initial = displayName.charAt(0).toUpperCase();
+        
+        // Update user dropdown display email
         const dropdownEmail = document.getElementById('user-dropdown-email');
-        if (dropdownEmail) dropdownEmail.textContent = email;
+        if (dropdownEmail) {
+            dropdownEmail.textContent = savedUsername ? `${savedUsername} (${email})` : email;
+        }
 
         const settingsEmail = document.getElementById('settings-email');
-        if (settingsEmail) settingsEmail.textContent = email;
+        if (settingsEmail) {
+            settingsEmail.textContent = savedUsername ? `${savedUsername} (${email})` : email;
+        }
 
-        const settingsAvatar = document.getElementById('settings-avatar');
-        if (settingsAvatar) settingsAvatar.textContent = initial;
-        
         const settingsStatCount = document.getElementById('settings-stat-count');
         if (settingsStatCount) settingsStatCount.textContent = cards.length;
+
+        // Helper to apply avatar background/style
+        const applyAvatarStyle = (avatarEl, showInitialText) => {
+            if (!avatarEl) return;
+            if (savedAvatarUrl) {
+                avatarEl.style.backgroundImage = `url('${savedAvatarUrl}')`;
+                avatarEl.style.backgroundColor = 'transparent';
+                avatarEl.style.backgroundSize = 'cover';
+                avatarEl.style.backgroundPosition = 'center';
+                avatarEl.textContent = '';
+            } else {
+                avatarEl.style.backgroundImage = 'none';
+                avatarEl.style.backgroundColor = savedColor;
+                if (showInitialText) {
+                    avatarEl.textContent = initial;
+                }
+            }
+        };
+
+        const badge = document.getElementById('user-avatar-badge');
+        applyAvatarStyle(badge, true);
+
+        const settingsAvatar = document.getElementById('settings-avatar');
+        applyAvatarStyle(settingsAvatar, true);
     }
 }
 
@@ -4693,8 +4725,6 @@ function initProfileMenu() {
     const btnOpenSettings = document.getElementById('btn-open-settings');
     const btnCloseSettings = document.getElementById('btn-close-settings');
     const settingsModal = document.getElementById('settings-modal');
-    const btnSettingsAddType = document.getElementById('btn-settings-add-type');
-    const settingsNewTypeInput = document.getElementById('settings-new-type-input');
 
     if (avatarBadge && dropdownMenu) {
         avatarBadge.addEventListener('click', (e) => {
@@ -4717,22 +4747,121 @@ function initProfileMenu() {
             
             // Populate settings profile details before opening
             if (userSession && userSession.user) {
+                const userId = userSession.user.id;
                 const email = userSession.user.email || 'User';
-                const initial = email.charAt(0).toUpperCase();
+                
+                // Retrieve custom details from local storage
+                const savedUsername = localStorage.getItem(`profile_username_${userId}`) || '';
+                const savedColor = localStorage.getItem(`profile_avatar_color_${userId}`) || '#4a805a';
+                const savedAvatarUrl = localStorage.getItem(`profile_avatar_url_${userId}`) || '';
+                
+                const displayName = savedUsername || email;
+                const initial = displayName.charAt(0).toUpperCase();
+                
                 const settingsAvatar = document.getElementById('settings-avatar');
                 const settingsEmail = document.getElementById('settings-email');
                 const settingsStatCount = document.getElementById('settings-stat-count');
+                const usernameInput = document.getElementById('settings-username-input');
+                const avatarUrlInput = document.getElementById('settings-avatar-url-input');
                 
-                if (settingsAvatar) settingsAvatar.textContent = initial;
-                if (settingsEmail) settingsEmail.textContent = email;
+                if (settingsEmail) settingsEmail.textContent = savedUsername ? `${savedUsername} (${email})` : email;
                 if (settingsStatCount) settingsStatCount.textContent = cards.length;
+                
+                if (usernameInput) usernameInput.value = savedUsername;
+                if (avatarUrlInput) avatarUrlInput.value = savedAvatarUrl;
+                
+                // Set active avatar color preset highlight
+                const presets = document.querySelectorAll('.avatar-preset');
+                presets.forEach(p => {
+                    p.classList.remove('active');
+                    p.style.borderColor = 'transparent';
+                    if (p.dataset.color === savedColor) {
+                        p.classList.add('active');
+                        p.style.borderColor = 'var(--accent)';
+                    }
+                });
+                
+                // Refresh preview
+                if (settingsAvatar) {
+                    if (savedAvatarUrl) {
+                        settingsAvatar.style.backgroundImage = `url('${savedAvatarUrl}')`;
+                        settingsAvatar.style.backgroundColor = 'transparent';
+                        settingsAvatar.textContent = '';
+                    } else {
+                        settingsAvatar.style.backgroundImage = 'none';
+                        settingsAvatar.style.backgroundColor = savedColor;
+                        settingsAvatar.textContent = initial;
+                    }
+                }
             }
             
             settingsModal.classList.remove('hidden');
-            renderTypeTags();
         });
     }
 
+    // Color Presets Selection Handler
+    const presets = document.querySelectorAll('.avatar-preset');
+    presets.forEach(preset => {
+        preset.addEventListener('click', () => {
+            presets.forEach(p => {
+                p.classList.remove('active');
+                p.style.borderColor = 'transparent';
+            });
+            preset.classList.add('active');
+            preset.style.borderColor = 'var(--accent)';
+            
+            const color = preset.dataset.color;
+            const avatarEl = document.getElementById('settings-avatar');
+            const avatarUrlInput = document.getElementById('settings-avatar-url-input');
+            
+            if (avatarEl && (!avatarUrlInput || !avatarUrlInput.value.trim())) {
+                avatarEl.style.backgroundImage = 'none';
+                avatarEl.style.backgroundColor = color;
+            }
+        });
+    });
+
+    // Dynamic Real-Time Username Preview
+    const usernameInput = document.getElementById('settings-username-input');
+    if (usernameInput) {
+        usernameInput.addEventListener('input', () => {
+            const avatarUrlInput = document.getElementById('settings-avatar-url-input');
+            const avatarUrl = avatarUrlInput ? avatarUrlInput.value.trim() : '';
+            if (!avatarUrl) {
+                const avatarEl = document.getElementById('settings-avatar');
+                if (avatarEl) {
+                    const email = userSession && userSession.user ? userSession.user.email : 'User';
+                    const name = usernameInput.value.trim() || email;
+                    avatarEl.textContent = name.charAt(0).toUpperCase();
+                }
+            }
+        });
+    }
+
+    // Dynamic Real-Time Avatar URL Preview
+    const avatarUrlInput = document.getElementById('settings-avatar-url-input');
+    if (avatarUrlInput) {
+        avatarUrlInput.addEventListener('input', () => {
+            const url = avatarUrlInput.value.trim();
+            const avatarEl = document.getElementById('settings-avatar');
+            if (avatarEl) {
+                if (url) {
+                    avatarEl.style.backgroundImage = `url('${url}')`;
+                    avatarEl.textContent = '';
+                } else {
+                    avatarEl.style.backgroundImage = 'none';
+                    const email = userSession && userSession.user ? userSession.user.email : 'User';
+                    const name = usernameInput ? usernameInput.value.trim() || email : email;
+                    avatarEl.textContent = name.charAt(0).toUpperCase();
+                    
+                    const activePreset = document.querySelector('.avatar-preset.active');
+                    avatarEl.style.backgroundColor = activePreset ? activePreset.dataset.color : '#4a805a';
+                }
+            }
+        });
+    }
+
+    // Close settings modal triggers
     if (btnCloseSettings && settingsModal) {
         btnCloseSettings.addEventListener('click', () => {
             settingsModal.classList.add('hidden');
@@ -4747,37 +4876,82 @@ function initProfileMenu() {
         });
     }
 
-    if (btnSettingsAddType && settingsNewTypeInput) {
-        btnSettingsAddType.addEventListener('click', handleSettingsAddType);
-        settingsNewTypeInput.addEventListener('keydown', async (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                await handleSettingsAddType();
+    // Save Profile Settings Action
+    const btnSaveProfile = document.getElementById('btn-settings-save-profile');
+    if (btnSaveProfile) {
+        btnSaveProfile.addEventListener('click', async () => {
+            if (!userSession || !userSession.user) return;
+            const userId = userSession.user.id;
+            
+            const username = usernameInput ? usernameInput.value.trim() : '';
+            const avatarUrl = avatarUrlInput ? avatarUrlInput.value.trim() : '';
+            
+            const activePreset = document.querySelector('.avatar-preset.active');
+            const selectedColor = activePreset ? activePreset.dataset.color : '#4a805a';
+            
+            localStorage.setItem(`profile_username_${userId}`, username);
+            localStorage.setItem(`profile_avatar_url_${userId}`, avatarUrl);
+            localStorage.setItem(`profile_avatar_color_${userId}`, selectedColor);
+            
+            // Sync Supabase user metadata asynchronously if connected
+            if (supabase) {
+                supabase.auth.updateUser({
+                    data: {
+                        display_name: username,
+                        avatar_url: avatarUrl
+                    }
+                }).then();
+            }
+            
+            playUISound('success');
+            updateUserAvatarBadge();
+            if (settingsModal) settingsModal.classList.add('hidden');
+            await alert("Profile settings saved successfully!");
+        });
+    }
+
+    // Crucially Necessary Action: Change Password
+    const btnChangePassword = document.getElementById('btn-settings-change-password');
+    if (btnChangePassword) {
+        btnChangePassword.addEventListener('click', async () => {
+            const newPassword = await prompt("Enter your new account password:");
+            if (newPassword && newPassword.trim().length >= 6) {
+                if (supabase) {
+                    try {
+                        const { error } = await supabase.auth.updateUser({ password: newPassword });
+                        if (error) throw error;
+                        playUISound('success');
+                        await alert("Password updated successfully!");
+                    } catch (err) {
+                        await alert("Failed to update password: " + err.message);
+                    }
+                } else {
+                    await alert("Supabase is not connected in this session.");
+                }
+            } else if (newPassword) {
+                await alert("Password must be at least 6 characters long.");
             }
         });
     }
-}
 
-async function handleSettingsAddType() {
-    const input = document.getElementById('settings-new-type-input');
-    if (!input) return;
-    let newType = input.value.trim();
-    if (newType === '') return;
-    
-    if (newType.toLowerCase() === 'vocabulary') {
-        await alert("The Vocabulary category must be capitalized. It has been auto-corrected.");
-        newType = 'Vocabulary';
+    // Crucially Necessary Action: Reset Spaced Repetition Intervals
+    const btnResetIntervals = document.getElementById('btn-settings-reset-intervals');
+    if (btnResetIntervals) {
+        btnResetIntervals.addEventListener('click', async () => {
+            if (await confirm("Are you sure you want to reset spaced repetition intervals on all memories? This will reschedule all cards to be due immediately and cannot be undone.")) {
+                cards.forEach(card => {
+                    card.repetitions = 0;
+                    card.interval = 1;
+                    card.easeFactor = 2.5;
+                    card.nextReview = Date.now();
+                    updateCardInDB(card); // Updates Supabase DB asynchronously
+                });
+                updateDashboard();
+                playUISound('success');
+                await alert("Spaced repetition intervals have been reset successfully!");
+            }
+        });
     }
-    
-    if (customTypes.includes(newType)) {
-        await alert("This category type already exists.");
-        return;
-    }
-    
-    customTypes.push(newType);
-    localStorage.setItem('customTypes', JSON.stringify(customTypes));
-    updateTypeDatalists();
-    input.value = '';
 }
 
 // ------ Premium Custom Dropdown Component ------
