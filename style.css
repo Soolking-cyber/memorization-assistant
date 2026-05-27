@@ -162,8 +162,8 @@ body {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: var(--text-primary);
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--btn-primary-text);
     display: flex;
     align-items: center;
     justify-content: center;

@@ -732,7 +732,13 @@ function updateUserAvatarBadge() {
                 avatarEl.textContent = '';
             } else {
                 avatarEl.style.backgroundImage = 'none';
-                avatarEl.style.backgroundColor = savedColor;
+                if (localStorage.getItem(`profile_avatar_color_${userId}`)) {
+                    avatarEl.style.backgroundColor = savedColor;
+                    avatarEl.style.color = '#ffffff'; // Force white text on dynamic presets
+                } else {
+                    avatarEl.style.backgroundColor = 'var(--accent)';
+                    avatarEl.style.color = 'var(--btn-primary-text)'; // Dynamic theme contrast text
+                }
                 if (showInitialText) {
                     avatarEl.textContent = initial;
                 }
