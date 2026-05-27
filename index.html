@@ -501,21 +501,16 @@
                     </div>
 
                     <div class="input-group" style="display: flex; flex-direction: column; gap: 6px;">
-                        <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px;">Select Avatar Style</label>
-                        <div class="avatar-presets-grid" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px;">
-                            <!-- Aesthetic minimalist color presets -->
-                            <div class="avatar-preset active" data-color="#4a805a" style="width: 32px; height: 32px; border-radius: 50%; background: #4a805a; cursor: pointer; border: 3px solid var(--border-color); transition: transform 0.15s ease, border-color 0.15s;"></div>
-                            <div class="avatar-preset" data-color="#b0524b" style="width: 32px; height: 32px; border-radius: 50%; background: #b0524b; cursor: pointer; border: 3px solid transparent; transition: transform 0.15s ease, border-color 0.15s;"></div>
-                            <div class="avatar-preset" data-color="#b38815" style="width: 32px; height: 32px; border-radius: 50%; background: #b38815; cursor: pointer; border: 3px solid transparent; transition: transform 0.15s ease, border-color 0.15s;"></div>
-                            <div class="avatar-preset" data-color="#4a76a8" style="width: 32px; height: 32px; border-radius: 50%; background: #4a76a8; cursor: pointer; border: 3px solid transparent; transition: transform 0.15s ease, border-color 0.15s;"></div>
-                            <div class="avatar-preset" data-color="#804aa8" style="width: 32px; height: 32px; border-radius: 50%; background: #804aa8; cursor: pointer; border: 3px solid transparent; transition: transform 0.15s ease, border-color 0.15s;"></div>
-                            <div class="avatar-preset" data-color="#3c3a35" style="width: 32px; height: 32px; border-radius: 50%; background: #3c3a35; cursor: pointer; border: 3px solid transparent; transition: transform 0.15s ease, border-color 0.15s;"></div>
+                        <label for="settings-avatar-file-input" style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px;">Profile Picture</label>
+                        <div class="avatar-upload-area" style="display: flex; gap: 12px; align-items: center; width: 100%;">
+                            <input type="file" id="settings-avatar-file-input" accept="image/*" style="display: none;">
+                            <button type="button" class="btn" id="btn-settings-upload-avatar" style="flex: 1; padding: 10px 14px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); transition: transform 0.1s ease; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                <span>Upload Photo</span>
+                            </button>
+                            <button type="button" class="btn" id="btn-settings-remove-avatar" style="padding: 10px 14px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 8px; border: 2px solid var(--border-color); background: transparent; color: var(--danger); transition: transform 0.1s ease; display: none;">Remove</button>
                         </div>
-                    </div>
-
-                    <div class="input-group" style="display: flex; flex-direction: column; gap: 6px;">
-                        <label for="settings-avatar-url-input" style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px;">Avatar Image URL <span style="font-weight: 500; text-transform: none; color: var(--text-tertiary);">(Optional)</span></label>
-                        <input type="url" id="settings-avatar-url-input" placeholder="Paste custom avatar URL (e.g. unsplash / imgur)..." style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; box-sizing: border-box; outline: none; transition: border-color 0.15s ease;">
+                        <p class="settings-subtext" style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 2px; margin-bottom: 0;">Upload a custom image (PNG, JPG, or GIF up to 2MB).</p>
                     </div>
 
                     <div class="modal-divider" style="height: 1px; background: var(--border-color); margin: 10px 0;"></div>

@@ -701,7 +701,6 @@ function updateUserAvatarBadge() {
         
         // Retrieve custom details from local storage
         const savedUsername = localStorage.getItem(`profile_username_${userId}`) || '';
-        const savedColor = localStorage.getItem(`profile_avatar_color_${userId}`) || '#4a805a';
         const savedAvatarUrl = localStorage.getItem(`profile_avatar_url_${userId}`) || '';
         
         const displayName = savedUsername || email;
@@ -732,13 +731,8 @@ function updateUserAvatarBadge() {
                 avatarEl.textContent = '';
             } else {
                 avatarEl.style.backgroundImage = 'none';
-                if (localStorage.getItem(`profile_avatar_color_${userId}`)) {
-                    avatarEl.style.backgroundColor = savedColor;
-                    avatarEl.style.color = '#ffffff'; // Force white text on dynamic presets
-                } else {
-                    avatarEl.style.backgroundColor = 'var(--accent)';
-                    avatarEl.style.color = 'var(--btn-primary-text)'; // Dynamic theme contrast text
-                }
+                avatarEl.style.backgroundColor = 'var(--accent)';
+                avatarEl.style.color = 'var(--btn-primary-text)'; // Theme contrast text
                 if (showInitialText) {
                     avatarEl.textContent = initial;
                 }
@@ -750,6 +744,12 @@ function updateUserAvatarBadge() {
 
         const settingsAvatar = document.getElementById('settings-avatar');
         applyAvatarStyle(settingsAvatar, true);
+        
+        // Toggle the Remove button visibility in Settings modal
+        const btnRemoveAvatar = document.getElementById('btn-settings-remove-avatar');
+        if (btnRemoveAvatar) {
+            btnRemoveAvatar.style.display = savedAvatarUrl ? 'inline-block' : 'none';
+        }
     }
 }
 
@@ -4758,7 +4758,6 @@ function initProfileMenu() {
                 
                 // Retrieve custom details from local storage
                 const savedUsername = localStorage.getItem(`profile_username_${userId}`) || '';
-                const savedColor = localStorage.getItem(`profile_avatar_color_${userId}`) || '#4a805a';
                 const savedAvatarUrl = localStorage.getItem(`profile_avatar_url_${userId}`) || '';
                 
                 const displayName = savedUsername || email;
@@ -4768,24 +4767,11 @@ function initProfileMenu() {
                 const settingsEmail = document.getElementById('settings-email');
                 const settingsStatCount = document.getElementById('settings-stat-count');
                 const usernameInput = document.getElementById('settings-username-input');
-                const avatarUrlInput = document.getElementById('settings-avatar-url-input');
                 
                 if (settingsEmail) settingsEmail.textContent = savedUsername ? `${savedUsername} (${email})` : email;
                 if (settingsStatCount) settingsStatCount.textContent = cards.length;
                 
                 if (usernameInput) usernameInput.value = savedUsername;
-                if (avatarUrlInput) avatarUrlInput.value = savedAvatarUrl;
-                
-                // Set active avatar color preset highlight
-                const presets = document.querySelectorAll('.avatar-preset');
-                presets.forEach(p => {
-                    p.classList.remove('active');
-                    p.style.borderColor = 'transparent';
-                    if (p.dataset.color === savedColor) {
-                        p.classList.add('active');
-                        p.style.borderColor = 'var(--accent)';
-                    }
-                });
                 
                 // Refresh preview
                 if (settingsAvatar) {
@@ -4795,7 +4781,8 @@ function initProfileMenu() {
                         settingsAvatar.textContent = '';
                     } else {
                         settingsAvatar.style.backgroundImage = 'none';
-                        settingsAvatar.style.backgroundColor = savedColor;
+                        settingsAvatar.style.backgroundColor = 'var(--accent)';
+                        settingsAvatar.style.color = 'var(--btn-primary-text)';
                         settingsAvatar.textContent = initial;
                     }
                 }
@@ -4805,38 +4792,17 @@ function initProfileMenu() {
         });
     }
 
-    // Color Presets Selection Handler
-    const presets = document.querySelectorAll('.avatar-preset');
-    presets.forEach(preset => {
-        preset.addEventListener('click', () => {
-            presets.forEach(p => {
-                p.classList.remove('active');
-                p.style.borderColor = 'transparent';
-            });
-            preset.classList.add('active');
-            preset.style.borderColor = 'var(--accent)';
-            
-            const color = preset.dataset.color;
-            const avatarEl = document.getElementById('settings-avatar');
-            const avatarUrlInput = document.getElementById('settings-avatar-url-input');
-            
-            if (avatarEl && (!avatarUrlInput || !avatarUrlInput.value.trim())) {
-                avatarEl.style.backgroundImage = 'none';
-                avatarEl.style.backgroundColor = color;
-            }
-        });
-    });
-
     // Dynamic Real-Time Username Preview
     const usernameInput = document.getElementById('settings-username-input');
     if (usernameInput) {
         usernameInput.addEventListener('input', () => {
-            const avatarUrlInput = document.getElementById('settings-avatar-url-input');
-            const avatarUrl = avatarUrlInput ? avatarUrlInput.value.trim() : '';
+            if (!userSession || !userSession.user) return;
+            const userId = userSession.user.id;
+            const avatarUrl = localStorage.getItem(`profile_avatar_url_${userId}`) || '';
             if (!avatarUrl) {
                 const avatarEl = document.getElementById('settings-avatar');
                 if (avatarEl) {
-                    const email = userSession && userSession.user ? userSession.user.email : 'User';
+                    const email = userSession.user.email || 'User';
                     const name = usernameInput.value.trim() || email;
                     avatarEl.textContent = name.charAt(0).toUpperCase();
                 }
@@ -4844,25 +4810,128 @@ function initProfileMenu() {
         });
     }
 
-    // Dynamic Real-Time Avatar URL Preview
-    const avatarUrlInput = document.getElementById('settings-avatar-url-input');
-    if (avatarUrlInput) {
-        avatarUrlInput.addEventListener('input', () => {
-            const url = avatarUrlInput.value.trim();
-            const avatarEl = document.getElementById('settings-avatar');
-            if (avatarEl) {
-                if (url) {
-                    avatarEl.style.backgroundImage = `url('${url}')`;
-                    avatarEl.textContent = '';
-                } else {
-                    avatarEl.style.backgroundImage = 'none';
-                    const email = userSession && userSession.user ? userSession.user.email : 'User';
-                    const name = usernameInput ? usernameInput.value.trim() || email : email;
-                    avatarEl.textContent = name.charAt(0).toUpperCase();
+    // File Upload Handler Setup
+    const avatarFileInput = document.getElementById('settings-avatar-file-input');
+    const btnUploadAvatar = document.getElementById('btn-settings-upload-avatar');
+    
+    if (btnUploadAvatar && avatarFileInput) {
+        btnUploadAvatar.addEventListener('click', () => avatarFileInput.click());
+    }
+
+    if (avatarFileInput) {
+        avatarFileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 2 * 1024 * 1024) {
+                await alert("File is too large! Maximum allowed size is 2MB.");
+                avatarFileInput.value = '';
+                return;
+            }
+            
+            if (!userSession || !userSession.user) return;
+            const userId = userSession.user.id;
+            
+            // Show loading state on upload button
+            const btnUploadText = btnUploadAvatar.querySelector('span');
+            const originalText = btnUploadText ? btnUploadText.textContent : "Upload Photo";
+            if (btnUploadText) btnUploadText.textContent = "Uploading...";
+            btnUploadAvatar.disabled = true;
+            
+            try {
+                if (supabase) {
+                    const fileExt = file.name.split('.').pop();
+                    const filePath = `${userId}.${fileExt}`;
                     
-                    const activePreset = document.querySelector('.avatar-preset.active');
-                    avatarEl.style.backgroundColor = activePreset ? activePreset.dataset.color : '#4a805a';
+                    // Upload to Supabase avatars bucket
+                    const { error: uploadError } = await supabase.storage
+                        .from('avatars')
+                        .upload(filePath, file, { upsert: true });
+                        
+                    if (uploadError) throw uploadError;
+                    
+                    // Get public url
+                    const { data } = supabase.storage
+                        .from('avatars')
+                        .getPublicUrl(filePath);
+                        
+                    const publicUrl = data.publicUrl;
+                    localStorage.setItem(`profile_avatar_url_${userId}`, publicUrl);
+                    
+                    // Update preview dynamically
+                    const settingsAvatar = document.getElementById('settings-avatar');
+                    if (settingsAvatar) {
+                        settingsAvatar.style.backgroundImage = `url('${publicUrl}')`;
+                        settingsAvatar.style.backgroundColor = 'transparent';
+                        settingsAvatar.textContent = '';
+                    }
+                    
+                    updateUserAvatarBadge();
+                    playUISound('success');
+                    await alert("Avatar uploaded successfully!");
+                } else {
+                    // Premium fallback: Offline Base64 DataURL storage
+                    const reader = new FileReader();
+                    reader.onload = async (event) => {
+                        const base64Url = event.target.result;
+                        localStorage.setItem(`profile_avatar_url_${userId}`, base64Url);
+                        
+                        const settingsAvatar = document.getElementById('settings-avatar');
+                        if (settingsAvatar) {
+                            settingsAvatar.style.backgroundImage = `url('${base64Url}')`;
+                            settingsAvatar.style.backgroundColor = 'transparent';
+                            settingsAvatar.textContent = '';
+                        }
+                        
+                        updateUserAvatarBadge();
+                        playUISound('success');
+                        await alert("Avatar uploaded successfully (Offline Mode)!");
+                    };
+                    reader.readAsDataURL(file);
                 }
+            } catch (err) {
+                await alert("Failed to upload avatar: " + err.message);
+            } finally {
+                if (btnUploadText) btnUploadText.textContent = originalText;
+                btnUploadAvatar.disabled = false;
+                avatarFileInput.value = ''; // reset file input
+            }
+        });
+    }
+
+    // Remove Profile Photo Action
+    const btnRemoveAvatar = document.getElementById('btn-settings-remove-avatar');
+    if (btnRemoveAvatar) {
+        btnRemoveAvatar.addEventListener('click', async () => {
+            if (!userSession || !userSession.user) return;
+            const userId = userSession.user.id;
+            
+            if (await confirm("Are you sure you want to remove your profile photo?")) {
+                localStorage.removeItem(`profile_avatar_url_${userId}`);
+                
+                const settingsAvatar = document.getElementById('settings-avatar');
+                if (settingsAvatar) {
+                    settingsAvatar.style.backgroundImage = 'none';
+                    settingsAvatar.style.backgroundColor = 'var(--accent)';
+                    settingsAvatar.style.color = 'var(--btn-primary-text)';
+                    
+                    const email = userSession.user.email || 'User';
+                    const displayName = usernameInput ? usernameInput.value.trim() || email : email;
+                    settingsAvatar.textContent = displayName.charAt(0).toUpperCase();
+                }
+                
+                // Sync Supabase empty avatar metadata
+                if (supabase) {
+                    supabase.auth.updateUser({
+                        data: {
+                            avatar_url: ''
+                        }
+                    }).then();
+                }
+                
+                updateUserAvatarBadge();
+                playUISound('success');
+                await alert("Profile photo removed.");
             }
         });
     }
@@ -4890,21 +4959,14 @@ function initProfileMenu() {
             const userId = userSession.user.id;
             
             const username = usernameInput ? usernameInput.value.trim() : '';
-            const avatarUrl = avatarUrlInput ? avatarUrlInput.value.trim() : '';
-            
-            const activePreset = document.querySelector('.avatar-preset.active');
-            const selectedColor = activePreset ? activePreset.dataset.color : '#4a805a';
             
             localStorage.setItem(`profile_username_${userId}`, username);
-            localStorage.setItem(`profile_avatar_url_${userId}`, avatarUrl);
-            localStorage.setItem(`profile_avatar_color_${userId}`, selectedColor);
             
             // Sync Supabase user metadata asynchronously if connected
             if (supabase) {
                 supabase.auth.updateUser({
                     data: {
-                        display_name: username,
-                        avatar_url: avatarUrl
+                        display_name: username
                     }
                 }).then();
             }
