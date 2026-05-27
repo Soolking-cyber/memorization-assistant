@@ -42,12 +42,13 @@ const fontSizeMap = {
 };
 
 let cards = [];
-let customTypes = JSON.parse(localStorage.getItem('customTypes')) || ['mixed', 'Vocabulary', 'Memory Map'];
+let customTypes = JSON.parse(localStorage.getItem('customTypes')) || ['mixed', 'Vocabulary', 'Memory Map', 'Image Card'];
 // Filter out lowercase vocabulary type to migrate to capitalized Vocabulary
 customTypes = customTypes.filter(t => t !== 'vocabulary');
 if (!customTypes.includes('mixed')) customTypes.unshift('mixed');
 if (!customTypes.includes('Vocabulary')) customTypes.push('Vocabulary');
 if (!customTypes.includes('Memory Map')) customTypes.push('Memory Map');
+if (!customTypes.includes('Image Card')) customTypes.push('Image Card');
 localStorage.setItem('customTypes', JSON.stringify(customTypes));
 
 let reviewQueue = [];
@@ -1082,6 +1083,7 @@ async function handleTypeSelectChange(e) {
         } else {
             vocabFields.classList.remove('hidden');
             mapFields.classList.add('hidden');
+            updateFormLabelsAndPlaceholders(isEdit, val);
         }
     }
 }
@@ -1434,6 +1436,8 @@ function renderManageView() {
             } catch (e) {
                 displayFront = card.front;
             }
+        } else if (card.type === 'Image Card') {
+            displayFront = `<strong style="color:var(--accent);">[Image Card]</strong> ${card.front.replace(/\n/g, '<br>')}`;
         } else {
             displayFront = card.front.replace(/\n/g, '<br>');
         }
@@ -1818,6 +1822,8 @@ function openEditView(cardId) {
         vocabFields.classList.remove('hidden');
         mapFields.classList.add('hidden');
         
+        updateFormLabelsAndPlaceholders(true, card.type);
+        
         document.getElementById('edit-card-front').value = card.front;
         document.getElementById('edit-card-back').value = card.back;
         
@@ -2191,11 +2197,106 @@ function renderCurrentCard() {
     if (exerciseTitleEl) exerciseTitleEl.style.display = '';
     const activeCard = document.getElementById('active-card');
     if (activeCard) {
-        activeCard.style.height = '';
+        const hasImage = card.image_front_url || card.image_back_url;
+        if (hasImage) {
+            const isMobile = window.innerWidth <= 768;
+            activeCard.style.height = isMobile ? '420px' : '500px';
+        } else {
+            activeCard.style.height = '';
+        }
         const cardFront = activeCard.querySelector('.card-front');
         if (cardFront) cardFront.style.padding = '';
         const cardBack = activeCard.querySelector('.card-back');
         if (cardBack) cardBack.style.padding = '';
+    }
+
+    const seqContainer = document.getElementById('practice-sequence-container');
+    if (seqContainer) {
+        seqContainer.classList.add('hidden');
+        seqContainer.innerHTML = '';
+    }
+
+    if (card.type === 'Image Card') {
+        exerciseTitleEl.textContent = "Recall the Steps in Sequence Order";
+        if (activeCard) {
+            const isMobile = window.innerWidth <= 768;
+            activeCard.style.height = isMobile ? '420px' : '500px';
+        }
+        
+        const explanationHtml = card.front.replace(/\n/g, '<br>');
+        frontEl.innerHTML = `
+            <div class="practice-image-card-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; margin: auto 0; width: 100%;">
+                <div class="practice-explanation" style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); text-align: center; max-width: 100%; line-height: 1.5; word-break: normal; overflow-wrap: break-word;">
+                    ${explanationHtml}
+                </div>
+                ${card.image_front_url ? `
+                    <div style="position: relative; overflow: hidden; border-radius: 16px; border: 2px solid var(--border-color); background: rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; max-width: 100%; max-height: 280px; width: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+                        <img src="${card.image_front_url}" style="max-height: 280px; width: auto; max-width: 100%; object-fit: contain; display: block;" alt="Image Card Prompt">
+                    </div>
+                ` : ''}
+            </div>
+        `;
+        
+        const targetSteps = parseSequencingSteps(card.back);
+        let seqHtml = '';
+        targetSteps.forEach((step, idx) => {
+            seqHtml += `
+                <div class="sequencing-input-row" style="margin-bottom: 4px;">
+                    <span style="font-weight: 800; font-size: 1.15rem; color: var(--accent); min-width: 24px; text-align: right;">${idx + 1}.</span>
+                    <input type="text" class="practice-sequence-input" data-step-index="${idx}" placeholder="Enter step ${idx + 1}..." style="flex: 1; background: transparent; border: none; outline: none; color: var(--text-primary); font-family: inherit; font-size: 1rem; padding: 0;">
+                </div>
+            `;
+        });
+        
+        if (seqContainer) {
+            seqContainer.innerHTML = seqHtml;
+            seqContainer.classList.remove('hidden');
+            
+            seqContainer.querySelectorAll('.practice-sequence-input').forEach(input => {
+                input.addEventListener('keydown', (evt) => {
+                    if (evt.key === 'Enter') {
+                        evt.preventDefault();
+                        const nextIdx = parseInt(input.dataset.stepIndex) + 1;
+                        const nextInput = seqContainer.querySelector(`.practice-sequence-input[data-step-index="${nextIdx}"]`);
+                        if (nextInput) {
+                            nextInput.focus();
+                        } else {
+                            document.getElementById('btn-submit-answer').click();
+                        }
+                    }
+                });
+            });
+        }
+        
+        document.getElementById('practice-input').classList.add('hidden');
+        spellingArea.classList.add('hidden');
+        
+        backEl.innerHTML = card.back.replace(/\n/g, '<br>');
+        
+        const frontImg = document.getElementById('practice-front-img');
+        if (frontImg) frontImg.classList.add('hidden');
+        
+        const backImg = document.getElementById('practice-back-img');
+        if (card.image_back_url) {
+            backImg.src = card.image_back_url;
+            backImg.classList.remove('hidden');
+        } else {
+            backImg.classList.add('hidden');
+        }
+        
+        document.querySelector('.card-front').classList.remove('hidden');
+        document.querySelector('.card-back').classList.add('hidden');
+        
+        document.getElementById('typing-area').classList.remove('hidden');
+        document.getElementById('evaluation-area').classList.add('hidden');
+        
+        setTimeout(() => {
+            if (seqContainer) {
+                const firstSeqInput = seqContainer.querySelector('.practice-sequence-input');
+                if (firstSeqInput) firstSeqInput.focus();
+            }
+        }, 100);
+        return;
     }
 
     // Check if card has saved example sentences
@@ -2585,6 +2686,39 @@ function calculateMatchPercentage(typed, actual) {
     return Math.round((totalMatchScore / actualWords.length) * 100);
 }
 
+function parseSequencingSteps(backText) {
+    if (!backText) return [];
+    return backText.split('\n')
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(line => {
+            const match = line.match(/^\s*\d+[\.\)\-:]\s*(.+)/);
+            return match ? match[1].trim() : line;
+        });
+}
+
+function updateFormLabelsAndPlaceholders(isEdit, type) {
+    const labelFront = document.querySelector(`label[for="${isEdit ? 'edit-card-front' : 'card-front'}"]`);
+    const labelBack = document.querySelector(`label[for="${isEdit ? 'edit-card-back' : 'card-back'}"]`);
+    const textareaFront = document.getElementById(isEdit ? 'edit-card-front' : 'card-front');
+    const textareaBack = document.getElementById(isEdit ? 'edit-card-back' : 'card-back');
+    const sentencesGroup = document.getElementById(isEdit ? 'edit-vocab-sentences-group' : 'create-vocab-sentences-group');
+
+    if (type === 'Image Card') {
+        if (labelFront) labelFront.textContent = "Concept Prompt (Front)";
+        if (textareaFront) textareaFront.placeholder = "e.g. Tie a shoe sequence / Krebs cycle stages";
+        if (labelBack) labelBack.textContent = "Numbered Sequence Steps (Back)";
+        if (textareaBack) textareaBack.placeholder = "Type each step on a new line, numbered, e.g.:\n1. Make a loop\n2. Swoop and pull\n3. Tie tight";
+        if (sentencesGroup) sentencesGroup.classList.add('hidden');
+    } else {
+        if (labelFront) labelFront.textContent = "Concept (Front)";
+        if (textareaFront) textareaFront.placeholder = "What is the powerhouse of the cell?";
+        if (labelBack) labelBack.textContent = "Recall (Back / Target Word)";
+        if (textareaBack) textareaBack.placeholder = "Mitochondria";
+        if (sentencesGroup) sentencesGroup.classList.remove('hidden');
+    }
+}
+
 async function evaluateAnswer() {
     const card = reviewQueue[currentReviewIndex];
     if (!card) return;
@@ -2613,7 +2747,53 @@ async function evaluateAnswer() {
         }
     }
 
-    if (isMap || card.type === 'Memory Map') {
+    if (card.type === 'Image Card') {
+        const practiceInputs = document.querySelectorAll('.practice-sequence-input');
+        const enteredCount = Array.from(practiceInputs).filter(i => i.value.trim().length > 0).length;
+        if (enteredCount === 0 && practiceInputs.length > 0) {
+            await alert("Please attempt to fill in the sequence steps before submitting!");
+            return;
+        }
+        
+        let totalScore = 0;
+        const targetSteps = parseSequencingSteps(card.back);
+        
+        practiceInputs.forEach(input => {
+            const idx = parseInt(input.dataset.stepIndex);
+            const correctVal = targetSteps[idx] || '';
+            const typedVal = input.value.trim();
+            
+            const matchScore = calculateMatchPercentage(typedVal, correctVal);
+            totalScore += matchScore;
+            
+            const rowEl = input.closest('.sequencing-input-row');
+            input.disabled = true;
+            
+            if (matchScore === 100) {
+                if (rowEl) {
+                    rowEl.style.borderColor = 'var(--success)';
+                    rowEl.style.background = 'rgba(46, 125, 50, 0.05)';
+                }
+                input.style.color = 'var(--success)';
+            } else {
+                if (rowEl) {
+                    rowEl.style.borderColor = 'var(--danger)';
+                    rowEl.style.background = 'rgba(198, 40, 40, 0.05)';
+                    
+                    // Trigger physical tactile shake animation
+                    rowEl.classList.remove('node-shake');
+                    void rowEl.offsetWidth; // Force layout reflow
+                    rowEl.classList.add('node-shake');
+                }
+                input.style.color = 'var(--danger)';
+                input.value = `${correctVal} (Typed: "${typedVal || 'empty'}")`;
+                input.title = `Correct: "${correctVal}". You typed: "${typedVal}"`;
+            }
+        });
+        
+        score = targetSteps.length > 0 ? Math.round(totalScore / targetSteps.length) : 100;
+        typed = 'sequencing-attempt';
+    } else if (isMap || card.type === 'Memory Map') {
         const practiceInputs = document.querySelectorAll('.practice-map-node-input');
         const enteredCount = Array.from(practiceInputs).filter(i => i.value.trim().length > 0).length;
         if (enteredCount === 0 && practiceInputs.length > 0) {
@@ -2740,7 +2920,7 @@ async function evaluateAnswer() {
     
     // Manage Incorrect sentence collector logic
     const sentenceContainer = document.getElementById('incorrect-sentence-container');
-    if (score < 75 && !(isMap || card.type === 'Memory Map')) {
+    if (score < 75 && !(isMap || card.type === 'Memory Map' || card.type === 'Image Card')) {
         sentenceContainer.classList.remove('hidden');
         document.getElementById('incorrect-sentence-input').value = '';
         document.getElementById('incorrect-sentence-input').placeholder = `e.g. We are running ${card.back} on gas.`;

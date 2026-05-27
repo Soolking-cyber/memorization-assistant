@@ -922,7 +922,7 @@ h1, h2, h3, h4 {
 }
 .card-img { 
     max-width: 100%; 
-    max-height: 180px; 
+    max-height: 280px; 
     object-fit: contain; 
     margin-top: 16px; 
     border-radius: 10px; 
@@ -2208,6 +2208,35 @@ input.letter-box:focus {
     border-color: var(--accent) !important;
     transform: scale(1.1);
 }
+
+/* Image Card / Sequencing Inputs Styles */
+.sequencing-input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    padding: 12px 14px;
+    border-radius: 12px;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.sequencing-input-row:focus-within {
+    border-color: var(--text-primary);
+    box-shadow: 0 0 0 3px var(--border-color);
+}
+
+.practice-sequence-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 0;
+}
+
 
 
 

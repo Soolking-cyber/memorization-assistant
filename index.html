@@ -198,7 +198,7 @@
                                 <textarea id="card-back" placeholder="Mitochondria"></textarea>
                                 <input type="file" id="card-back-image" class="file-input" accept="image/*">
                             </div>
-                            <div class="input-group" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
+                            <div id="create-vocab-sentences-group" class="input-group" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
                                 <label>Example Sentences (Vocabulary Memory Clues)</label>
                                 <div id="create-sentences-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
                                     <!-- Drafted sentences will render here -->
@@ -297,7 +297,7 @@
                                 <input type="file" id="edit-card-back-image" class="file-input" accept="image/*">
                                 <small style="color: var(--text-secondary);">Select a new image to replace the current one.</small>
                             </div>
-                            <div class="input-group" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
+                            <div id="edit-vocab-sentences-group" class="input-group" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
                                 <label>Example Sentences (Vocabulary Memory Clues)</label>
                                 <div id="edit-sentences-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
                                     <!-- Saved sentences will render here -->
@@ -392,6 +392,7 @@
                     </div>
 
                     <div id="typing-area" class="input-group slide-up">
+                        <div id="practice-sequence-container" class="hidden" style="width: 100%; display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;"></div>
                         <textarea id="practice-input" placeholder="Type your answer here..." rows="2"></textarea>
                         <button class="btn primary full-width" id="btn-submit-answer" style="margin-top: 16px;">Submit Answer</button>
                     </div>
