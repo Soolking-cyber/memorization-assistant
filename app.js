@@ -1140,7 +1140,17 @@ function updateDashboard() {
     const dueCards = filteredCards.filter(c => c.nextReview <= now);
 
     if (totalElement) totalElement.textContent = total;
-    if (dueElement) dueElement.textContent = dueCards.length;
+    if (dueElement) {
+        dueElement.textContent = dueCards.length;
+        const duePill = dueElement.closest('.stat-pill');
+        if (duePill) {
+            if (dueCards.length === 0 && total > 0) {
+                duePill.classList.add('streak-completed');
+            } else {
+                duePill.classList.remove('streak-completed');
+            }
+        }
+    }
 
     const settingsStatCount = document.getElementById('settings-stat-count');
     if (settingsStatCount) settingsStatCount.textContent = cards.length;
@@ -2593,6 +2603,11 @@ async function evaluateAnswer() {
                 input.style.borderBottom = 'none';
                 input.value = node.text; // Show correct keyword
                 input.title = `You typed: "${typedVal}"`;
+                
+                // Trigger physical tactile shake animation
+                nodeEl.classList.remove('node-shake');
+                void nodeEl.offsetWidth; // Force layout reflow
+                nodeEl.classList.add('node-shake');
             }
         });
         
