@@ -2191,6 +2191,17 @@ function renderCurrentCard() {
         }
     } catch (e) {}
 
+    const hasImage = card.image_front_url || card.image_back_url;
+    const isSplit = card.type === 'Image Card' || isMap || card.type === 'Memory Map' || hasImage;
+    const viewPractice = document.getElementById('view-practice');
+    if (viewPractice) {
+        if (isSplit) {
+            viewPractice.classList.add('practice-layout-split');
+        } else {
+            viewPractice.classList.remove('practice-layout-split');
+        }
+    }
+
     if (isMap || card.type === 'Memory Map') {
         if (exerciseTitleEl) exerciseTitleEl.style.display = 'none';
         spellingArea.classList.add('hidden');

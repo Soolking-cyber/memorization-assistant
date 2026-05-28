@@ -399,8 +399,13 @@ h1, h2, h3, h4 {
 }
 
 #view-practice {
-    max-width: 1150px;
+    max-width: 650px;
     margin: 0 auto;
+    transition: max-width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#view-practice.practice-layout-split {
+    max-width: 1150px;
 }
 
 .practice-workspace {
@@ -2297,13 +2302,13 @@ input.letter-box:focus {
 
 /* Desktop Practice Workspace split-pane layout and scaling */
 @media (min-width: 769px) {
-    .practice-workspace {
+    .practice-layout-split .practice-workspace {
         display: grid;
         grid-template-columns: 1.25fr 1fr;
         gap: 40px;
         align-items: start;
     }
-    .flashcard {
+    .practice-layout-split .flashcard {
         margin-bottom: 0;
     }
     .card-img {
