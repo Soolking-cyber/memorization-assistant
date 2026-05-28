@@ -1,25 +1,25 @@
 :root {
-    --bg-page: #f4efe2;        /* Soothing, luxurious warm cream/champagne background */
-    --bg-card: #faf7ee;        /* Soft, warm ivory-cream for cards (reduces glare entirely) */
-    --bg-secondary: #e8e1cf;   /* Rich warm cream-gray for sidebars/hover buttons */
-    --bg-tertiary: #dad2bf;    /* Muted warm cream-gray border/disabled states */
+    --bg-page: #f5f4f0;        /* Soft warm-gray/alabaster background (clean and modern) */
+    --bg-card: #fafaf7;        /* Soft bone-white container (completely reduces glare without being too yellow) */
+    --bg-secondary: #ebeae4;   /* Soft warm metallic gray/cream for sidebars/hover buttons */
+    --bg-tertiary: #dddbd3;    /* Clean warm-gray border/disabled states */
     
-    --text-primary: #2d2b27;   /* Luxurious soft charcoal-black for perfect eye comfort */
-    --text-secondary: #6e6a5f; /* Elegant warm slate-gray for subtexts */
-    --text-tertiary: #9e9788;  /* Muted warm helper text */
+    --text-primary: #333230;   /* Soft premium charcoal-black for perfect reading comfort */
+    --text-secondary: #706e68; /* Neutral warm slate-gray for subtexts */
+    --text-tertiary: #a3a096;  /* Muted warm helper gray */
     
-    --accent: #3e3a33;         /* Softer warm matte charcoal for primary accents/buttons */
-    --accent-hover: #262420;   /* Rich deeper warm black on hover */
-    --accent-light: #e8e1cf;   /* Soft cream accent for active navigation */
-    --accent-border: #504c43;  /* Soft solid gray-dark border */
+    --accent: #3c3a35;         /* Soft matte warm charcoal for primary accents/buttons */
+    --accent-hover: #262524;   /* Clean deep black on hover */
+    --accent-light: #ebeae4;   /* Soft cream-gray accent for active navigation */
+    --accent-border: #4a4843;  /* Solid warm gray-dark border */
     
-    --border-color: #ded6c2;   /* Elegant tactile warm-cream outline */
-    --border-dark: #3e3a33;    /* Softer contrast dark border */
+    --border-color: #e3e1d9;   /* Smooth warm tactile outline */
+    --border-dark: #3c3a35;    /* Softer contrast dark border */
     
-    --success-fill: #3e3a33;   /* Softer warm contrast progress fill */
-    --btn-primary-text: #faf7ee; /* Cream-ivory text on primary buttons */
-    --btn-primary-shadow: #262420; /* Tactile flat 3D shadow matching the softer accent */
-    --bg-mobile-nav: rgba(244, 239, 226, 0.98); /* Translucent soft cream bg for mobile nav */
+    --success-fill: #3c3a35;   /* Softer progress fill */
+    --btn-primary-text: #fafaf7; /* Clean bone-white text on primary buttons */
+    --btn-primary-shadow: #2b2a29; /* Softer tactile 3D button shadow */
+    --bg-mobile-nav: rgba(245, 244, 240, 0.98); /* Translucent soft cream bg for mobile nav */
     
     --danger: #b0524b;
     --warning: #b38815;
