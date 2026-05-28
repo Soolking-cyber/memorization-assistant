@@ -1100,7 +1100,7 @@ input.letter-box:focus {
     display: flex; align-items: center; cursor: pointer; flex-shrink: 0; padding-top: 2px;
 }
 .manage-card-checkbox input[type="checkbox"] { display: none; }
-.manage-card-content { flex-grow: 1; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; }
+.manage-card-content { flex-grow: 1; font-size: 0.9rem; color: var(--text-primary); line-height: 1.5; }
 .manage-card-content strong { color: var(--text-primary); font-weight: 700; }
 .manage-card-img { max-width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-top: 8px; border: 2px solid var(--border-color); }
 
@@ -1109,7 +1109,7 @@ input.letter-box:focus {
     display: inline-block; 
     padding: 3px 8px; 
     background: var(--bg-secondary) !important; 
-    color: var(--text-secondary) !important; 
+    color: var(--text-primary) !important; 
     border: 2px solid var(--border-color);
     border-radius: 8px; 
     font-size: 0.75rem; 
