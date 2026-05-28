@@ -1113,6 +1113,12 @@ function renderTypeTags() {
 
 function updateTypeDatalists() {
     const types = new Set(customTypes);
+    
+    // Enforce core standard types are always present in selection dropdowns
+    types.add('Vocabulary');
+    types.add('Memory Map');
+    types.add('Image Card');
+    
     let migrated = false;
     let migratedVocab = false;
     cards.forEach(c => {
