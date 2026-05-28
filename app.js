@@ -815,6 +815,9 @@ async function loadData() {
         });
         localStorage.setItem('exampleSentences', JSON.stringify(exampleSentences));
         
+        // Fetch and cache review logs in localStorage
+        await fetchAndCacheReviewLogs();
+        
         updateDashboard();
     }
 }
@@ -2859,7 +2862,7 @@ function updateFormLabelsAndPlaceholders(isEdit, type) {
     }
 }
 
-function logReviewAttempt(cardId, gradeInt, score) {
+async function logReviewAttempt(cardId, gradeInt, score) {
     let logs = [];
     try {
         logs = JSON.parse(localStorage.getItem('review_activity_logs')) || [];
@@ -2871,18 +2874,56 @@ function logReviewAttempt(cardId, gradeInt, score) {
         logs = [];
     }
     
-    logs.push({
+    const newAttempt = {
         timestamp: Date.now(),
         cardId: cardId,
         grade: gradeInt,
         score: score
-    });
+    };
+    logs.push(newAttempt);
     
     if (logs.length > 10000) {
         logs.shift();
     }
     
     localStorage.setItem('review_activity_logs', JSON.stringify(logs));
+
+    // Save to Supabase DB in real-time
+    if (userSession) {
+        const { error } = await supabase
+            .from('review_logs')
+            .insert([{
+                user_id: userSession.user.id,
+                card_id: cardId,
+                grade: gradeInt,
+                score: score
+            }]);
+        if (error) {
+            console.error("Error saving review attempt to database:", error);
+        }
+    }
+}
+
+async function fetchAndCacheReviewLogs() {
+    if (!userSession) return;
+    const { data, error } = await supabase
+        .from('review_logs')
+        .select('card_id, score, grade, created_at')
+        .eq('user_id', userSession.user.id);
+        
+    if (error) {
+        console.error("Error loading review logs from DB:", error);
+        return;
+    }
+    
+    const formattedLogs = (data || []).map(log => ({
+        timestamp: new Date(log.created_at).getTime(),
+        cardId: log.card_id,
+        grade: log.grade,
+        score: log.score
+    }));
+    
+    localStorage.setItem('review_activity_logs', JSON.stringify(formattedLogs));
 }
 
 async function evaluateAnswer() {
