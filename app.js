@@ -1285,7 +1285,8 @@ function renderStatistics() {
     const dailyReviews = {};
     logs.forEach(log => {
         if (log.timestamp) {
-            const dateStr = new Date(log.timestamp).toISOString().split('T')[0]; // YYYY-MM-DD
+            const date = new Date(log.timestamp);
+            const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
             dailyReviews[dateStr] = (dailyReviews[dateStr] || 0) + 1;
         }
     });
@@ -1293,7 +1294,7 @@ function renderStatistics() {
     const dailyCreations = {};
     cards.forEach(card => {
         const time = card.created_at ? new Date(card.created_at) : new Date(card.nextReview || Date.now());
-        const dateStr = time.toISOString().split('T')[0]; // YYYY-MM-DD
+        const dateStr = `${time.getFullYear()}-${String(time.getMonth() + 1).padStart(2, '0')}-${String(time.getDate()).padStart(2, '0')}`;
         dailyCreations[dateStr] = (dailyCreations[dateStr] || 0) + 1;
     });
 
@@ -1311,7 +1312,7 @@ function renderStatistics() {
     for (let w = 0; w < 53; w++) {
         let colHtml = '<div class="contribution-col">';
         for (let d = 0; d < 7; d++) {
-            const dateStr = tempDate.toISOString().split('T')[0];
+            const dateStr = `${tempDate.getFullYear()}-${String(tempDate.getMonth() + 1).padStart(2, '0')}-${String(tempDate.getDate()).padStart(2, '0')}`;
             const reviews = dailyReviews[dateStr] || 0;
             const creations = dailyCreations[dateStr] || 0;
             
