@@ -398,8 +398,15 @@ h1, h2, h3, h4 {
 }
 
 #view-practice {
-    max-width: 650px;
+    max-width: 1150px;
     margin: 0 auto;
+}
+
+.practice-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
 }
 
 #view-auth {
@@ -2276,6 +2283,25 @@ input.letter-box:focus {
 .stats-card:hover {
     transform: translateY(-2px);
     border-color: var(--text-primary) !important;
+}
+
+/* Desktop Practice Workspace split-pane layout and scaling */
+@media (min-width: 769px) {
+    .practice-workspace {
+        display: grid;
+        grid-template-columns: 1.25fr 1fr;
+        gap: 40px;
+        align-items: start;
+    }
+    .flashcard {
+        margin-bottom: 0;
+    }
+    .card-img {
+        max-height: 450px;
+    }
+    .card-face h3 {
+        font-size: 0.9rem;
+    }
 }
 
 

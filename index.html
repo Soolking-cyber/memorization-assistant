@@ -373,54 +373,56 @@
                     </button>
                 </div>
 
-                <div class="flashcard-container perspective">
-                    <div class="flashcard" id="active-card">
-                        <div class="card-face card-front glass">
-                            <h3 id="practice-exercise-title">Complete the sentence with the correct word</h3>
-                            <!-- Inline letter boxes inside the front face if sentence prompt exists -->
-                            <div class="card-content" id="practice-front"></div>
-                            <img id="practice-front-img" class="card-img hidden" alt="Front Attachment">
-                        </div>
-                        <div class="card-face card-back glass hidden">
-                            <h3>Answer</h3>
-                            <div class="card-content" id="practice-back"></div>
-                            <img id="practice-back-img" class="card-img hidden" alt="Back Attachment">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="practice-controls">
-                    <!-- Dynamic Letter Spelling boxes container (Duolingo visual hint) -->
-                    <div id="spelling-indicator-area" class="hidden" style="width: 100%; text-align: center; margin-bottom: 12px;">
-                        <div id="practice-letter-boxes" class="letter-boxes-container">
-                            <!-- Letters filled dynamically -->
-                        </div>
-                    </div>
-
-                    <div id="typing-area" class="input-group slide-up">
-                        <div id="practice-sequence-container" class="hidden" style="width: 100%; display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;"></div>
-                        <textarea id="practice-input" placeholder="Type your answer here..." rows="2"></textarea>
-                        <button class="btn primary full-width" id="btn-submit-answer" style="margin-top: 16px;">Submit Answer</button>
-                    </div>
-                    
-                    <div id="evaluation-area" class="hidden slide-up" style="width: 100%; text-align: left; background: var(--bg-card); padding: 20px; border-radius: 16px; border: 2px solid var(--border-color); border-bottom: 4px solid var(--border-color);">
-                        <h3 style="margin-bottom: 8px; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Match Analysis</h3>
-                        <p style="font-size: 1.3rem; margin-bottom: 8px; font-weight: 700;">Score: <span id="eval-score">0%</span> - <span id="eval-grade" style="color: var(--accent);">Good</span></p>
-                        <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">Your Grade has been locked in automatically.</p>
-                        
-                        <!-- Incorrect example sentence collector container -->
-                        <div id="incorrect-sentence-container" class="hidden" style="margin-top: 16px; border-top: 2px solid var(--border-color); padding-top: 16px;">
-                            <label for="incorrect-sentence-input" style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 8px;">Create an example sentence using this word:</label>
-                            <div style="display: flex; gap: 8px; width: 100%;">
-                                <input type="text" id="incorrect-sentence-input" placeholder="e.g. We're running low on gas." style="flex: 1; padding: 12px 14px; border: 2px solid var(--border-color); border-radius: 12px; font-family: inherit; font-size: 0.95rem; background: var(--bg-card); color: var(--text-primary);">
-                                <button type="button" class="btn" id="btn-save-sentence" style="padding: 12px 20px; font-size: 0.85rem; border-radius: 12px;">Save Clue</button>
+                <div class="practice-workspace">
+                    <div class="flashcard-container perspective">
+                        <div class="flashcard" id="active-card">
+                            <div class="card-face card-front glass">
+                                <h3 id="practice-exercise-title">Complete the sentence with the correct word</h3>
+                                <!-- Inline letter boxes inside the front face if sentence prompt exists -->
+                                <div class="card-content" id="practice-front"></div>
+                                <img id="practice-front-img" class="card-img hidden" alt="Front Attachment">
                             </div>
-                            <small id="sentence-error-msg" style="color: #ea4335; font-size: 0.8rem; display: block; margin-top: 6px; font-weight: 600;" class="hidden"></small>
+                            <div class="card-face card-back glass hidden">
+                                <h3>Answer</h3>
+                                <div class="card-content" id="practice-back"></div>
+                                <img id="practice-back-img" class="card-img hidden" alt="Back Attachment">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="practice-controls">
+                        <!-- Dynamic Letter Spelling boxes container (Duolingo visual hint) -->
+                        <div id="spelling-indicator-area" class="hidden" style="width: 100%; text-align: center; margin-bottom: 12px;">
+                            <div id="practice-letter-boxes" class="letter-boxes-container">
+                                <!-- Letters filled dynamically -->
+                            </div>
                         </div>
 
-                        <button class="btn full-width" id="btn-next-card" style="margin-top: 20px;">
-                            Next Memory <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="margin-left: 6px; transition: transform 0.2s;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                        </button>
+                        <div id="typing-area" class="input-group slide-up">
+                            <div id="practice-sequence-container" class="hidden" style="width: 100%; display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;"></div>
+                            <textarea id="practice-input" placeholder="Type your answer here..." rows="2"></textarea>
+                            <button class="btn primary full-width" id="btn-submit-answer" style="margin-top: 16px;">Submit Answer</button>
+                        </div>
+                        
+                        <div id="evaluation-area" class="hidden slide-up" style="width: 100%; text-align: left; background: var(--bg-card); padding: 20px; border-radius: 16px; border: 2px solid var(--border-color); border-bottom: 4px solid var(--border-color);">
+                            <h3 style="margin-bottom: 8px; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Match Analysis</h3>
+                            <p style="font-size: 1.3rem; margin-bottom: 8px; font-weight: 700;">Score: <span id="eval-score">0%</span> - <span id="eval-grade" style="color: var(--accent);">Good</span></p>
+                            <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">Your Grade has been locked in automatically.</p>
+                            
+                            <!-- Incorrect example sentence collector container -->
+                            <div id="incorrect-sentence-container" class="hidden" style="margin-top: 16px; border-top: 2px solid var(--border-color); padding-top: 16px;">
+                                <label for="incorrect-sentence-input" style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 8px;">Create an example sentence using this word:</label>
+                                <div style="display: flex; gap: 8px; width: 100%;">
+                                    <input type="text" id="incorrect-sentence-input" placeholder="e.g. We're running low on gas." style="flex: 1; padding: 12px 14px; border: 2px solid var(--border-color); border-radius: 12px; font-family: inherit; font-size: 0.95rem; background: var(--bg-card); color: var(--text-primary);">
+                                    <button type="button" class="btn" id="btn-save-sentence" style="padding: 12px 20px; font-size: 0.85rem; border-radius: 12px;">Save Clue</button>
+                                </div>
+                                <small id="sentence-error-msg" style="color: #ea4335; font-size: 0.8rem; display: block; margin-top: 6px; font-weight: 600;" class="hidden"></small>
+                            </div>
+
+                            <button class="btn full-width" id="btn-next-card" style="margin-top: 20px;">
+                                Next Memory <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="margin-left: 6px; transition: transform 0.2s;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
