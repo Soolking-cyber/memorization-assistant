@@ -2377,11 +2377,11 @@ function renderCurrentCard() {
         frontEl.innerHTML = `
             <div class="practice-image-card-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; width: 100%; height: 100%; position: relative; box-sizing: border-box; padding: 24px;">
                 <!-- Absolute Header & Title Clue Overlays -->
-                <div class="image-card-clue-header" style="position: absolute; top: 16px; left: 24px; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-secondary); opacity: 0.15; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease; z-index: 10; pointer-events: none;">
+                <div class="image-card-clue-header">
                     Recall the Steps in Sequence Order
                 </div>
                 
-                <div class="image-card-clue-title" style="position: absolute; top: 12px; right: 24px; font-size: 0.95rem; font-weight: 800; color: var(--accent); background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 6px 14px; border-radius: 20px; backdrop-filter: blur(10px); opacity: 0.15; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease; z-index: 10; pointer-events: none; max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <div class="image-card-clue-title">
                     ${card.front}
                 </div>
                 

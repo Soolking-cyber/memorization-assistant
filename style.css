@@ -2319,6 +2319,74 @@ input.letter-box:focus {
     }
 }
 
+/* Image Card Clue Overlays & Mobile Stack Responsiveness */
+.image-card-clue-header {
+    position: absolute;
+    top: 16px;
+    left: 24px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+    opacity: 0.15;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.image-card-clue-title {
+    position: absolute;
+    top: 12px;
+    right: 24px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--accent);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    padding: 6px 14px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    opacity: 0.15;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease;
+    z-index: 10;
+    pointer-events: none;
+    max-width: 60%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+    .image-card-clue-header {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        font-size: 0.75rem !important;
+        text-align: center !important;
+        width: 100% !important;
+        margin-bottom: 4px !important;
+        opacity: 0.65 !important;
+        letter-spacing: 1px !important;
+    }
+    .image-card-clue-title {
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        font-size: 0.85rem !important;
+        text-align: center !important;
+        max-width: 100% !important;
+        width: fit-content !important;
+        margin: 0 auto 12px auto !important;
+        opacity: 0.85 !important;
+    }
+    .practice-image-card-container {
+        padding: 16px !important;
+        justify-content: flex-start !important;
+    }
+}
+
 
 
 
