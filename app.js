@@ -536,7 +536,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('edit-card-form').addEventListener('submit', handleEditCardSubmit);
     
     // Practice events
-    document.getElementById('btn-practice').addEventListener('click', startPractice);
+    document.getElementById('btn-practice').addEventListener('click', () => startPractice(false));
     document.getElementById('btn-submit-answer').addEventListener('click', evaluateAnswer);
     document.getElementById('btn-next-card').addEventListener('click', proceedToNextCard);
     document.getElementById('btn-finish-practice').addEventListener('click', () => switchView('dashboard'));
