@@ -2354,11 +2354,17 @@ input.letter-box:focus {
     border-color: var(--text-primary) !important;
 }
 .stats-card {
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    box-shadow: inset 0 -2px 0 var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .stats-card:hover {
     transform: translateY(-2px);
     border-color: var(--text-primary) !important;
+    box-shadow: inset 0 -2px 0 var(--text-primary);
 }
 
 /* Desktop Practice Workspace split-pane layout and scaling */
@@ -2453,6 +2459,95 @@ input.letter-box:focus {
         justify-content: flex-start !important;
     }
 }
+
+/* ==========================================================================
+   Visual Dimensionality & Layout Standardization
+   ========================================================================== */
+
+/* Unified Card and Panel Standards */
+.glass, .stats-card, .category-card, .manage-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    box-shadow: inset 0 -2px 0 var(--border-color);
+    border-radius: 16px;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+/* Card Hover/Click Standard Signifiers */
+.category-card.clickable:hover,
+.stats-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--text-primary) !important;
+    box-shadow: inset 0 -2px 0 var(--text-primary);
+}
+
+.category-card.clickable:active {
+    transform: translateY(2px);
+    box-shadow: none;
+}
+
+/* Mini Cards for stats/metrics dashboard grids */
+.stats-mini-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    box-shadow: inset 0 -2px 0 var(--border-color);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 95px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+.stats-mini-card:hover {
+    border-color: var(--text-primary);
+}
+
+/* Standardized Form Inputs & Selects */
+.input-field {
+    width: 100%; 
+    padding: 12px 14px; 
+    border-radius: 12px;
+    background: var(--bg-card); 
+    border: 2px solid var(--border-color);
+    color: var(--text-primary); 
+    font-family: inherit; 
+    font-size: 0.95rem; 
+    font-weight: 400;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    line-height: 1.5;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.input-field:focus { 
+    outline: none; 
+    border-color: var(--text-primary); 
+    box-shadow: 0 0 0 3px var(--border-color);
+}
+
+/* Flex Row & Layout Helpers */
+.input-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+}
+.input-row .input-field {
+    flex: 1;
+}
+
+.btn-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+.btn-row .btn {
+    flex: 1;
+    min-width: 120px;
+}
+
 
 
 

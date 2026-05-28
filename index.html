@@ -186,7 +186,7 @@
                     <form id="create-card-form">
                         <div class="input-group">
                             <label for="card-type">Memory Type (Category)</label>
-                            <select id="card-type" required style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); margin-bottom: 8px; font-family: 'Outfit', sans-serif;">
+                            <select id="card-type" required>
                                 <option value="mixed">All Types (Mixed)</option>
                             </select>
                             <div id="create-type-tags" class="type-tags-container" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;"></div>
@@ -209,9 +209,9 @@
                                 <div id="create-sentences-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
                                     <!-- Drafted sentences will render here -->
                                 </div>
-                                <div style="display: flex; gap: 10px; align-items: center;">
-                                    <input type="text" id="create-new-sentence" placeholder="e.g. The cells contain Mitochondria." style="flex: 1; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit;">
-                                    <button type="button" id="btn-create-add-sentence" class="btn" style="padding: 12px 18px; border-radius: 8px;">+ Add</button>
+                                <div class="input-row">
+                                    <input type="text" id="create-new-sentence" class="input-field" placeholder="e.g. The cells contain Mitochondria.">
+                                    <button type="button" id="btn-create-add-sentence" class="btn">+ Add</button>
                                 </div>
                                 <span id="create-sentence-error" style="color: #ef4444; font-size: 0.8rem; margin-top: 6px; display: none;"></span>
                             </div>
@@ -221,7 +221,7 @@
                         <div id="create-map-fields" class="hidden">
                             <div class="input-group">
                                 <label for="create-map-title">Memory Map Title / Prompt</label>
-                                <input type="text" id="create-map-title" placeholder="e.g. Krebs Cycle Steps / Brain Anatomy" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); margin-bottom: 12px; font-family: inherit;">
+                                <input type="text" id="create-map-title" class="input-field" placeholder="e.g. Krebs Cycle Steps / Brain Anatomy">
                             </div>
                             <div class="input-group">
                                 <label>Visual Concept Map Editor</label>
@@ -277,7 +277,7 @@
                         <input type="hidden" id="edit-card-id">
                         <div class="input-group">
                             <label for="edit-card-type">Memory Type (Category)</label>
-                            <select id="edit-card-type" required style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); margin-bottom: 8px; font-family: 'Outfit', sans-serif;">
+                            <select id="edit-card-type" required>
                                 <option value="mixed">All Types (Mixed)</option>
                             </select>
                             <div id="edit-type-tags" class="type-tags-container" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;"></div>
@@ -308,9 +308,9 @@
                                 <div id="edit-sentences-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
                                     <!-- Saved sentences will render here -->
                                 </div>
-                                <div style="display: flex; gap: 10px; align-items: center;">
-                                    <input type="text" id="edit-new-sentence" placeholder="e.g. The cells contain Mitochondria." style="flex: 1; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit;">
-                                    <button type="button" id="btn-edit-add-sentence" class="btn" style="padding: 12px 18px; border-radius: 8px;">+ Add</button>
+                                <div class="input-row">
+                                    <input type="text" id="edit-new-sentence" class="input-field" placeholder="e.g. The cells contain Mitochondria.">
+                                    <button type="button" id="btn-edit-add-sentence" class="btn">+ Add</button>
                                 </div>
                                 <span id="edit-sentence-error" style="color: #ef4444; font-size: 0.8rem; margin-top: 6px; display: none;"></span>
                             </div>
@@ -320,7 +320,7 @@
                         <div id="edit-map-fields" class="hidden">
                             <div class="input-group">
                                 <label for="edit-map-title">Memory Map Title / Prompt</label>
-                                <input type="text" id="edit-map-title" placeholder="e.g. Krebs Cycle Steps / Brain Anatomy" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); margin-bottom: 12px; font-family: inherit;">
+                                <input type="text" id="edit-map-title" class="input-field" placeholder="e.g. Krebs Cycle Steps / Brain Anatomy">
                             </div>
                             <div class="input-group">
                                 <label>Visual Concept Map Editor</label>
@@ -404,7 +404,7 @@
                             <button class="btn primary full-width" id="btn-submit-answer" style="margin-top: 16px;">Submit Answer</button>
                         </div>
                         
-                        <div id="evaluation-area" class="hidden slide-up" style="width: 100%; text-align: left; background: var(--bg-card); padding: 20px; border-radius: 16px; border: 2px solid var(--border-color); border-bottom: 4px solid var(--border-color);">
+                        <div id="evaluation-area" class="glass hidden slide-up" style="width: 100%; text-align: left; padding: 24px;">
                             <h3 style="margin-bottom: 8px; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Match Analysis</h3>
                             <p style="font-size: 1.3rem; margin-bottom: 8px; font-weight: 700;">Score: <span id="eval-score">0%</span> - <span id="eval-grade" style="color: var(--accent);">Good</span></p>
                             <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">Your Grade has been locked in automatically.</p>
@@ -412,9 +412,9 @@
                             <!-- Incorrect example sentence collector container -->
                             <div id="incorrect-sentence-container" class="hidden" style="margin-top: 16px; border-top: 2px solid var(--border-color); padding-top: 16px;">
                                 <label for="incorrect-sentence-input" style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 8px;">Create an example sentence using this word:</label>
-                                <div style="display: flex; gap: 8px; width: 100%;">
-                                    <input type="text" id="incorrect-sentence-input" placeholder="e.g. We're running low on gas." style="flex: 1; padding: 12px 14px; border: 2px solid var(--border-color); border-radius: 12px; font-family: inherit; font-size: 0.95rem; background: var(--bg-card); color: var(--text-primary);">
-                                    <button type="button" class="btn" id="btn-save-sentence" style="padding: 12px 20px; font-size: 0.85rem; border-radius: 12px;">Save Clue</button>
+                                <div class="input-row">
+                                    <input type="text" id="incorrect-sentence-input" class="input-field" placeholder="e.g. We're running low on gas.">
+                                    <button type="button" class="btn" id="btn-save-sentence">Save Clue</button>
                                 </div>
                                 <small id="sentence-error-msg" style="color: #ea4335; font-size: 0.8rem; display: block; margin-top: 6px; font-weight: 600;" class="hidden"></small>
                             </div>
@@ -447,7 +447,7 @@
                         <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 200px;">
                             <label for="manage-type-select" style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px; white-space: nowrap;">Filter By Type:</label>
                             <div class="input-group-select" style="flex: 1; max-width: 200px;">
-                                <select id="manage-type-select" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit; font-size: 0.9rem; outline: none; transition: border-color 0.15s ease;">
+                                <select id="manage-type-select" class="input-field">
                                     <option value="mixed">All Types (Mixed)</option>
                                 </select>
                             </div>
@@ -455,7 +455,7 @@
                         
                         <div class="manage-search-box" style="position: relative; flex: 1.2; min-width: 250px; display: flex; align-items: center;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16" style="position: absolute; left: 14px; color: var(--text-secondary); pointer-events: none;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                            <input type="text" id="manage-search-input" placeholder="Search concept, recall, or details..." style="width: 100%; padding: 10px 14px 10px 38px; border-radius: 10px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit; font-size: 0.9rem; outline: none; transition: border-color 0.15s ease, box-shadow 0.15s ease;">
+                            <input type="text" id="manage-search-input" class="input-field" placeholder="Search concept, recall, or details..." style="padding-left: 38px;">
                         </div>
                     </div>
                     <div id="manage-toolbar" class="manage-toolbar hidden">
@@ -489,7 +489,7 @@
                     <div style="display: flex; flex-direction: column; gap: 24px;">
                         
                         <!-- 1. Unified Comprehensive Activity & Creation Map -->
-                        <div class="stats-card" style="background: rgba(255,255,255,0.02); border: 2px solid var(--border-color); padding: 24px; border-radius: 16px;">
+                        <div class="stats-card">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;">
                                 <div>
                                     <h3 id="stats-heatmap-title" style="margin-top: 0; margin-bottom: 6px; font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">Activity & Creation Heatmap</h3>
@@ -531,49 +531,48 @@
                         </div>
 
                         <!-- 2. Consolidated Progress Overview -->
-                        <div class="stats-card" style="background: rgba(255,255,255,0.02); border: 2px solid var(--border-color); padding: 24px; border-radius: 16px; width: 100%;">
+                        <div class="stats-card">
                             <h3 style="margin-top: 0; margin-bottom: 6px; font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">Progress Overview</h3>
                             <p style="margin: 0 0 20px 0; font-size: 0.85rem; color: var(--text-secondary);">Your essential card creation, practice, and accuracy metrics tracked over time.</p>
                             
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
                                 <!-- 1. Total Cards Created -->
-                                <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 18px 20px; border-radius: 14px; display: flex; flex-direction: column; justify-content: space-between; min-height: 95px; box-shadow: inset 0 -2px 0 var(--border-color);">
+                                <div class="stats-mini-card">
                                     <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Total Cards Created</span>
                                     <span id="stats-total-cards" style="font-weight: 800; font-size: 1.75rem; color: var(--text-primary); margin-top: 8px;">0</span>
                                 </div>
                                 
                                 <!-- 2. Added This Week -->
-                                <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 18px 20px; border-radius: 14px; display: flex; flex-direction: column; justify-content: space-between; min-height: 95px; box-shadow: inset 0 -2px 0 var(--border-color);">
+                                <div class="stats-mini-card">
                                     <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Added This Week</span>
                                     <span id="stats-added-week" style="font-weight: 800; font-size: 1.75rem; color: var(--text-primary); margin-top: 8px;">0</span>
                                 </div>
                                 
                                 <!-- 3. Cards Recalled (Reviews) -->
-                                <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 18px 20px; border-radius: 14px; display: flex; flex-direction: column; justify-content: space-between; min-height: 95px; box-shadow: inset 0 -2px 0 var(--border-color);">
+                                <div class="stats-mini-card">
                                     <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Cards Recalled</span>
                                     <span id="stats-total-reviews" style="font-weight: 800; font-size: 1.75rem; color: var(--text-primary); margin-top: 8px;">0</span>
                                 </div>
                                 
                                 <!-- 4. Recall Accuracy -->
-                                <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 18px 20px; border-radius: 14px; display: flex; flex-direction: column; justify-content: space-between; min-height: 95px; box-shadow: inset 0 -2px 0 var(--border-color);">
+                                <div class="stats-mini-card">
                                     <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Recall Accuracy</span>
                                     <span id="stats-avg-score" style="font-weight: 800; font-size: 1.75rem; color: var(--accent); margin-top: 8px;">0%</span>
                                 </div>
-
+ 
                                 <!-- 5. Perfect Retrievals -->
-                                <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 18px 20px; border-radius: 14px; display: flex; flex-direction: column; justify-content: space-between; min-height: 95px; box-shadow: inset 0 -2px 0 var(--border-color);">
+                                <div class="stats-mini-card">
                                     <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Perfect Retrievals (100%)</span>
                                     <span id="stats-perfect-reviews" style="font-weight: 800; font-size: 1.75rem; color: var(--success); margin-top: 8px;">0</span>
                                 </div>
-
+ 
                                 <!-- 6. Strong Memories Ratio -->
-                                <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 18px 20px; border-radius: 14px; display: flex; flex-direction: column; justify-content: space-between; min-height: 95px; box-shadow: inset 0 -2px 0 var(--border-color);">
+                                <div class="stats-mini-card">
                                     <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Strong Memories</span>
                                     <span id="stats-strong-pct" style="font-weight: 800; font-size: 1.75rem; color: var(--text-primary); margin-top: 8px;">0%</span>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </section>
@@ -609,20 +608,20 @@
                 <div class="settings-section" style="display: flex; flex-direction: column; gap: 16px;">
                     <div class="input-group" style="display: flex; flex-direction: column; gap: 6px;">
                         <label for="settings-username-input" style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px;">Username</label>
-                        <input type="text" id="settings-username-input" placeholder="Set your username..." style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; box-sizing: border-box; outline: none; transition: border-color 0.15s ease;">
+                        <input type="text" id="settings-username-input" class="input-field" placeholder="Set your username...">
                     </div>
 
                     <div class="input-group" style="display: flex; flex-direction: column; gap: 6px;">
                         <label for="settings-avatar-file-input" style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px;">Profile Picture</label>
-                        <div class="avatar-upload-area" style="display: flex; gap: 12px; align-items: center; width: 100%;">
+                        <div class="btn-row">
                             <input type="file" id="settings-avatar-file-input" accept="image/*" style="display: none;">
-                            <button type="button" class="btn" id="btn-settings-upload-avatar" style="flex: 1; padding: 10px 14px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); transition: transform 0.1s ease; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <button type="button" class="btn" id="btn-settings-upload-avatar">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                                 <span>Upload Photo</span>
                             </button>
-                            <button type="button" class="btn" id="btn-settings-remove-avatar" style="padding: 10px 14px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 8px; border: 2px solid var(--border-color); background: transparent; color: var(--danger); transition: transform 0.1s ease; display: none;">Remove</button>
+                            <button type="button" class="btn" id="btn-settings-remove-avatar" style="color: var(--danger); display: none;">Remove</button>
                         </div>
-                        <p class="settings-subtext" style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 2px; margin-bottom: 0;">Upload a custom image (PNG, JPG, or GIF up to 2MB).</p>
+                        <p class="settings-subtext" style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 6px; margin-bottom: 0;">Upload a custom image (PNG, JPG, or GIF up to 2MB).</p>
                     </div>
 
                     <div class="modal-divider" style="height: 1px; background: var(--border-color); margin: 10px 0;"></div>
@@ -630,15 +629,15 @@
                     <!-- Crucially Necessary Account Management Functions -->
                     <div class="account-actions-section" style="display: flex; flex-direction: column; gap: 10px;">
                         <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px;">Account Management</h4>
-                        <div class="actions-buttons" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <button type="button" class="btn" id="btn-settings-change-password" style="flex: 1; padding: 10px 14px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); min-width: 120px; transition: transform 0.1s ease;">Change Password</button>
-                            <button type="button" class="btn" id="btn-settings-reset-intervals" style="flex: 1; padding: 10px 14px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); min-width: 120px; transition: transform 0.1s ease;">Reset Spacing</button>
+                        <div class="btn-row">
+                            <button type="button" class="btn" id="btn-settings-change-password">Change Password</button>
+                            <button type="button" class="btn" id="btn-settings-reset-intervals">Reset Spacing</button>
                         </div>
                     </div>
 
                     <div class="modal-divider" style="height: 1px; background: var(--border-color); margin: 10px 0;"></div>
 
-                    <button type="button" class="btn btn-primary" id="btn-settings-save-profile" style="padding: 12px; font-size: 0.95rem; font-family: inherit; font-weight: 700; cursor: pointer; border-radius: 8px; border: none; background: var(--accent); color: var(--btn-primary-text); transition: filter 0.1s ease; width: 100%; margin-top: 8px;">Save Profile Settings</button>
+                    <button type="button" class="btn primary full-width" id="btn-settings-save-profile" style="margin-top: 8px;">Save Profile Settings</button>
                 </div>
             </div>
         </div>
