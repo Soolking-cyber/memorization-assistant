@@ -3136,6 +3136,7 @@ async function evaluateAnswer() {
 
     // Show Evaluation
     document.getElementById('typing-area').classList.add('hidden');
+    document.querySelector('.card-front').classList.add('hidden'); // Hide front face to prevent z-index bleeding
     document.querySelector('.card-back').classList.remove('hidden'); // Reveal answer
     
     document.getElementById('eval-score').textContent = score + '%';
