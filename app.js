@@ -1913,7 +1913,7 @@ async function handleCreateCard(e) {
     btn.innerHTML = "Memory Locked! " + ICONS.check;
     btn.style.background = "var(--accent)";
     btn.style.borderColor = "var(--accent)";
-    btn.style.color = "#ffffff";
+    btn.style.color = "var(--btn-primary-text)";
     btn.disabled = false;
     
     setTimeout(() => {
@@ -2140,7 +2140,7 @@ async function handleEditCardSubmit(e) {
         btn.innerHTML = "Changes Saved! " + ICONS.check;
         btn.style.background = "var(--accent)";
         btn.style.borderColor = "var(--accent)";
-        btn.style.color = "#ffffff";
+        btn.style.color = "var(--btn-primary-text)";
         
         setTimeout(() => {
             btn.innerHTML = oldText;

@@ -1,25 +1,25 @@
 :root {
-    --bg-page: #f5f4f0;        /* Soft, warm cream-gray hued white for glare reduction */
-    --bg-card: #ffffff;        /* Pure white container */
-    --bg-secondary: #ebeae4;   /* Soft warm metallic gray/cream */
-    --bg-tertiary: #dddbd3;    /* Warm gray-cream border/disabled */
+    --bg-page: #f4efe2;        /* Soothing, luxurious warm cream/champagne background */
+    --bg-card: #faf7ee;        /* Soft, warm ivory-cream for cards (reduces glare entirely) */
+    --bg-secondary: #e8e1cf;   /* Rich warm cream-gray for sidebars/hover buttons */
+    --bg-tertiary: #dad2bf;    /* Muted warm cream-gray border/disabled states */
     
-    --text-primary: #1c1c1b;   /* Soft obsidian/charcoal for premium readability */
-    --text-secondary: #706e68; /* Neutral warm slate gray for subtexts */
-    --text-tertiary: #a3a096;  /* Muted warm helper gray */
+    --text-primary: #2d2b27;   /* Luxurious soft charcoal-black for perfect eye comfort */
+    --text-secondary: #6e6a5f; /* Elegant warm slate-gray for subtexts */
+    --text-tertiary: #9e9788;  /* Muted warm helper text */
     
-    --accent: #262524;         /* Rich matte charcoal-black for premium buttons */
-    --accent-hover: #161615;   /* Warm deep black on hover */
-    --accent-light: #ebeae4;   /* Soft cream accent for active navigation */
-    --accent-border: #3c3a35;  /* Solid warm gray-dark border */
+    --accent: #3e3a33;         /* Softer warm matte charcoal for primary accents/buttons */
+    --accent-hover: #262420;   /* Rich deeper warm black on hover */
+    --accent-light: #e8e1cf;   /* Soft cream accent for active navigation */
+    --accent-border: #504c43;  /* Soft solid gray-dark border */
     
-    --border-color: #e3e1d9;   /* Smooth warm tactile outline */
-    --border-dark: #1c1c1b;    /* High contrast dark border */
+    --border-color: #ded6c2;   /* Elegant tactile warm-cream outline */
+    --border-dark: #3e3a33;    /* Softer contrast dark border */
     
-    --success-fill: #1c1c1b;   /* High contrast dark progress fill */
-    --btn-primary-text: #ffffff; /* Contrast text color on primary buttons */
-    --btn-primary-shadow: #000000; /* Flat 3D tactile button shadow */
-    --bg-mobile-nav: rgba(245, 244, 240, 0.98); /* Translucent soft cream bg for mobile nav */
+    --success-fill: #3e3a33;   /* Softer warm contrast progress fill */
+    --btn-primary-text: #faf7ee; /* Cream-ivory text on primary buttons */
+    --btn-primary-shadow: #262420; /* Tactile flat 3D shadow matching the softer accent */
+    --bg-mobile-nav: rgba(244, 239, 226, 0.98); /* Translucent soft cream bg for mobile nav */
     
     --danger: #b0524b;
     --warning: #b38815;
@@ -1517,7 +1517,7 @@ input.letter-box:focus {
 
 .segmented-btn.active {
     background: var(--accent);
-    color: #ffffff;
+    color: var(--btn-primary-text);
 }
 
 .segmented-btn:not(.active):hover {
