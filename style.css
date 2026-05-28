@@ -1124,13 +1124,35 @@ input.letter-box:focus {
 
 /* Responsive Adaptations for Mobile Bottom Tab Bar */
 @media (max-width: 768px) {
-    .top-header { padding: 12px 16px; }
-    .top-header-right { gap: 10px; }
+    .top-header { padding: 10px 12px; }
+    .top-header-right { gap: 8px; }
     .app-container {
         flex-direction: column;
-        padding: 16px;
-        padding-bottom: 90px;
-        gap: 20px;
+        padding: 12px 12px 95px 12px !important;
+        gap: 16px !important;
+    }
+    body.logged-out .app-container {
+        padding: 20px 12px !important;
+        min-height: calc(100vh - 60px) !important;
+    }
+    .view {
+        gap: 16px !important;
+    }
+    .hero-section h2 {
+        font-size: 2.0rem !important;
+        margin-bottom: 12px !important;
+        letter-spacing: -0.8px !important;
+    }
+    .hero-section p {
+        font-size: 0.95rem !important;
+        line-height: 1.5 !important;
+    }
+    .auth-box {
+        padding: 24px 16px !important;
+        margin: 12px auto 0 auto !important;
+    }
+    .form-container {
+        padding: 20px 16px !important;
     }
     .sidebar {
         width: 100%;
@@ -1203,11 +1225,11 @@ input.letter-box:focus {
     }
     .dashboard-hero {
         flex-direction: column;
-        padding: 20px;
+        padding: 16px !important;
         text-align: center;
     }
     .hero-left { text-align: center; }
-    .hero-left h2 { font-size: 1.6rem; }
+    .hero-left h2 { font-size: 1.45rem !important; }
     .practice-controls-inline {
         flex-direction: column;
         align-items: stretch;
@@ -1215,7 +1237,7 @@ input.letter-box:focus {
     .hero-right { display: none; }
     .stats-row { flex-direction: column; gap: 10px; }
     .flashcard { height: 320px; }
-    .card-face { padding: 20px; }
+    .card-face { padding: 16px !important; }
     .card-content { font-size: 1.15rem; }
 
     /* Canvas specific mobile styles */
