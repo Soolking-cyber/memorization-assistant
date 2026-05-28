@@ -2198,6 +2198,42 @@ input.letter-box:focus {
     color: var(--bg-card);
 }
 
+/* Premium Multi-Select Dropdown overrides & checkbox visuals */
+.custom-dropdown.multi-select .custom-dropdown-item {
+    justify-content: flex-start;
+    gap: 12px;
+}
+
+.custom-dropdown.multi-select .custom-dropdown-item.active {
+    background: transparent;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.custom-dropdown.multi-select .custom-dropdown-item.active:hover {
+    background: var(--bg-secondary);
+}
+
+.custom-dropdown-checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    color: transparent;
+}
+
+.custom-dropdown-checkbox.checked {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--btn-primary-text);
+}
+
 /* Premium Search Input Focus State */
 #manage-search-input:focus {
     border-color: var(--warning) !important;

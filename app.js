@@ -1182,6 +1182,19 @@ function updateTypeDatalists() {
     renderTypeTags();
 }
 
+function getSelectedTypes(selectId) {
+    const select = document.getElementById(selectId);
+    if (!select) return [];
+    
+    if (!select.selectedValues) {
+        // Initialize it if it's not set
+        const options = [...select.options].map(o => o.value).filter(v => v !== 'add_new');
+        select.selectedValues = options;
+    }
+    
+    return select.selectedValues.filter(v => v !== 'mixed' && v !== 'add_new');
+}
+
 function updateDashboard() {
     updateTypeDatalists();
     renderCategoryTabs();
@@ -1191,10 +1204,9 @@ function updateDashboard() {
     const btnPractice = document.getElementById('btn-practice');
     const statusMsg = document.getElementById('practice-status-msg');
 
-    const practiceSelect = document.getElementById('practice-type-select');
-    const selectedType = practiceSelect ? practiceSelect.value : 'mixed';
+    const activeTypes = getSelectedTypes('practice-type-select');
 
-    const filteredCards = selectedType === 'mixed' ? cards : cards.filter(c => c.type === selectedType);
+    const filteredCards = cards.filter(c => activeTypes.includes(c.type));
     const total = filteredCards.length;
     const now = Date.now();
     const dueCards = filteredCards.filter(c => c.nextReview <= now);
@@ -1486,13 +1498,8 @@ function renderManageView() {
         return;
     }
 
-    const filterSelect = document.getElementById('manage-type-select');
-    const activeFilter = filterSelect ? filterSelect.value : 'mixed';
-    
-    let filteredCards = cards;
-    if (activeFilter !== 'mixed') {
-        filteredCards = cards.filter(c => c.type === activeFilter);
-    }
+    const activeTypes = getSelectedTypes('manage-type-select');
+    let filteredCards = cards.filter(c => activeTypes.includes(c.type));
 
     const searchInput = document.getElementById('manage-search-input');
     const searchQuery = searchInput ? searchInput.value.trim().toLowerCase() : '';
@@ -2161,8 +2168,8 @@ function startForcedPractice(count) {
 function startPractice() {
     isForcedMode = false;
     const now = Date.now();
-    const selectedType = document.getElementById('practice-type-select').value;
-    reviewQueue = cards.filter(c => c.nextReview <= now && (selectedType === 'mixed' || c.type === selectedType))
+    const activeTypes = getSelectedTypes('practice-type-select');
+    reviewQueue = cards.filter(c => c.nextReview <= now && activeTypes.includes(c.type))
                        .sort((a, b) => a.nextReview - b.nextReview); // Oldest due first
                        
     if (reviewQueue.length === 0) return;
@@ -5467,6 +5474,8 @@ function buildCustomDropdownUI(selectId) {
     // Hide the native select cleanly
     select.style.display = 'none';
     
+    const isMultiSelect = selectId === 'practice-type-select' || selectId === 'manage-type-select';
+    
     // Check if we already created the custom dropdown wrapper
     let customWrapper = document.getElementById(`custom-dropdown-${selectId}`);
     if (!customWrapper) {
@@ -5474,6 +5483,18 @@ function buildCustomDropdownUI(selectId) {
         customWrapper.id = `custom-dropdown-${selectId}`;
         customWrapper.className = 'custom-dropdown';
         select.parentNode.insertBefore(customWrapper, select);
+    }
+    
+    if (isMultiSelect) {
+        customWrapper.classList.add('multi-select');
+    } else {
+        customWrapper.classList.remove('multi-select');
+    }
+    
+    // Initialize selectedValues if it doesn't exist
+    if (isMultiSelect && !select.selectedValues) {
+        const options = [...select.options].map(o => o.value).filter(v => v !== 'add_new');
+        select.selectedValues = options; // Select all by default
     }
     
     // Clear and build the trigger and menu elements
@@ -5486,9 +5507,23 @@ function buildCustomDropdownUI(selectId) {
     const triggerText = document.createElement('span');
     triggerText.className = 'custom-dropdown-text';
     
-    // Find text of current selected option
-    const activeOpt = [...select.options].find(o => o.value === select.value) || select.options[0];
-    triggerText.textContent = activeOpt ? activeOpt.textContent : '';
+    if (isMultiSelect) {
+        const activeIndividualTypes = select.selectedValues.filter(v => v !== 'mixed');
+        const totalTypes = [...select.options].filter(o => o.value !== 'mixed' && o.value !== 'add_new').length;
+        
+        if (select.selectedValues.includes('mixed') || activeIndividualTypes.length === totalTypes) {
+            triggerText.textContent = 'All Types (Mixed)';
+        } else if (activeIndividualTypes.length === 0) {
+            triggerText.textContent = 'None Selected';
+        } else if (activeIndividualTypes.length <= 2) {
+            triggerText.textContent = activeIndividualTypes.join(', ');
+        } else {
+            triggerText.textContent = `${activeIndividualTypes.length} Types Selected`;
+        }
+    } else {
+        const activeOpt = [...select.options].find(o => o.value === select.value) || select.options[0];
+        triggerText.textContent = activeOpt ? activeOpt.textContent : '';
+    }
     
     const arrowSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     arrowSvg.setAttribute('viewBox', '0 0 24 24');
@@ -5513,43 +5548,102 @@ function buildCustomDropdownUI(selectId) {
         const item = document.createElement('div');
         item.className = 'custom-dropdown-item';
         item.dataset.value = opt.value;
-        item.textContent = opt.textContent;
         
-        if (opt.value === select.value) {
-            item.classList.add('active');
+        if (isMultiSelect) {
+            const isChecked = select.selectedValues.includes(opt.value);
             
-            // Add a checkmark icon to the active item for visual excellence
-            const check = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            check.setAttribute('viewBox', '0 0 24 24');
-            check.setAttribute('fill', 'none');
-            check.setAttribute('stroke', 'currentColor');
-            check.setAttribute('stroke-width', '3');
-            check.setAttribute('stroke-linecap', 'round');
-            check.setAttribute('stroke-linejoin', 'round');
-            check.style.width = '14px';
-            check.style.height = '14px';
-            check.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
-            item.appendChild(check);
+            // Build visual checkbox element
+            const checkbox = document.createElement('span');
+            checkbox.className = `custom-dropdown-checkbox ${isChecked ? 'checked' : ''}`;
+            if (isChecked) {
+                checkbox.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="width:11px; height:11px;"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            }
+            item.appendChild(checkbox);
+            
+            // Build item text element
+            const textSpan = document.createElement('span');
+            textSpan.textContent = opt.textContent;
+            item.appendChild(textSpan);
+            
+            if (isChecked) {
+                item.classList.add('active');
+            }
+            
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                playUISound('click');
+                
+                if (opt.value === 'mixed') {
+                    const wasChecked = select.selectedValues.includes('mixed');
+                    if (wasChecked) {
+                        select.selectedValues = [];
+                    } else {
+                        select.selectedValues = [...select.options]
+                            .map(o => o.value)
+                            .filter(v => v !== 'add_new');
+                    }
+                } else {
+                    const isChecked = select.selectedValues.includes(opt.value);
+                    if (isChecked) {
+                        select.selectedValues = select.selectedValues.filter(v => v !== opt.value);
+                        select.selectedValues = select.selectedValues.filter(v => v !== 'mixed');
+                    } else {
+                        select.selectedValues.push(opt.value);
+                        
+                        const allIndividualTypes = [...select.options]
+                            .map(o => o.value)
+                            .filter(v => v !== 'mixed' && v !== 'add_new');
+                        
+                        const allChecked = allIndividualTypes.every(v => select.selectedValues.includes(v));
+                        if (allChecked) {
+                            select.selectedValues.push('mixed');
+                        }
+                    }
+                }
+                
+                // Synchronize native select value (as a single value fallback)
+                if (select.selectedValues.includes('mixed')) {
+                    select.value = 'mixed';
+                } else if (select.selectedValues.length > 0) {
+                    select.value = select.selectedValues[0];
+                } else {
+                    select.value = '';
+                }
+                
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                buildCustomDropdownUI(selectId);
+            });
+            
+        } else {
+            item.textContent = opt.textContent;
+            
+            if (opt.value === select.value) {
+                item.classList.add('active');
+                
+                const check = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                check.setAttribute('viewBox', '0 0 24 24');
+                check.setAttribute('fill', 'none');
+                check.setAttribute('stroke', 'currentColor');
+                check.setAttribute('stroke-width', '3');
+                check.setAttribute('stroke-linecap', 'round');
+                check.setAttribute('stroke-linejoin', 'round');
+                check.style.width = '14px';
+                check.style.height = '14px';
+                check.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+                item.appendChild(check);
+            }
+            
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                playUISound('click');
+                select.value = opt.value;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                buildCustomDropdownUI(selectId);
+                customWrapper.classList.remove('open');
+            });
         }
-        
-        item.addEventListener('click', (e) => {
-            e.stopPropagation();
-            
-            // Play synthesized selection click sound
-            playUISound('click');
-            
-            // Update hidden native select value
-            select.value = opt.value;
-            
-            // Dispatch dynamic change event so standard app triggers fire cleanly!
-            select.dispatchEvent(new Event('change', { bubbles: true }));
-            
-            // Re-render custom dropdown elements to sync state
-            buildCustomDropdownUI(selectId);
-            
-            // Close the menu
-            customWrapper.classList.remove('open');
-        });
         
         menu.appendChild(item);
     });
@@ -5560,7 +5654,6 @@ function buildCustomDropdownUI(selectId) {
     trigger.addEventListener('click', (e) => {
         e.stopPropagation();
         
-        // Play synthesized haptic pop sound
         playUISound('click');
         
         // Close other open custom dropdowns first
