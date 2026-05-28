@@ -3478,7 +3478,17 @@ function validateExampleSentence(sentenceText, targetWordText) {
     if (!sentenceText || !targetWordText) return false;
     const targetWord = targetWordText.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
     const cleanSentence = sentenceText.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
-    return cleanSentence.includes(targetWord);
+    
+    // 1. Try a direct full match first
+    if (cleanSentence.includes(targetWord)) return true;
+    
+    // 2. Drop the last letter fallback (handles conjugated endings, e.g., 'dawdle' -> 'dawdling')
+    if (targetWord.length > 2) {
+        const droppedWord = targetWord.slice(0, -1);
+        if (cleanSentence.includes(droppedWord)) return true;
+    }
+    
+    return false;
 }
 
 function handleCreateAddSentence() {
