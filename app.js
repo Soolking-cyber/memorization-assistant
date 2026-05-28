@@ -2640,21 +2640,43 @@ function renderCurrentCard() {
 
 function blankOutWordInSentence(sentence, word, startIndex = 0) {
     if (!sentence || !word) return { html: '', nextIndex: startIndex };
-    const targetWord = word.trim();
+    let targetWord = word.trim();
     if (!targetWord) return { html: sentence, nextIndex: startIndex };
     
     // Escape special regex characters in the target word
-    const escapedWord = targetWord.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    let escapedWord = targetWord.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     
     // Create regex matching the word case-insensitively at boundaries
-    const regex = new RegExp('\\b' + escapedWord + '\\b', 'gi');
+    let regex = new RegExp('\\b' + escapedWord + '\\b', 'gi');
+    let simpleRegex = new RegExp(escapedWord, 'gi');
+    
+    let isMatch = regex.test(sentence) || simpleRegex.test(sentence);
+    regex.lastIndex = 0;
+    simpleRegex.lastIndex = 0;
+
+    let useStripped = false;
+    let strippedWord = '';
+
+    if (!isMatch && targetWord.length >= 3) {
+        // Strip the last character (e.g. dawdle -> dawdl)
+        strippedWord = targetWord.slice(0, -1);
+        const escapedStripped = strippedWord.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const strippedRegex = new RegExp(escapedStripped, 'gi');
+        if (strippedRegex.test(sentence)) {
+            useStripped = true;
+            targetWord = strippedWord;
+            escapedWord = escapedStripped;
+            regex = new RegExp(escapedStripped, 'gi');
+            simpleRegex = strippedRegex;
+        }
+    }
     
     let currentStartIndex = startIndex;
     let finalNextIndex = startIndex;
     
+    regex.lastIndex = 0;
     const match = regex.exec(sentence);
     if (!match) {
-        const simpleRegex = new RegExp(escapedWord, 'gi');
         const simpleMatch = simpleRegex.exec(sentence);
         if (!simpleMatch) {
             const boxesObj = renderBoxesForWord(targetWord, currentStartIndex);
@@ -2664,7 +2686,7 @@ function blankOutWordInSentence(sentence, word, startIndex = 0) {
             };
         }
         let htmlResult = sentence.replace(simpleRegex, (matched) => {
-            const boxesObj = renderBoxesForWord(matched, currentStartIndex);
+            const boxesObj = renderBoxesForWord(targetWord, currentStartIndex);
             currentStartIndex = boxesObj.nextIndex;
             finalNextIndex = boxesObj.nextIndex;
             return boxesObj.html;
@@ -2674,7 +2696,7 @@ function blankOutWordInSentence(sentence, word, startIndex = 0) {
     
     regex.lastIndex = 0;
     let htmlResult = sentence.replace(regex, (matched) => {
-        const boxesObj = renderBoxesForWord(matched, currentStartIndex);
+        const boxesObj = renderBoxesForWord(targetWord, currentStartIndex);
         currentStartIndex = boxesObj.nextIndex;
         finalNextIndex = boxesObj.nextIndex;
         return boxesObj.html;
@@ -2762,27 +2784,39 @@ function getTypedSpellingAnswer(targetWord) {
     return typed;
 }
 
+// Helper to determine the expected target words for each sentence, supporting stripped suffix matches
+function getTargetWordsForSentences(backWord, sentences) {
+    const targetWord = backWord.trim();
+    return sentences.map(s => {
+        const escapedWord = targetWord.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const regex = new RegExp('\\b' + escapedWord + '\\b', 'gi');
+        const simpleRegex = new RegExp(escapedWord, 'gi');
+        const isMatch = regex.test(s) || simpleRegex.test(s);
+        
+        if (!isMatch && targetWord.length >= 3) {
+            const strippedWord = targetWord.slice(0, -1);
+            const escapedStripped = strippedWord.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            const strippedRegex = new RegExp(escapedStripped, 'gi');
+            if (strippedRegex.test(s)) {
+                return strippedWord;
+            }
+        }
+        return targetWord;
+    });
+}
+
 // Reconstruct spelling answer from individual input boxes for multiple sentences
-function getTypedAnswersForSentences(targetWord, sentencesCount) {
+function getTypedAnswersForSentences(targetWords, sentencesCount) {
     const inputs = Array.from(document.querySelectorAll('.letter-input'));
     const typedWords = [];
-    
-    // Count how many letter inputs are needed for a single instance of the target word
-    let letterInputsPerWord = 0;
-    for (let i = 0; i < targetWord.length; i++) {
-        const char = targetWord.charAt(i);
-        if (!/\s/.test(char) && !/[.,\/#!$%\^&\*;:{}=\-_`~()]/g.test(char)) {
-            letterInputsPerWord++;
-        }
-    }
-    
-    if (letterInputsPerWord === 0) return [targetWord];
     
     let inputIndex = 0;
     for (let s = 0; s < sentencesCount; s++) {
         let typed = '';
-        for (let i = 0; i < targetWord.length; i++) {
-            const char = targetWord.charAt(i);
+        const currentTargetWord = targetWords[s] || targetWords[0];
+        
+        for (let i = 0; i < currentTargetWord.length; i++) {
+            const char = currentTargetWord.charAt(i);
             if (/\s/.test(char)) {
                 typed += ' ';
             } else if (/[.,\/#!$%\^&\*;:{}=\-_`~()]/.test(char)) {
@@ -3147,11 +3181,13 @@ async function evaluateAnswer() {
             }
             
             if (sentences.length > 0) {
-                const typedWords = getTypedAnswersForSentences(card.back.trim(), sentences.length);
+                const targetWords = getTargetWordsForSentences(card.back.trim(), sentences);
+                const typedWords = getTypedAnswersForSentences(targetWords, sentences.length);
                 let allCorrect = true;
                 let totalScore = 0;
-                typedWords.forEach(word => {
-                    const matchScore = calculateMatchPercentage(word, card.back);
+                typedWords.forEach((word, idx) => {
+                    const expectedWord = targetWords[idx] || card.back.trim();
+                    const matchScore = calculateMatchPercentage(word, expectedWord);
                     if (matchScore < 100) {
                         allCorrect = false;
                     }
