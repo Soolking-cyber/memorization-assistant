@@ -78,7 +78,6 @@ let mapGridActive = false;
 let practiceMapZoom = 1.0;
 
 let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
-let activeHeatmapMode = 'reviews';
 let audioCtx = null;
 
 function getAudioContext() {
@@ -569,42 +568,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     window.deleteDraftCreateSentence = deleteDraftCreateSentence;
     window.deleteEditSentence = deleteEditSentence;
-
-    // Stats Heatmap toggle event listeners
-    const btnReviews = document.getElementById('btn-heatmap-reviews');
-    const btnCards = document.getElementById('btn-heatmap-cards');
-    const heatmapTitle = document.getElementById('stats-heatmap-title');
-    const heatmapSub = document.getElementById('stats-heatmap-sub');
-    if (btnReviews && btnCards) {
-        btnReviews.addEventListener('click', () => {
-            if (activeHeatmapMode !== 'reviews') {
-                activeHeatmapMode = 'reviews';
-                btnReviews.classList.add('active');
-                btnCards.classList.remove('active');
-                btnReviews.style.background = 'var(--accent)';
-                btnReviews.style.color = 'var(--btn-primary-text)';
-                btnCards.style.background = 'transparent';
-                btnCards.style.color = 'var(--text-secondary)';
-                if (heatmapTitle) heatmapTitle.textContent = "Activity Heatmap";
-                if (heatmapSub) heatmapSub.textContent = "Your daily learning checklist consistency over the last year.";
-                renderStatistics();
-            }
-        });
-        btnCards.addEventListener('click', () => {
-            if (activeHeatmapMode !== 'cards') {
-                activeHeatmapMode = 'cards';
-                btnCards.classList.add('active');
-                btnReviews.classList.remove('active');
-                btnCards.style.background = 'var(--accent)';
-                btnCards.style.color = 'var(--btn-primary-text)';
-                btnReviews.style.background = 'transparent';
-                btnReviews.style.color = 'var(--text-secondary)';
-                if (heatmapTitle) heatmapTitle.textContent = "Creation Heatmap";
-                if (heatmapSub) heatmapSub.textContent = "Your daily card creation and vocabulary expansion over the last year.";
-                renderStatistics();
-            }
-        });
-    }
 
     // Initialize Memory Map canvas and button click listeners
     initMapCanvasListeners();
@@ -1319,21 +1282,20 @@ function renderStatistics() {
     }
 
     // 1. Heatmap calculation
-    const dailyCounts = {};
-    if (activeHeatmapMode === 'reviews') {
-        logs.forEach(log => {
-            if (log.timestamp) {
-                const dateStr = new Date(log.timestamp).toISOString().split('T')[0]; // YYYY-MM-DD
-                dailyCounts[dateStr] = (dailyCounts[dateStr] || 0) + 1;
-            }
-        });
-    } else {
-        cards.forEach(card => {
-            const time = card.created_at ? new Date(card.created_at) : new Date(card.nextReview || Date.now());
-            const dateStr = time.toISOString().split('T')[0]; // YYYY-MM-DD
-            dailyCounts[dateStr] = (dailyCounts[dateStr] || 0) + 1;
-        });
-    }
+    const dailyReviews = {};
+    logs.forEach(log => {
+        if (log.timestamp) {
+            const dateStr = new Date(log.timestamp).toISOString().split('T')[0]; // YYYY-MM-DD
+            dailyReviews[dateStr] = (dailyReviews[dateStr] || 0) + 1;
+        }
+    });
+
+    const dailyCreations = {};
+    cards.forEach(card => {
+        const time = card.created_at ? new Date(card.created_at) : new Date(card.nextReview || Date.now());
+        const dateStr = time.toISOString().split('T')[0]; // YYYY-MM-DD
+        dailyCreations[dateStr] = (dailyCreations[dateStr] || 0) + 1;
+    });
 
     const today = new Date();
     const currentDayOfWeek = today.getDay(); // 0 is Sunday, 6 is Saturday
@@ -1350,41 +1312,49 @@ function renderStatistics() {
         let colHtml = '<div class="contribution-col">';
         for (let d = 0; d < 7; d++) {
             const dateStr = tempDate.toISOString().split('T')[0];
-            const count = dailyCounts[dateStr] || 0;
+            const reviews = dailyReviews[dateStr] || 0;
+            const creations = dailyCreations[dateStr] || 0;
             
             let bg = 'var(--bg-secondary)';
             let opacity = '0.35'; // base opacity for empty
-            let titleText = '';
+            let titleText = `${dateStr}: no activity`;
             
-            if (activeHeatmapMode === 'reviews') {
-                titleText = `${dateStr}: no reviews`;
-                if (count > 0) {
-                    titleText = `${dateStr}: ${count} review${count > 1 ? 's' : ''}`;
-                    bg = 'var(--accent)';
-                    if (count <= 3) {
-                        opacity = '0.2';
-                    } else if (count <= 8) {
-                        opacity = '0.45';
-                    } else if (count <= 15) {
-                        opacity = '0.75';
-                    } else {
-                        opacity = '1.0';
-                    }
+            if (reviews > 0 && creations > 0) {
+                // Combined activity (Gold-Green gradient)
+                const totalActivity = reviews + creations;
+                bg = 'linear-gradient(135deg, #d4a63b, #4a805a)';
+                titleText = `${dateStr}: ${creations} card${creations > 1 ? 's' : ''} created & ${reviews} review${reviews > 1 ? 's' : ''} done`;
+                
+                if (totalActivity <= 3) {
+                    opacity = '0.4';
+                } else if (totalActivity <= 8) {
+                    opacity = '0.7';
+                } else {
+                    opacity = '1.0';
                 }
-            } else {
-                titleText = `${dateStr}: no cards added`;
-                if (count > 0) {
-                    titleText = `${dateStr}: ${count} card${count > 1 ? 's' : ''} added`;
-                    bg = 'var(--accent)';
-                    if (count <= 1) {
-                        opacity = '0.2';
-                    } else if (count <= 3) {
-                        opacity = '0.45';
-                    } else if (count <= 5) {
-                        opacity = '0.75';
-                    } else {
-                        opacity = '1.0';
-                    }
+            } else if (creations > 0) {
+                // Gold / Yellow representing creations
+                bg = '#d4a63b';
+                titleText = `${dateStr}: ${creations} card${creations > 1 ? 's' : ''} created`;
+                
+                if (creations <= 1) {
+                    opacity = '0.35';
+                } else if (creations <= 3) {
+                    opacity = '0.65';
+                } else {
+                    opacity = '1.0';
+                }
+            } else if (reviews > 0) {
+                // Green representing reviews
+                bg = '#4a805a';
+                titleText = `${dateStr}: ${reviews} review${reviews > 1 ? 's' : ''} done`;
+                
+                if (reviews <= 3) {
+                    opacity = '0.35';
+                } else if (reviews <= 8) {
+                    opacity = '0.65';
+                } else {
+                    opacity = '1.0';
                 }
             }
             
