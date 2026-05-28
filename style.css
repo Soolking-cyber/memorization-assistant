@@ -2363,6 +2363,12 @@ input.letter-box:focus {
 
 /* Desktop Practice Workspace split-pane layout and scaling */
 @media (min-width: 769px) {
+    #view-practice {
+        max-width: 950px; /* Luxurious widened optimal card width for desktop viewports */
+    }
+    #view-practice.practice-layout-split {
+        max-width: 1380px; /* Spacious split-pane layout for large maps/diagrams and inputs */
+    }
     .practice-layout-split .practice-workspace {
         display: grid;
         grid-template-columns: 1.25fr 1fr;
