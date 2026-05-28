@@ -1372,45 +1372,28 @@ function renderStatistics() {
         gridContainer.innerHTML = gridHtml;
     }
 
-    // 2. Memory Strength Ratio calculations
+    // 2. Memory Strength calculations
     let strongCount = 0;
-    let challengingCount = 0;
-
     cards.forEach(card => {
         const reps = card.repetitions || 0;
         const ease = card.ease || 2.5;
-        
         if (reps >= 3 && ease >= 2.2) {
             strongCount++;
-        } else {
-            challengingCount++;
         }
     });
 
     const totalActive = cards.length;
     let strongPct = 50;
-    let challengingPct = 50;
-
     if (totalActive > 0) {
         strongPct = Math.round((strongCount / totalActive) * 100);
-        challengingPct = 100 - strongPct;
     }
 
-    const barRemembered = document.getElementById('bar-remembered');
-    const barRecall = document.getElementById('bar-recall');
-    const textRememberedPct = document.getElementById('text-remembered-pct');
-    const textRecallPct = document.getElementById('text-recall-pct');
-
-    if (barRemembered) barRemembered.style.width = `${strongPct}%`;
-    if (barRecall) barRecall.style.width = `${challengingPct}%`;
-    if (textRememberedPct) textRememberedPct.textContent = `${strongPct}% (${strongCount})`;
-    if (textRecallPct) textRecallPct.textContent = `${challengingPct}% (${challengingCount})`;
-
-    // 3. Other statistics
+    // 3. Populate statistics setters
     const totalCardsEl = document.getElementById('stats-total-cards');
     const perfectReviewsEl = document.getElementById('stats-perfect-reviews');
     const avgScoreEl = document.getElementById('stats-avg-score');
     const totalReviewsEl = document.getElementById('stats-total-reviews');
+    const strongPctEl = document.getElementById('stats-strong-pct');
 
     if (totalCardsEl) totalCardsEl.textContent = cards.length;
     if (totalReviewsEl) totalReviewsEl.textContent = logs.length;
@@ -1424,85 +1407,19 @@ function renderStatistics() {
         avgScore = Math.round(sum / logs.length);
     }
     if (avgScoreEl) avgScoreEl.textContent = `${avgScore}%`;
+    if (strongPctEl) strongPctEl.textContent = totalActive > 0 ? `${strongPct}% (${strongCount}/${totalActive})` : `0%`;
 
-    // 4. Vocabulary Expansion Stats
+    // 4. Vocabulary Creation Metrics (This Week)
     const sevenDaysAgo = Date.now() - 7 * 86400000;
-    const thirtyDaysAgo = Date.now() - 30 * 86400000;
-    
     let addedThisWeek = 0;
-    let addedThisMonth = 0;
-    let totalWordsTracked = 0;
-    
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const last6Months = [];
-    const todayObj = new Date();
-    
-    for (let i = 5; i >= 0; i--) {
-        const d = new Date(todayObj.getFullYear(), todayObj.getMonth() - i, 1);
-        last6Months.push({
-            year: d.getFullYear(),
-            month: d.getMonth(),
-            label: monthNames[d.getMonth()],
-            count: 0
-        });
-    }
 
     cards.forEach(c => {
         const time = c.created_at ? new Date(c.created_at).getTime() : (c.nextReview || Date.now());
         if (time >= sevenDaysAgo) addedThisWeek++;
-        if (time >= thirtyDaysAgo) addedThisMonth++;
-        
-        if (c.front && c.type !== 'Memory Map') {
-            totalWordsTracked += c.front.split(/\s+/).filter(Boolean).length;
-        }
-        if (c.back && c.type !== 'Memory Map') {
-            totalWordsTracked += c.back.split(/\s+/).filter(Boolean).length;
-        }
-        
-        const cardDate = c.created_at ? new Date(c.created_at) : new Date(c.nextReview || Date.now());
-        const cy = cardDate.getFullYear();
-        const cm = cardDate.getMonth();
-        const match = last6Months.find(m => m.year === cy && m.month === cm);
-        if (match) {
-            match.count++;
-        }
     });
 
-    const vocabCardsCount = cards.filter(c => c.type === 'Vocabulary').length;
-
-    // Set UI elements
     const addedWeekEl = document.getElementById('stats-added-week');
-    const addedMonthEl = document.getElementById('stats-added-month');
-    const vocabCountEl = document.getElementById('stats-vocab-count');
-    const totalWordsEl = document.getElementById('stats-total-words');
-
     if (addedWeekEl) addedWeekEl.textContent = addedThisWeek;
-    if (addedMonthEl) addedMonthEl.textContent = addedThisMonth;
-    if (vocabCountEl) vocabCountEl.textContent = vocabCardsCount;
-    if (totalWordsEl) totalWordsEl.textContent = totalWordsTracked;
-
-    // Monthly Chart rendering
-    const maxMonthCount = Math.max(...last6Months.map(m => m.count), 1);
-    let chartHtml = '';
-    
-    last6Months.forEach(m => {
-        const pct = Math.round((m.count / maxMonthCount) * 60) + 15; // 15% to 75%
-        const heightPct = m.count === 0 ? 8 : pct;
-        
-        chartHtml += `
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%;">
-                <div style="width: 100%; display: flex; align-items: flex-end; justify-content: center; flex-grow: 1;">
-                    <div style="width: 16px; height: ${heightPct}%; background: var(--accent); border-radius: 4px; transition: height 0.4s ease; min-height: 4px; position: relative;" title="${m.count} cards added">
-                        ${m.count > 0 ? `<span style="position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; font-weight: 700; color: var(--text-primary);">${m.count}</span>` : ''}
-                    </div>
-                </div>
-                <span style="font-size: 0.65rem; font-weight: 700; color: var(--text-secondary);">${m.label}</span>
-            </div>
-        `;
-    });
-    
-    const chartContainer = document.getElementById('stats-monthly-chart');
-    if (chartContainer) chartContainer.innerHTML = chartHtml;
 }
 
 function renderCategoryTabs() {
