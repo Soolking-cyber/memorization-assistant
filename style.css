@@ -2491,8 +2491,7 @@ input.letter-box:focus {
 .category-card.clickable:hover,
 .stats-card:hover {
     transform: translateY(-2px);
-    border-color: var(--text-primary) !important;
-    box-shadow: inset 0 -2px 0 var(--text-primary);
+    background-color: var(--bg-secondary);
 }
 
 .category-card.clickable:active {
@@ -2514,7 +2513,7 @@ input.letter-box:focus {
     transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 .stats-mini-card:hover {
-    border-color: var(--text-primary);
+    background-color: var(--bg-tertiary);
 }
 
 /* Standardized Form Inputs & Selects */
