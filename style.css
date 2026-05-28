@@ -533,6 +533,8 @@ h1, h2, h3, h4 {
     gap: 30px;
     background: var(--bg-card);
     width: 100%;
+    position: relative;
+    z-index: 10;
 }
 .hero-left {
     flex: 1;
@@ -2081,6 +2083,7 @@ input.letter-box:focus {
     margin-bottom: 8px;
     font-family: 'Outfit', sans-serif;
     user-select: none;
+    z-index: 15;
 }
 
 .custom-dropdown-trigger {
