@@ -1141,7 +1141,7 @@ input.letter-box:focus {
         z-index: 10000; /* Float on top of everything */
         top: auto;
         height: auto;
-        background: rgba(var(--bg-card-rgb, 18, 18, 18), 0.85) !important;
+        background: var(--bg-mobile-nav) !important;
         backdrop-filter: blur(16px) !important;
         -webkit-backdrop-filter: blur(16px) !important;
         border-top: 2px solid var(--border-color);
