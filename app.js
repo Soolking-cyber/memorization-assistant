@@ -78,6 +78,7 @@ let mapGridActive = false;
 let practiceMapZoom = 1.0;
 
 let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+let activeHeatmapMode = 'reviews';
 let audioCtx = null;
 
 function getAudioContext() {
@@ -568,6 +569,42 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     window.deleteDraftCreateSentence = deleteDraftCreateSentence;
     window.deleteEditSentence = deleteEditSentence;
+
+    // Stats Heatmap toggle event listeners
+    const btnReviews = document.getElementById('btn-heatmap-reviews');
+    const btnCards = document.getElementById('btn-heatmap-cards');
+    const heatmapTitle = document.getElementById('stats-heatmap-title');
+    const heatmapSub = document.getElementById('stats-heatmap-sub');
+    if (btnReviews && btnCards) {
+        btnReviews.addEventListener('click', () => {
+            if (activeHeatmapMode !== 'reviews') {
+                activeHeatmapMode = 'reviews';
+                btnReviews.classList.add('active');
+                btnCards.classList.remove('active');
+                btnReviews.style.background = 'var(--accent)';
+                btnReviews.style.color = 'var(--btn-primary-text)';
+                btnCards.style.background = 'transparent';
+                btnCards.style.color = 'var(--text-secondary)';
+                if (heatmapTitle) heatmapTitle.textContent = "Activity Heatmap";
+                if (heatmapSub) heatmapSub.textContent = "Your daily learning checklist consistency over the last year.";
+                renderStatistics();
+            }
+        });
+        btnCards.addEventListener('click', () => {
+            if (activeHeatmapMode !== 'cards') {
+                activeHeatmapMode = 'cards';
+                btnCards.classList.add('active');
+                btnReviews.classList.remove('active');
+                btnCards.style.background = 'var(--accent)';
+                btnCards.style.color = 'var(--btn-primary-text)';
+                btnReviews.style.background = 'transparent';
+                btnReviews.style.color = 'var(--text-secondary)';
+                if (heatmapTitle) heatmapTitle.textContent = "Creation Heatmap";
+                if (heatmapSub) heatmapSub.textContent = "Your daily card creation and vocabulary expansion over the last year.";
+                renderStatistics();
+            }
+        });
+    }
 
     // Initialize Memory Map canvas and button click listeners
     initMapCanvasListeners();
@@ -1283,12 +1320,20 @@ function renderStatistics() {
 
     // 1. Heatmap calculation
     const dailyCounts = {};
-    logs.forEach(log => {
-        if (log.timestamp) {
-            const dateStr = new Date(log.timestamp).toISOString().split('T')[0]; // YYYY-MM-DD
+    if (activeHeatmapMode === 'reviews') {
+        logs.forEach(log => {
+            if (log.timestamp) {
+                const dateStr = new Date(log.timestamp).toISOString().split('T')[0]; // YYYY-MM-DD
+                dailyCounts[dateStr] = (dailyCounts[dateStr] || 0) + 1;
+            }
+        });
+    } else {
+        cards.forEach(card => {
+            const time = card.created_at ? new Date(card.created_at) : new Date(card.nextReview || Date.now());
+            const dateStr = time.toISOString().split('T')[0]; // YYYY-MM-DD
             dailyCounts[dateStr] = (dailyCounts[dateStr] || 0) + 1;
-        }
-    });
+        });
+    }
 
     const today = new Date();
     const currentDayOfWeek = today.getDay(); // 0 is Sunday, 6 is Saturday
@@ -1307,29 +1352,43 @@ function renderStatistics() {
             const dateStr = tempDate.toISOString().split('T')[0];
             const count = dailyCounts[dateStr] || 0;
             
-            let bg = 'rgba(255,255,255,0.03)';
-            let titleText = `${dateStr}: no reviews`;
+            let bg = 'var(--bg-secondary)';
+            let opacity = '0.35'; // base opacity for empty
+            let titleText = '';
             
-            if (count > 0) {
-                titleText = `${dateStr}: ${count} review${count > 1 ? 's' : ''}`;
-                if (count <= 3) {
-                    bg = 'rgba(255,255,255,0.12)';
-                } else if (count <= 8) {
-                    bg = 'rgba(255,255,255,0.3)';
-                } else if (count <= 15) {
+            if (activeHeatmapMode === 'reviews') {
+                titleText = `${dateStr}: no reviews`;
+                if (count > 0) {
+                    titleText = `${dateStr}: ${count} review${count > 1 ? 's' : ''}`;
                     bg = 'var(--accent)';
-                } else {
+                    if (count <= 3) {
+                        opacity = '0.2';
+                    } else if (count <= 8) {
+                        opacity = '0.45';
+                    } else if (count <= 15) {
+                        opacity = '0.75';
+                    } else {
+                        opacity = '1.0';
+                    }
+                }
+            } else {
+                titleText = `${dateStr}: no cards added`;
+                if (count > 0) {
+                    titleText = `${dateStr}: ${count} card${count > 1 ? 's' : ''} added`;
                     bg = 'var(--accent)';
+                    if (count <= 1) {
+                        opacity = '0.2';
+                    } else if (count <= 3) {
+                        opacity = '0.45';
+                    } else if (count <= 5) {
+                        opacity = '0.75';
+                    } else {
+                        opacity = '1.0';
+                    }
                 }
             }
             
-            let styleStr = `background: ${bg}; border: 1px solid var(--border-color);`;
-            if (count > 8 && count <= 15) {
-                styleStr = `background: var(--accent); opacity: 0.6;`;
-            } else if (count > 15) {
-                styleStr = `background: var(--accent); opacity: 1.0;`;
-            }
-            
+            let styleStr = `background: ${bg}; opacity: ${opacity}; border: 1px solid var(--border-color);`;
             colHtml += `<div class="contribution-cell" style="${styleStr}" title="${titleText}"></div>`;
             
             tempDate.setDate(tempDate.getDate() + 1);
@@ -1395,6 +1454,85 @@ function renderStatistics() {
         avgScore = Math.round(sum / logs.length);
     }
     if (avgScoreEl) avgScoreEl.textContent = `${avgScore}%`;
+
+    // 4. Vocabulary Expansion Stats
+    const sevenDaysAgo = Date.now() - 7 * 86400000;
+    const thirtyDaysAgo = Date.now() - 30 * 86400000;
+    
+    let addedThisWeek = 0;
+    let addedThisMonth = 0;
+    let totalWordsTracked = 0;
+    
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const last6Months = [];
+    const todayObj = new Date();
+    
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(todayObj.getFullYear(), todayObj.getMonth() - i, 1);
+        last6Months.push({
+            year: d.getFullYear(),
+            month: d.getMonth(),
+            label: monthNames[d.getMonth()],
+            count: 0
+        });
+    }
+
+    cards.forEach(c => {
+        const time = c.created_at ? new Date(c.created_at).getTime() : (c.nextReview || Date.now());
+        if (time >= sevenDaysAgo) addedThisWeek++;
+        if (time >= thirtyDaysAgo) addedThisMonth++;
+        
+        if (c.front && c.type !== 'Memory Map') {
+            totalWordsTracked += c.front.split(/\s+/).filter(Boolean).length;
+        }
+        if (c.back && c.type !== 'Memory Map') {
+            totalWordsTracked += c.back.split(/\s+/).filter(Boolean).length;
+        }
+        
+        const cardDate = c.created_at ? new Date(c.created_at) : new Date(c.nextReview || Date.now());
+        const cy = cardDate.getFullYear();
+        const cm = cardDate.getMonth();
+        const match = last6Months.find(m => m.year === cy && m.month === cm);
+        if (match) {
+            match.count++;
+        }
+    });
+
+    const vocabCardsCount = cards.filter(c => c.type === 'Vocabulary').length;
+
+    // Set UI elements
+    const addedWeekEl = document.getElementById('stats-added-week');
+    const addedMonthEl = document.getElementById('stats-added-month');
+    const vocabCountEl = document.getElementById('stats-vocab-count');
+    const totalWordsEl = document.getElementById('stats-total-words');
+
+    if (addedWeekEl) addedWeekEl.textContent = addedThisWeek;
+    if (addedMonthEl) addedMonthEl.textContent = addedThisMonth;
+    if (vocabCountEl) vocabCountEl.textContent = vocabCardsCount;
+    if (totalWordsEl) totalWordsEl.textContent = totalWordsTracked;
+
+    // Monthly Chart rendering
+    const maxMonthCount = Math.max(...last6Months.map(m => m.count), 1);
+    let chartHtml = '';
+    
+    last6Months.forEach(m => {
+        const pct = Math.round((m.count / maxMonthCount) * 60) + 15; // 15% to 75%
+        const heightPct = m.count === 0 ? 8 : pct;
+        
+        chartHtml += `
+            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%;">
+                <div style="width: 100%; display: flex; align-items: flex-end; justify-content: center; flex-grow: 1;">
+                    <div style="width: 16px; height: ${heightPct}%; background: var(--accent); border-radius: 4px; transition: height 0.4s ease; min-height: 4px; position: relative;" title="${m.count} cards added">
+                        ${m.count > 0 ? `<span style="position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; font-weight: 700; color: var(--text-primary);">${m.count}</span>` : ''}
+                    </div>
+                </div>
+                <span style="font-size: 0.65rem; font-weight: 700; color: var(--text-secondary);">${m.label}</span>
+            </div>
+        `;
+    });
+    
+    const chartContainer = document.getElementById('stats-monthly-chart');
+    if (chartContainer) chartContainer.innerHTML = chartHtml;
 }
 
 function renderCategoryTabs() {
