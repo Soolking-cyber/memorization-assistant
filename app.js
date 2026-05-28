@@ -42,13 +42,13 @@ const fontSizeMap = {
 };
 
 let cards = [];
-let customTypes = JSON.parse(localStorage.getItem('customTypes')) || ['mixed', 'Vocabulary', 'Memory Map', 'Image Card'];
-// Filter out lowercase vocabulary type to migrate to capitalized Vocabulary
-customTypes = customTypes.filter(t => t !== 'vocabulary');
-if (!customTypes.includes('mixed')) customTypes.unshift('mixed');
+let customTypes = JSON.parse(localStorage.getItem('customTypes')) || ['Vocabulary', 'Memory Map', 'Image Card', 'Unknown'];
+// Filter out lowercase vocabulary and mixed helper selectors
+customTypes = customTypes.filter(t => t !== 'vocabulary' && t !== 'mixed');
 if (!customTypes.includes('Vocabulary')) customTypes.push('Vocabulary');
 if (!customTypes.includes('Memory Map')) customTypes.push('Memory Map');
 if (!customTypes.includes('Image Card')) customTypes.push('Image Card');
+if (!customTypes.includes('Unknown')) customTypes.push('Unknown');
 localStorage.setItem('customTypes', JSON.stringify(customTypes));
 
 let reviewQueue = [];
@@ -802,8 +802,14 @@ async function loadData() {
     } else {
         cards = data || [];
         
-        // Populate exampleSentences from backend example_sentences column
+        // Ensure all cards have a valid type (fallback to 'Unknown' if missing/General/mixed)
+        let migratedAny = false;
         cards.forEach(card => {
+            if (!card.type || card.type === 'General' || card.type === 'mixed') {
+                card.type = 'Unknown';
+                migratedAny = true;
+                updateCardInDB(card);
+            }
             if (card.example_sentences) {
                 exampleSentences[card.id] = card.example_sentences;
             } else {
@@ -1118,12 +1124,13 @@ function updateTypeDatalists() {
     types.add('Vocabulary');
     types.add('Memory Map');
     types.add('Image Card');
+    types.add('Unknown');
     
     let migrated = false;
     let migratedVocab = false;
     cards.forEach(c => {
-        if (!c.type || c.type === 'General') {
-            c.type = 'mixed';
+        if (!c.type || c.type === 'General' || c.type === 'mixed') {
+            c.type = 'Unknown';
             migrated = true;
         }
         if (c.type === 'vocabulary') {
@@ -1134,7 +1141,7 @@ function updateTypeDatalists() {
     });
     
     if (migrated && userSession) {
-        supabase.from('flashcards').update({ type: 'mixed' }).or('type.eq.General,type.is.null').eq('user_id', userSession.user.id).then();
+        supabase.from('flashcards').update({ type: 'Unknown' }).or('type.eq.General,type.eq.mixed,type.is.null').eq('user_id', userSession.user.id).then();
     }
     
     if (migratedVocab && userSession) {
@@ -1143,8 +1150,9 @@ function updateTypeDatalists() {
     
     types.delete('General');
     types.delete('vocabulary');
+    types.delete('mixed');
     
-    customTypes = Array.from(types).filter(t => t !== 'vocabulary');
+    customTypes = Array.from(types).filter(t => t !== 'vocabulary' && t !== 'mixed');
     localStorage.setItem('customTypes', JSON.stringify(customTypes));
     
     const populateSelect = (selectId, addMixed = false) => {
@@ -1153,11 +1161,20 @@ function updateTypeDatalists() {
         const currentVal = select.value;
         select.innerHTML = '';
         
+        if (addMixed) {
+            const optMixed = document.createElement('option');
+            optMixed.value = 'mixed';
+            optMixed.textContent = 'All Types (Mixed)';
+            select.appendChild(optMixed);
+        }
+        
         customTypes.forEach(t => {
-            const opt = document.createElement('option');
-            opt.value = t;
-            opt.textContent = t === 'mixed' ? 'All Types (Mixed)' : t;
-            select.appendChild(opt);
+            if (t !== 'mixed' && t !== 'General') {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.textContent = t;
+                select.appendChild(opt);
+            }
         });
         
         if (!addMixed) {
@@ -1167,6 +1184,8 @@ function updateTypeDatalists() {
         if ([...select.options].some(o => o.value === currentVal)) {
             select.value = currentVal;
         } else if (!addMixed) {
+            select.value = 'Vocabulary'; // Default to Vocabulary instead of mixed
+        } else {
             select.value = 'mixed';
         }
         
