@@ -394,12 +394,12 @@ h1, h2, h3, h4 {
 
 #view-create .form-container,
 #view-edit .form-container {
-    max-width: 760px;
-    margin: 0 auto;
+    width: 100%;
 }
 
 #view-practice {
-    max-width: 650px;
+    width: 100%;
+    max-width: 650px; /* Mobile/portrait viewport constraint */
     margin: 0 auto;
     transition: max-width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -2369,8 +2369,15 @@ input.letter-box:focus {
 
 /* Desktop Practice Workspace split-pane layout and scaling */
 @media (min-width: 769px) {
+    .view {
+        max-width: 960px;
+        margin: 0 auto;
+    }
+    #view-auth {
+        max-width: 550px;
+    }
     #view-practice {
-        max-width: 950px; /* Luxurious widened optimal card width for desktop viewports */
+        max-width: 960px; /* Standardize card width dynamically */
     }
     #view-practice.practice-layout-split {
         max-width: 1380px; /* Spacious split-pane layout for large maps/diagrams and inputs */
