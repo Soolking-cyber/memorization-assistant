@@ -1639,10 +1639,7 @@ function renderManageView() {
         }
 
         cardEl.innerHTML = `
-            <label class="manage-card-checkbox">
-                <input type="checkbox" class="card-checkbox" data-id="${card.id}">
-                <span class="custom-checkbox"></span>
-            </label>
+            <input type="checkbox" class="card-checkbox" data-id="${card.id}" style="display: none;">
             <div class="manage-card-content" style="flex: 1;">
                 <span class="type-tag">${card.type === 'mixed' ? 'All Types' : (card.type || 'All Types')}</span><br>
                 <strong>Front:</strong> <br> ${displayFront} ${frontImgHtml} <br><br>
@@ -1658,6 +1655,18 @@ function renderManageView() {
                 </button>
             </div>
         `;
+
+        cardEl.addEventListener('click', (e) => {
+            if (e.target.closest('button') || e.target.closest('a')) {
+                return;
+            }
+            const cb = cardEl.querySelector('.card-checkbox');
+            if (cb) {
+                cb.checked = !cb.checked;
+                cb.dispatchEvent(new Event('change'));
+            }
+        });
+
         list.appendChild(cardEl);
     });
 
