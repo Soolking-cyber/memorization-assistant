@@ -2188,6 +2188,10 @@ function renderCurrentCard() {
     const backEl = document.getElementById('practice-back');
     const spellingArea = document.getElementById('spelling-indicator-area');
 
+    // Reset standard input and submit button visibility
+    document.getElementById('practice-input').classList.remove('hidden');
+    document.getElementById('btn-submit-answer').classList.remove('hidden');
+
     let isMap = false;
     let mapData = null;
     try {
@@ -3135,9 +3139,26 @@ async function evaluateAnswer() {
     logReviewAttempt(card.id, gradeInt, score);
 
     // Show Evaluation
-    document.getElementById('typing-area').classList.add('hidden');
-    document.querySelector('.card-front').classList.add('hidden'); // Hide front face to prevent z-index bleeding
-    document.querySelector('.card-back').classList.remove('hidden'); // Reveal answer
+    if (card.type === 'Image Card') {
+        // Keep front face visible so the image and cues remain visible
+        document.querySelector('.card-front').classList.remove('hidden');
+        document.querySelector('.card-back').classList.add('hidden');
+        
+        // Hide submit button to lock action, but keep typing-area visible for sequence inputs
+        document.getElementById('btn-submit-answer').classList.add('hidden');
+    } else if (isMap || card.type === 'Memory Map') {
+        // Keep front face visible so the mind map canvas remains visible
+        document.querySelector('.card-front').classList.remove('hidden');
+        document.querySelector('.card-back').classList.add('hidden');
+        
+        document.getElementById('typing-area').classList.add('hidden');
+    } else {
+        // Standard card types: Hide front face, show back face
+        document.querySelector('.card-front').classList.add('hidden');
+        document.querySelector('.card-back').classList.remove('hidden');
+        
+        document.getElementById('typing-area').classList.add('hidden');
+    }
     
     document.getElementById('eval-score').textContent = score + '%';
     const gradeSpan = document.getElementById('eval-grade');
