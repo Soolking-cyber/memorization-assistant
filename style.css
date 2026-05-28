@@ -200,6 +200,7 @@ body.logged-out .app-container {
     justify-content: center;
     align-items: center;
     min-height: calc(100vh - 80px);
+    padding: 0 !important;
 }
 
 /* Sidebar Navigation */
@@ -412,6 +413,10 @@ h1, h2, h3, h4 {
 #view-auth {
     max-width: 550px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Auth / Hero Section */
@@ -446,7 +451,12 @@ h1, h2, h3, h4 {
     flex-direction: column; 
     align-items: center; 
 }
-.auth-box { max-width: 450px; padding: 40px 30px; margin-top: 20px; }
+.auth-box { 
+    max-width: 450px; 
+    width: 100%; 
+    padding: 40px 30px; 
+    margin: 20px auto 0 auto; 
+}
 .auth-box h3 { font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; }
 
 .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
