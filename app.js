@@ -541,6 +541,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('btn-next-card').addEventListener('click', proceedToNextCard);
     document.getElementById('btn-finish-practice').addEventListener('click', () => switchView('dashboard'));
 
+    // Global Enter key handler for Practice Mode
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const viewPractice = document.getElementById('view-practice');
+            if (viewPractice && !viewPractice.classList.contains('hidden')) {
+                // Ignore keypress if inside a modal or settings
+                if (e.target.closest('#settings-modal') || e.target.closest('#settings-sidebar')) {
+                    return;
+                }
+                
+                // Case A: Session complete screen
+                const completedArea = document.getElementById('practice-completed');
+                if (completedArea && !completedArea.classList.contains('hidden')) {
+                    e.preventDefault();
+                    document.getElementById('btn-finish-practice').click();
+                    return;
+                }
+                
+                // Case B: Evaluation area is visible
+                const evalArea = document.getElementById('evaluation-area');
+                if (evalArea && !evalArea.classList.contains('hidden')) {
+                    if (e.target.id === 'incorrect-sentence-input') {
+                        e.preventDefault();
+                        document.getElementById('btn-save-sentence').click();
+                        return;
+                    }
+                    e.preventDefault();
+                    document.getElementById('btn-next-card').click();
+                    return;
+                }
+                
+                // Case C: Answer submission state
+                const btnSubmit = document.getElementById('btn-submit-answer');
+                if (btnSubmit && !btnSubmit.classList.contains('hidden')) {
+                    e.preventDefault();
+                    btnSubmit.click();
+                    return;
+                }
+            }
+        }
+    });
+
     document.getElementById('card-type').addEventListener('change', handleTypeSelectChange);
     document.getElementById('edit-card-type').addEventListener('change', handleTypeSelectChange);
     document.getElementById('practice-type-select').addEventListener('change', updateDashboard);
