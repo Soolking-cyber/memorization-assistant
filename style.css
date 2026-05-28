@@ -908,7 +908,7 @@ h1, h2, h3, h4 {
 .perspective { perspective: 1000px; width: 100%; }
 .flashcard { 
     width: 100%; 
-    height: 500px; 
+    height: 600px; 
     position: relative; 
     margin-bottom: 24px; 
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
@@ -1243,7 +1243,7 @@ input.letter-box:focus {
     }
     .hero-right { display: none; }
     .stats-row { flex-direction: column; gap: 10px; }
-    .flashcard { height: 430px; }
+    .flashcard { height: 500px; }
     .card-face { padding: 16px !important; }
     .card-content { font-size: 1.15rem; }
 
