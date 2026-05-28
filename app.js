@@ -982,6 +982,8 @@ function switchView(viewId) {
 
         if (viewId === 'dashboard') {
             updateDashboard();
+        } else if (viewId === 'stats') {
+            renderStatistics();
         }
         if (viewId === 'create') {
             draftCreateSentences = [];
@@ -1226,6 +1228,133 @@ function updateDashboard() {
     }
 
     renderCategoryCards();
+}
+
+function renderStatistics() {
+    let logs = [];
+    try {
+        logs = JSON.parse(localStorage.getItem('review_activity_logs')) || [];
+    } catch(e) {
+        logs = [];
+    }
+    if (!Array.isArray(logs)) {
+        logs = [];
+    }
+
+    // 1. Heatmap calculation
+    const dailyCounts = {};
+    logs.forEach(log => {
+        if (log.timestamp) {
+            const dateStr = new Date(log.timestamp).toISOString().split('T')[0]; // YYYY-MM-DD
+            dailyCounts[dateStr] = (dailyCounts[dateStr] || 0) + 1;
+        }
+    });
+
+    const today = new Date();
+    const currentDayOfWeek = today.getDay(); // 0 is Sunday, 6 is Saturday
+
+    // Start date is exactly 52 weeks ago from the Sunday of this week
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - 364 - currentDayOfWeek);
+    startDate.setHours(0, 0, 0, 0);
+
+    let gridHtml = '';
+    const tempDate = new Date(startDate);
+
+    for (let w = 0; w < 53; w++) {
+        let colHtml = '<div class="contribution-col">';
+        for (let d = 0; d < 7; d++) {
+            const dateStr = tempDate.toISOString().split('T')[0];
+            const count = dailyCounts[dateStr] || 0;
+            
+            let bg = 'rgba(255,255,255,0.03)';
+            let titleText = `${dateStr}: no reviews`;
+            
+            if (count > 0) {
+                titleText = `${dateStr}: ${count} review${count > 1 ? 's' : ''}`;
+                if (count <= 3) {
+                    bg = 'rgba(255,255,255,0.12)';
+                } else if (count <= 8) {
+                    bg = 'rgba(255,255,255,0.3)';
+                } else if (count <= 15) {
+                    bg = 'var(--accent)';
+                } else {
+                    bg = 'var(--accent)';
+                }
+            }
+            
+            let styleStr = `background: ${bg}; border: 1px solid var(--border-color);`;
+            if (count > 8 && count <= 15) {
+                styleStr = `background: var(--accent); opacity: 0.6;`;
+            } else if (count > 15) {
+                styleStr = `background: var(--accent); opacity: 1.0;`;
+            }
+            
+            colHtml += `<div class="contribution-cell" style="${styleStr}" title="${titleText}"></div>`;
+            
+            tempDate.setDate(tempDate.getDate() + 1);
+        }
+        colHtml += '</div>';
+        gridHtml += colHtml;
+    }
+
+    const gridContainer = document.getElementById('contribution-grid-container');
+    if (gridContainer) {
+        gridContainer.innerHTML = gridHtml;
+    }
+
+    // 2. Memory Strength Ratio calculations
+    let strongCount = 0;
+    let challengingCount = 0;
+
+    cards.forEach(card => {
+        const reps = card.repetitions || 0;
+        const ease = card.ease || 2.5;
+        
+        if (reps >= 3 && ease >= 2.2) {
+            strongCount++;
+        } else {
+            challengingCount++;
+        }
+    });
+
+    const totalActive = cards.length;
+    let strongPct = 50;
+    let challengingPct = 50;
+
+    if (totalActive > 0) {
+        strongPct = Math.round((strongCount / totalActive) * 100);
+        challengingPct = 100 - strongPct;
+    }
+
+    const barRemembered = document.getElementById('bar-remembered');
+    const barRecall = document.getElementById('bar-recall');
+    const textRememberedPct = document.getElementById('text-remembered-pct');
+    const textRecallPct = document.getElementById('text-recall-pct');
+
+    if (barRemembered) barRemembered.style.width = `${strongPct}%`;
+    if (barRecall) barRecall.style.width = `${challengingPct}%`;
+    if (textRememberedPct) textRememberedPct.textContent = `${strongPct}% (${strongCount})`;
+    if (textRecallPct) textRecallPct.textContent = `${challengingPct}% (${challengingCount})`;
+
+    // 3. Other statistics
+    const totalCardsEl = document.getElementById('stats-total-cards');
+    const perfectReviewsEl = document.getElementById('stats-perfect-reviews');
+    const avgScoreEl = document.getElementById('stats-avg-score');
+    const totalReviewsEl = document.getElementById('stats-total-reviews');
+
+    if (totalCardsEl) totalCardsEl.textContent = cards.length;
+    if (totalReviewsEl) totalReviewsEl.textContent = logs.length;
+
+    const perfectCount = logs.filter(l => l.score === 100).length;
+    if (perfectReviewsEl) perfectReviewsEl.textContent = perfectCount;
+
+    let avgScore = 0;
+    if (logs.length > 0) {
+        const sum = logs.reduce((acc, curr) => acc + (curr.score || 0), 0);
+        avgScore = Math.round(sum / logs.length);
+    }
+    if (avgScoreEl) avgScoreEl.textContent = `${avgScore}%`;
 }
 
 function renderCategoryTabs() {
@@ -2730,6 +2859,32 @@ function updateFormLabelsAndPlaceholders(isEdit, type) {
     }
 }
 
+function logReviewAttempt(cardId, gradeInt, score) {
+    let logs = [];
+    try {
+        logs = JSON.parse(localStorage.getItem('review_activity_logs')) || [];
+    } catch(e) {
+        logs = [];
+    }
+    
+    if (!Array.isArray(logs)) {
+        logs = [];
+    }
+    
+    logs.push({
+        timestamp: Date.now(),
+        cardId: cardId,
+        grade: gradeInt,
+        score: score
+    });
+    
+    if (logs.length > 10000) {
+        logs.shift();
+    }
+    
+    localStorage.setItem('review_activity_logs', JSON.stringify(logs));
+}
+
 async function evaluateAnswer() {
     const card = reviewQueue[currentReviewIndex];
     if (!card) return;
@@ -2919,6 +3074,7 @@ async function evaluateAnswer() {
     }
 
     applySM2Grade(gradeInt);
+    logReviewAttempt(card.id, gradeInt, score);
 
     // Show Evaluation
     document.getElementById('typing-area').classList.add('hidden');
