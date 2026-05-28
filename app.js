@@ -1482,7 +1482,7 @@ function renderCategoryCards() {
         
         const cardEl = document.createElement('div');
         cardEl.className = 'category-card';
-        if (total > 0 && due > 0) {
+        if (total > 0) {
             cardEl.classList.add('clickable');
         }
 
@@ -1511,13 +1511,20 @@ function renderCategoryCards() {
             </div>
         `;
 
-        if (total > 0 && due > 0) {
-            cardEl.addEventListener('click', () => {
+        if (total > 0) {
+            cardEl.addEventListener('click', async () => {
                 const select = document.getElementById('practice-type-select');
                 if (select) {
                     select.value = type;
                     updateDashboard();
-                    startPractice();
+                    if (due > 0) {
+                        startPractice();
+                    } else {
+                        const displayName = type === 'mixed' ? 'All Memories' : type;
+                        if (await confirm(`You are all caught up on due reviews for "${displayName}"! Would you like to start a study-ahead session to practice all cards in this category?`)) {
+                            startPractice(true);
+                        }
+                    }
                 }
             });
         }
@@ -2209,12 +2216,16 @@ function startForcedPractice(count) {
     renderCurrentCard();
 }
 
-function startPractice() {
+function startPractice(forceStudyAhead = false) {
     isForcedMode = false;
     const now = Date.now();
     const activeTypes = getSelectedTypes('practice-type-select');
-    reviewQueue = cards.filter(c => c.nextReview <= now && activeTypes.includes(c.type))
-                       .sort((a, b) => a.nextReview - b.nextReview); // Oldest due first
+    if (forceStudyAhead) {
+        reviewQueue = cards.filter(c => activeTypes.includes(c.type));
+    } else {
+        reviewQueue = cards.filter(c => c.nextReview <= now && activeTypes.includes(c.type))
+                           .sort((a, b) => a.nextReview - b.nextReview); // Oldest due first
+    }
                        
     if (reviewQueue.length === 0) return;
     
