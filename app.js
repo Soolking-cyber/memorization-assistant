@@ -2495,13 +2495,14 @@ function renderCurrentCard() {
         
         frontEl.innerHTML = `
             <div class="practice-image-card-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; width: 100%; height: 100%; position: relative; box-sizing: border-box; padding: 24px;">
-                <!-- Absolute Header & Title Clue Overlays -->
-                <div class="image-card-clue-header">
-                    Recall the Steps in Sequence Order
-                </div>
-                
-                <div class="image-card-clue-title">
-                    ${card.front}
+                <!-- Cohesive Header Row (Prevents absolute overlap) -->
+                <div class="image-card-clue-row">
+                    <div class="image-card-clue-header">
+                        Recall the Steps in Sequence Order
+                    </div>
+                    <div class="image-card-clue-title">
+                        ${card.front}
+                    </div>
                 </div>
                 
                 ${card.image_front_url ? `
