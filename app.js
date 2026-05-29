@@ -1557,7 +1557,9 @@ function renderCategoryCards() {
             cardEl.addEventListener('click', async () => {
                 const select = document.getElementById('practice-type-select');
                 if (select) {
-                    select.value = type;
+                    select.selectedValues = type === 'mixed' ? [...select.options].map(o => o.value).filter(v => v !== 'add_new') : [type];
+                    select.value = type === 'mixed' ? 'mixed' : type;
+                    buildCustomDropdownUI('practice-type-select');
                     updateDashboard();
                     if (due > 0) {
                         startPractice();
