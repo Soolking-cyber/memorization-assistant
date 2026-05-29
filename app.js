@@ -984,6 +984,8 @@ function switchView(viewId) {
     const activeCard = document.getElementById('active-card');
     if (activeCard) {
         activeCard.style.height = '';
+        activeCard.style.minHeight = '';
+        activeCard.style.maxHeight = '';
         const cardFront = activeCard.querySelector('.card-front');
         if (cardFront) cardFront.style.padding = '';
         const cardBack = activeCard.querySelector('.card-back');
@@ -2320,10 +2322,14 @@ function renderCurrentCard() {
     const isSplit = (card.type === 'Image Card' || hasImage) && !(isMap || card.type === 'Memory Map');
     const viewPractice = document.getElementById('view-practice');
     if (viewPractice) {
-        if (isSplit) {
-            viewPractice.classList.add('practice-layout-split');
-        } else {
+        if (isMap || card.type === 'Memory Map') {
+            viewPractice.classList.add('practice-layout-map');
             viewPractice.classList.remove('practice-layout-split');
+        } else if (isSplit) {
+            viewPractice.classList.add('practice-layout-split');
+            viewPractice.classList.remove('practice-layout-map');
+        } else {
+            viewPractice.classList.remove('practice-layout-split', 'practice-layout-map');
         }
     }
 
@@ -2335,7 +2341,9 @@ function renderCurrentCard() {
         const activeCard = document.getElementById('active-card');
         if (activeCard) {
             const isMobile = window.innerWidth <= 768;
-            activeCard.style.height = isMobile ? '460px' : '650px';
+            activeCard.style.height = isMobile ? '460px' : 'calc(100vh - 280px)';
+            activeCard.style.minHeight = isMobile ? '360px' : '480px';
+            activeCard.style.maxHeight = isMobile ? 'none' : '850px';
             const cardFront = activeCard.querySelector('.card-front');
             if (cardFront) cardFront.style.padding = '0';
             const cardBack = activeCard.querySelector('.card-back');
@@ -2465,6 +2473,8 @@ function renderCurrentCard() {
     if (exerciseTitleEl) exerciseTitleEl.style.display = '';
     const activeCard = document.getElementById('active-card');
     if (activeCard) {
+        activeCard.style.minHeight = '';
+        activeCard.style.maxHeight = '';
         const hasImage = card.image_front_url || card.image_back_url;
         if (hasImage) {
             const isMobile = window.innerWidth <= 768;
