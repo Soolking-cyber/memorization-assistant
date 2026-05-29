@@ -2316,8 +2316,7 @@ function renderCurrentCard() {
         }
     } catch (e) {}
 
-    const hasImage = card.image_front_url || card.image_back_url;
-    const isSplit = card.type === 'Image Card' || isMap || card.type === 'Memory Map' || hasImage;
+    const isSplit = (card.type === 'Image Card' || hasImage) && !(isMap || card.type === 'Memory Map');
     const viewPractice = document.getElementById('view-practice');
     if (viewPractice) {
         if (isSplit) {
