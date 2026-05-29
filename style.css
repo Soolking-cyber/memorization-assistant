@@ -917,7 +917,7 @@ h1, h2, h3, h4 {
 .card-face { 
     position: relative; 
     width: 100%; 
-    height: auto; 
+    height: 100%; 
     min-height: 350px;
     display: flex; 
     flex-direction: column; 
@@ -2383,17 +2383,12 @@ input.letter-box:focus {
     #view-auth {
         max-width: 550px;
     }
-    #view-create,
-    #view-edit {
-        max-width: 1400px;
-    }
     #view-practice {
         max-width: 960px; /* Standardize card width dynamically */
         transition: max-width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    #view-practice.practice-layout-split,
-    #view-practice.practice-layout-map {
-        max-width: 1400px; /* Spacious split-pane layout for large maps/diagrams and inputs */
+    #view-practice.practice-layout-split {
+        max-width: 1380px; /* Spacious split-pane layout for large maps/diagrams and inputs */
     }
     .practice-layout-split .practice-workspace {
         display: grid;
