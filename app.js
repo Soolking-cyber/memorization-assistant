@@ -850,7 +850,6 @@ async function loadData() {
             if (!card.type || card.type === 'General' || card.type === 'mixed') {
                 card.type = 'Unknown';
                 migratedAny = true;
-                updateCardInDB(card);
             }
             if (card.example_sentences) {
                 exampleSentences[card.id] = card.example_sentences;
@@ -1325,19 +1324,31 @@ function renderStatistics() {
         logs = [];
     }
 
+    // Helper for high-performance UTC date string formatting
+    const getUTCDateString = (val) => {
+        if (!val) return '';
+        if (typeof val === 'string') {
+            return val.slice(0, 10);
+        }
+        const d = new Date(val);
+        const year = d.getUTCFullYear();
+        const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(d.getUTCDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     // 1. Heatmap calculation
     const dailyReviews = {};
     logs.forEach(log => {
         if (log.timestamp) {
-            const dateStr = new Date(log.timestamp).toISOString().split('T')[0]; // YYYY-MM-DD (Database Time / UTC)
+            const dateStr = getUTCDateString(log.timestamp);
             dailyReviews[dateStr] = (dailyReviews[dateStr] || 0) + 1;
         }
     });
 
     const dailyCreations = {};
     cards.forEach(card => {
-        const time = card.created_at ? new Date(card.created_at) : new Date(card.nextReview || Date.now());
-        const dateStr = time.toISOString().split('T')[0]; // YYYY-MM-DD (Database Time / UTC)
+        const dateStr = getUTCDateString(card.created_at || card.nextReview || Date.now());
         dailyCreations[dateStr] = (dailyCreations[dateStr] || 0) + 1;
     });
 
@@ -1355,7 +1366,7 @@ function renderStatistics() {
     for (let w = 0; w < 53; w++) {
         let colHtml = '<div class="contribution-col">';
         for (let d = 0; d < 7; d++) {
-            const dateStr = tempDate.toISOString().split('T')[0]; // YYYY-MM-DD (Database Time / UTC)
+            const dateStr = getUTCDateString(tempDate.getTime());
             const reviews = dailyReviews[dateStr] || 0;
             const creations = dailyCreations[dateStr] || 0;
             
@@ -2954,21 +2965,40 @@ function getEditDistance(a, b) {
   if (a.length === 0) return b.length; 
   if (b.length === 0) return a.length; 
 
-  var matrix = [];
+  // Swap to ensure a is the shorter string, minimizing space to O(min(M, N))
+  if (a.length > b.length) {
+    const temp = a;
+    a = b;
+    b = temp;
+  }
 
-  for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
-  for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+  const lenA = a.length;
+  const lenB = b.length;
 
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      if (b.charAt(i - 1) == a.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1];
+  let prevRow = new Int32Array(lenA + 1);
+  let currRow = new Int32Array(lenA + 1);
+
+  for (let j = 0; j <= lenA; j++) {
+    prevRow[j] = j;
+  }
+
+  for (let i = 1; i <= lenB; i++) {
+    currRow[0] = i;
+    const charB = b.charAt(i - 1);
+    for (let j = 1; j <= lenA; j++) {
+      if (charB === a.charAt(j - 1)) {
+        currRow[j] = prevRow[j - 1];
       } else {
-        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1));
+        currRow[j] = Math.min(prevRow[j - 1] + 1, Math.min(currRow[j - 1] + 1, prevRow[j] + 1));
       }
     }
+    // Swap rows
+    const temp = prevRow;
+    prevRow = currRow;
+    currRow = temp;
   }
-  return matrix[b.length][a.length];
+
+  return prevRow[lenA];
 }
 
 function calculateMatchPercentage(typed, actual) {
@@ -4345,14 +4375,68 @@ function getClosestTargetSide(sPt, tgt, w = 180, h = 90) {
     return bestTgtSide;
 }
 
+function updateDraftLink(svgId, srcNode, side, mousePos) {
+    const svg = document.getElementById(svgId);
+    if (!svg || !srcNode) return;
+    
+    const draftPathId = `${svgId}-draft-connection-path`;
+    let draftPath = document.getElementById(draftPathId);
+    
+    const sPt = getNodeSideCoords(srcNode, side || 'right');
+    const tPt = mousePos;
+    
+    const dx = tPt.x - sPt.x;
+    const dy = tPt.y - sPt.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const offset = Math.min(150, Math.max(35, dist * 0.35));
+    
+    let tSide = 'left';
+    if (side === 'left') tSide = 'right';
+    else if (side === 'right') tSide = 'left';
+    else if (side === 'top') tSide = 'bottom';
+    else if (side === 'bottom') tSide = 'top';
+    
+    const cp1 = { x: sPt.x, y: sPt.y };
+    if (side === 'left') cp1.x -= offset;
+    else if (side === 'right') cp1.x += offset;
+    else if (side === 'top') cp1.y -= offset;
+    else if (side === 'bottom') cp1.y += offset;
+    
+    const cp2 = { x: tPt.x, y: tPt.y };
+    if (tSide === 'left') cp2.x -= offset;
+    else if (tSide === 'right') cp2.x += offset;
+    else if (tSide === 'top') cp2.y -= offset;
+    else if (tSide === 'bottom') cp2.y += offset;
+    
+    const pathData = `M ${sPt.x} ${sPt.y} C ${cp1.x} ${cp1.y}, ${cp2.x} ${cp2.y}, ${tPt.x} ${tPt.y}`;
+    
+    if (!draftPath) {
+        draftPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        draftPath.id = draftPathId;
+        draftPath.className.baseVal = 'svg-link-element';
+        draftPath.setAttribute('stroke', '#22c55e');
+        draftPath.setAttribute('stroke-width', '2');
+        draftPath.setAttribute('stroke-dasharray', '6,4');
+        draftPath.setAttribute('fill', 'none');
+        draftPath.style.opacity = '0.8';
+        svg.appendChild(draftPath);
+    }
+    
+    draftPath.setAttribute('d', pathData);
+}
+
 function drawLinks(nodes, links, svgId, arrowheadId, interactive = false, containerId = null, isEdit = false) {
     const svg = document.getElementById(svgId);
     if (!svg) return;
     
-    // Keep defs but clear everything else
-    const defs = svg.querySelector('defs');
-    svg.innerHTML = '';
-    if (defs) svg.appendChild(defs);
+    // Ensure defs exists but do NOT clear the whole innerHTML to prevent thrashes
+    let defs = svg.querySelector('defs');
+    if (!defs) {
+        defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        svg.appendChild(defs);
+    }
+    
+    const activeIds = new Set();
     
     links.forEach(link => {
         const src = nodes.find(n => n.id === link.source);
@@ -4403,8 +4487,18 @@ function drawLinks(nodes, links, svgId, arrowheadId, interactive = false, contai
         // Link stroke color
         const lineColor = link.color || 'var(--text-secondary)';
         
-        // 1. Draw actual path
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const pathId = `${svgId}-link-path-${link.source}-${link.target}`;
+        activeIds.add(pathId);
+        
+        // 1. Draw/update actual path
+        let path = document.getElementById(pathId);
+        if (!path) {
+            path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.id = pathId;
+            path.className.baseVal = 'svg-link-element';
+            svg.appendChild(path);
+        }
+        
         path.setAttribute('d', pathData);
         path.setAttribute('stroke', lineColor);
         path.setAttribute('stroke-width', link.thickness || 2);
@@ -4413,53 +4507,116 @@ function drawLinks(nodes, links, svgId, arrowheadId, interactive = false, contai
         path.style.opacity = '0.7';
         path.style.color = lineColor;
         
-        // Handle styles
         if (link.style === 'dashed') {
             path.setAttribute('stroke-dasharray', '6,4');
         } else if (link.style === 'dotted') {
             path.setAttribute('stroke-dasharray', '2,3');
+        } else {
+            path.removeAttribute('stroke-dasharray');
         }
-        
-        svg.appendChild(path);
         
         // Compute Midpoint for labels & click events
         const midX = 0.125 * sPt.x + 0.375 * cp1.x + 0.375 * cp2.x + 0.125 * tPt.x;
         const midY = 0.125 * sPt.y + 0.375 * cp1.y + 0.375 * cp2.y + 0.125 * tPt.y;
         
-        // 2. Draw invisible thick stroke path for easy clicking/hovering
+        // 2. Draw/update invisible thick stroke path for easy clicking/hovering
         if (interactive && containerId) {
-            const overlay = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            overlay.setAttribute('d', pathData);
-            overlay.setAttribute('stroke', 'transparent');
-            overlay.setAttribute('stroke-width', '12');
-            overlay.setAttribute('fill', 'none');
-            overlay.style.cursor = 'pointer';
-            overlay.style.pointerEvents = 'stroke';
+            const overlayId = `${svgId}-link-overlay-${link.source}-${link.target}`;
+            activeIds.add(overlayId);
             
-            overlay.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const container = document.getElementById(containerId);
-                if (container) {
-                    showLinkToolbar(midX, midY, container, link, nodes, links, svgId, arrowheadId, containerId, isEdit);
-                }
-            });
-            svg.appendChild(overlay);
-        }
-        
-        // 3. Draw connection label group if it exists
-        if (link.label && link.label.trim().length > 0) {
-            const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            group.style.userSelect = 'none';
-            if (interactive) {
-                group.style.cursor = 'pointer';
-                group.style.pointerEvents = 'auto';
+            let overlay = document.getElementById(overlayId);
+            if (!overlay) {
+                overlay = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                overlay.id = overlayId;
+                overlay.className.baseVal = 'svg-link-element';
+                overlay.setAttribute('stroke', 'transparent');
+                overlay.setAttribute('stroke-width', '12');
+                overlay.setAttribute('fill', 'none');
+                overlay.style.cursor = 'pointer';
+                overlay.style.pointerEvents = 'stroke';
+                
+                // Assign dynamic click handler utilizing dataset properties
+                overlay.onclick = (e) => {
+                    e.stopPropagation();
+                    const container = document.getElementById(containerId);
+                    if (container) {
+                        showLinkToolbar(
+                            parseFloat(overlay.dataset.midX),
+                            parseFloat(overlay.dataset.midY),
+                            container,
+                            link,
+                            nodes,
+                            links,
+                            svgId,
+                            arrowheadId,
+                            containerId,
+                            isEdit
+                        );
+                    }
+                };
+                svg.appendChild(overlay);
             }
             
-            // Mask rect
-            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            overlay.setAttribute('d', pathData);
+            overlay.dataset.midX = midX;
+            overlay.dataset.midY = midY;
+        }
+        
+        // 3. Draw/update connection label group if it exists
+        const labelGroupId = `${svgId}-link-label-group-${link.source}-${link.target}`;
+        if (link.label && link.label.trim().length > 0) {
+            activeIds.add(labelGroupId);
+            
+            let group = document.getElementById(labelGroupId);
+            let rect, text;
+            
+            if (!group) {
+                group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                group.id = labelGroupId;
+                group.className.baseVal = 'svg-link-element';
+                group.style.userSelect = 'none';
+                
+                if (interactive) {
+                    group.style.cursor = 'pointer';
+                    group.style.pointerEvents = 'auto';
+                    group.onclick = (e) => {
+                        e.stopPropagation();
+                        const container = document.getElementById(containerId);
+                        if (container) {
+                            showLinkToolbar(
+                                parseFloat(group.dataset.midX),
+                                parseFloat(group.dataset.midY),
+                                container,
+                                link,
+                                nodes,
+                                links,
+                                svgId,
+                                arrowheadId,
+                                containerId,
+                                isEdit
+                            );
+                        }
+                    };
+                }
+                
+                rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                
+                group.appendChild(rect);
+                group.appendChild(text);
+                svg.appendChild(group);
+            } else {
+                rect = group.querySelector('rect');
+                text = group.querySelector('text');
+            }
+            
+            group.dataset.midX = midX;
+            group.dataset.midY = midY;
+            
             const labelLength = link.label.length;
             const rWidth = Math.max(45, labelLength * 6.5 + 10);
             const rHeight = 18;
+            
             rect.setAttribute('width', rWidth);
             rect.setAttribute('height', rHeight);
             rect.setAttribute('x', midX - rWidth / 2);
@@ -4470,8 +4627,6 @@ function drawLinks(nodes, links, svgId, arrowheadId, interactive = false, contai
             rect.setAttribute('stroke', link.textColor || 'var(--border-color)');
             rect.setAttribute('stroke-width', '1');
             
-            // Text
-            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             text.setAttribute('x', midX);
             text.setAttribute('y', midY + 4);
             text.setAttribute('text-anchor', 'middle');
@@ -4479,26 +4634,19 @@ function drawLinks(nodes, links, svgId, arrowheadId, interactive = false, contai
             text.setAttribute('font-weight', '700');
             text.setAttribute('fill', link.textColor || 'var(--text-primary)');
             text.textContent = link.label;
-            
-            group.appendChild(rect);
-            group.appendChild(text);
-            
-            if (interactive && containerId) {
-                group.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const container = document.getElementById(containerId);
-                    if (container) {
-                        showLinkToolbar(midX, midY, container, link, nodes, links, svgId, arrowheadId, containerId, isEdit);
-                    }
-                });
-            }
-            
-            svg.appendChild(group);
+        } else {
+            // Remove label group if it is empty
+            const group = document.getElementById(labelGroupId);
+            if (group) group.remove();
         }
     });
     
-    // Render live draft curve if currently linking in this container
+    // Draw draft curve if linking is active and interactive is true
+    const draftPathId = `${svgId}-draft-connection-path`;
+    let draftPath = document.getElementById(draftPathId);
+    
     if (interactive && linkingSourceNodeId) {
+        activeIds.add(draftPathId);
         const srcNode = nodes.find(n => n.id === linkingSourceNodeId);
         if (srcNode) {
             const sSide = linkingSourceSide || 'right';
@@ -4530,17 +4678,32 @@ function drawLinks(nodes, links, svgId, arrowheadId, interactive = false, contai
             
             const pathData = `M ${sPt.x} ${sPt.y} C ${cp1.x} ${cp1.y}, ${cp2.x} ${cp2.y}, ${tPt.x} ${tPt.y}`;
             
-            const draftPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            if (!draftPath) {
+                draftPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                draftPath.id = draftPathId;
+                draftPath.className.baseVal = 'svg-link-element';
+                draftPath.setAttribute('stroke', '#22c55e');
+                draftPath.setAttribute('stroke-width', '2');
+                draftPath.setAttribute('stroke-dasharray', '6,4');
+                draftPath.setAttribute('fill', 'none');
+                draftPath.style.opacity = '0.8';
+                svg.appendChild(draftPath);
+            }
             draftPath.setAttribute('d', pathData);
-            draftPath.setAttribute('stroke', '#22c55e');
-            draftPath.setAttribute('stroke-width', '2');
-            draftPath.setAttribute('stroke-dasharray', '6,4');
-            draftPath.setAttribute('fill', 'none');
-            draftPath.style.opacity = '0.8';
-            
-            svg.appendChild(draftPath);
+        } else if (draftPath) {
+            draftPath.remove();
         }
+    } else if (draftPath) {
+        draftPath.remove();
     }
+    
+    // 4. Remove stale elements
+    const staleElements = svg.querySelectorAll('.svg-link-element');
+    staleElements.forEach(el => {
+        if (!activeIds.has(el.id)) {
+            el.remove();
+        }
+    });
 }
 
 function renderEditorNodes(containerId, nodes, links, svgId, arrowheadId, isEdit = false) {
@@ -5010,7 +5173,8 @@ function initMapCanvasListeners() {
                     const rect = viewport.getBoundingClientRect();
                     linkingMousePos.x = (e.clientX - rect.left) / createMapZoom;
                     linkingMousePos.y = (e.clientY - rect.top) / createMapZoom;
-                    drawLinks(createMapNodes, createMapLinks, 'create-map-svg', 'create-arrowhead', true, 'create-map-nodes-container', false);
+                    const srcNode = createMapNodes.find(n => n.id === linkingSourceNodeId);
+                    updateDraftLink('create-map-svg', srcNode, linkingSourceSide, linkingMousePos);
                 });
             }
         });
@@ -5156,7 +5320,8 @@ function initMapCanvasListeners() {
                     const rect = viewport.getBoundingClientRect();
                     linkingMousePos.x = (e.clientX - rect.left) / editMapZoom;
                     linkingMousePos.y = (e.clientY - rect.top) / editMapZoom;
-                    drawLinks(editMapNodes, editMapLinks, 'edit-map-svg', 'edit-arrowhead', true, 'edit-map-nodes-container', true);
+                    const srcNode = editMapNodes.find(n => n.id === linkingSourceNodeId);
+                    updateDraftLink('edit-map-svg', srcNode, linkingSourceSide, linkingMousePos);
                 });
             }
         });
