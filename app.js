@@ -845,12 +845,21 @@ async function loadData() {
     } else {
         cards = data || [];
         
-        // Ensure all cards have a valid type (fallback to 'Unknown' if missing/General/mixed)
-        let migratedAny = false;
+        // Ensure all cards have a valid type and precise created_at timestamp
+        let migratedCards = [];
         cards.forEach(card => {
+            let needsUpdate = false;
             if (!card.type || card.type === 'General' || card.type === 'mixed') {
                 card.type = 'Unknown';
-                migratedAny = true;
+                needsUpdate = true;
+            }
+            if (!card.created_at) {
+                // Initialise missing created_at to the current time so it's tracked precisely and saved in the DB
+                card.created_at = new Date().toISOString();
+                needsUpdate = true;
+            }
+            if (needsUpdate) {
+                migratedCards.push(card);
             }
             if (card.example_sentences) {
                 exampleSentences[card.id] = card.example_sentences;
@@ -862,6 +871,24 @@ async function loadData() {
             }
         });
         localStorage.setItem('exampleSentences', JSON.stringify(exampleSentences));
+        
+        // Batch sync migrated cards to the database
+        if (migratedCards.length > 0) {
+            console.log(`Migrating ${migratedCards.length} cards with missing types/timestamps...`);
+            Promise.all(migratedCards.map(card => 
+                supabase.from('flashcards')
+                    .update({
+                        type: card.type,
+                        created_at: card.created_at
+                    })
+                    .eq('id', card.id)
+                    .eq('user_id', userSession.user.id)
+            )).then(() => {
+                console.log("Database migration and synchronization complete!");
+            }).catch(err => {
+                console.error("Failed to sync migrated cards to database:", err);
+            });
+        }
         
         // Fetch and cache review logs in localStorage
         await fetchAndCacheReviewLogs();
@@ -1350,7 +1377,7 @@ function renderStatistics() {
 
     const dailyCreations = {};
     cards.forEach(card => {
-        const dateStr = getLocalDateString(card.created_at || card.nextReview || Date.now());
+        const dateStr = getLocalDateString(card.created_at || Date.now());
         dailyCreations[dateStr] = (dailyCreations[dateStr] || 0) + 1;
     });
 
@@ -1563,7 +1590,7 @@ function renderStatistics() {
     let addedThisWeek = 0;
 
     cards.forEach(c => {
-        const time = c.created_at ? new Date(c.created_at).getTime() : (c.nextReview || Date.now());
+        const time = c.created_at ? new Date(c.created_at).getTime() : Date.now();
         if (time >= sevenDaysAgo) addedThisWeek++;
     });
 
