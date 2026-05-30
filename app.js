@@ -1371,45 +1371,39 @@ function renderStatistics() {
             const reviews = dailyReviews[dateStr] || 0;
             const creations = dailyCreations[dateStr] || 0;
             
-            let bg = 'var(--bg-secondary)';
-            let opacity = '0.35'; // base opacity for empty
+            let bg = 'rgba(255, 255, 255, 0.06)';
+            let opacity = '1.0';
             const isFuture = tempDate > today;
             
             if (isFuture) {
-                opacity = '0.12';
+                bg = 'rgba(255, 255, 255, 0.018)';
             } else if (reviews > 0 && creations > 0) {
                 // Combined activity (Gold-Green gradient)
                 const totalActivity = reviews + creations;
-                bg = 'linear-gradient(135deg, #d4a63b, #4a805a)';
-                
                 if (totalActivity <= 3) {
-                    opacity = '0.4';
+                    bg = 'linear-gradient(135deg, #4d3c1a, #1a3322)';
                 } else if (totalActivity <= 8) {
-                    opacity = '0.7';
+                    bg = 'linear-gradient(135deg, #94722a, #346644)';
                 } else {
-                    opacity = '1.0';
+                    bg = 'linear-gradient(135deg, #e5b955, #52b76e)';
                 }
             } else if (creations > 0) {
                 // Gold / Yellow representing creations
-                bg = '#d4a63b';
-                
                 if (creations <= 1) {
-                    opacity = '0.35';
+                    bg = '#4d3c1a';
                 } else if (creations <= 3) {
-                    opacity = '0.65';
+                    bg = '#94722a';
                 } else {
-                    opacity = '1.0';
+                    bg = '#e5b955';
                 }
             } else if (reviews > 0) {
                 // Green representing reviews
-                bg = '#4a805a';
-                
                 if (reviews <= 3) {
-                    opacity = '0.35';
+                    bg = '#1a3322';
                 } else if (reviews <= 8) {
-                    opacity = '0.65';
+                    bg = '#346644';
                 } else {
-                    opacity = '1.0';
+                    bg = '#52b76e';
                 }
             }
             
