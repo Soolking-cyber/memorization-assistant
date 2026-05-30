@@ -1328,16 +1328,13 @@ function renderStatistics() {
         logs = [];
     }
 
-    // Helper for high-performance UTC date string formatting
-    const getUTCDateString = (val) => {
+    // Helper for high-performance Local date string formatting (accounts for user's timezone)
+    const getLocalDateString = (val) => {
         if (!val) return '';
-        if (typeof val === 'string') {
-            return val.slice(0, 10);
-        }
         const d = new Date(val);
-        const year = d.getUTCFullYear();
-        const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(d.getUTCDate()).padStart(2, '0');
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     };
 
@@ -1345,14 +1342,14 @@ function renderStatistics() {
     const dailyReviews = {};
     logs.forEach(log => {
         if (log.timestamp) {
-            const dateStr = getUTCDateString(log.timestamp);
+            const dateStr = getLocalDateString(log.timestamp);
             dailyReviews[dateStr] = (dailyReviews[dateStr] || 0) + 1;
         }
     });
 
     const dailyCreations = {};
     cards.forEach(card => {
-        const dateStr = getUTCDateString(card.created_at || card.nextReview || Date.now());
+        const dateStr = getLocalDateString(card.created_at || card.nextReview || Date.now());
         dailyCreations[dateStr] = (dailyCreations[dateStr] || 0) + 1;
     });
 
@@ -1370,7 +1367,7 @@ function renderStatistics() {
     for (let w = 0; w < 53; w++) {
         let colHtml = '<div class="contribution-col">';
         for (let d = 0; d < 7; d++) {
-            const dateStr = getUTCDateString(tempDate.getTime());
+            const dateStr = getLocalDateString(tempDate);
             const reviews = dailyReviews[dateStr] || 0;
             const creations = dailyCreations[dateStr] || 0;
             
