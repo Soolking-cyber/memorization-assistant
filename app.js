@@ -978,6 +978,9 @@ function initThemeSystem() {
 function initNavigation() {
     document.querySelectorAll('[data-view]').forEach(elem => {
         elem.addEventListener('click', (e) => {
+            if (typeof playUISound === 'function') {
+                try { playUISound('click'); } catch(err) {}
+            }
             const targetView = e.currentTarget.dataset.view;
             switchView(targetView);
         });
