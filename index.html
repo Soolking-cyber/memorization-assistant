@@ -494,7 +494,18 @@
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;">
                                 <div>
                                     <h3 id="stats-heatmap-title" style="margin-top: 0; margin-bottom: 6px; font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">Activity & Creation Heatmap</h3>
-                                    <p id="stats-heatmap-sub" style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Daily overview of new cards added (<span style="color: #d4a63b; font-weight: 700;">Yellow</span>) and practice retrievals completed (<span style="color: #4a805a; font-weight: 700;">Green</span>) over the last year.</p>
+                                    <p id="stats-heatmap-sub" style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Daily overview of new cards added (<span style="color: #d4a63b; font-weight: 700;">Yellow</span>) and practice retrievals completed (<span style="color: #4a805a; font-weight: 700;">Green</span>) over <span id="stats-heatmap-period">the last year</span>.</p>
+                                </div>
+                                
+                                <!-- Premium Capsule Year Navigator -->
+                                <div style="display: flex; align-items: center; gap: 4px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 20px; padding: 2px;">
+                                    <button id="stats-year-prev" class="btn-icon" style="width: 32px; height: 32px;" title="Previous Year">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                                    </button>
+                                    <span id="stats-year-display" style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); padding: 0 8px; min-width: 44px; text-align: center;">2026</span>
+                                    <button id="stats-year-next" class="btn-icon" style="width: 32px; height: 32px;" title="Next Year">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                    </button>
                                 </div>
                             </div>
                             

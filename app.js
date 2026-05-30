@@ -58,6 +58,7 @@ let isForcedMode = false;
 
 // New Features Global State Variables
 let exampleSentences = JSON.parse(localStorage.getItem('exampleSentences')) || {};
+let statsYear = new Date().getFullYear();
 let activeCategoryTab = 'mixed';
 let draftCreateSentences = [];
 let editSentences = [];
@@ -1354,11 +1355,10 @@ function renderStatistics() {
     });
 
     const today = new Date();
-    const currentDayOfWeek = today.getDay(); // 0 is Sunday, 6 is Saturday
 
-    // Start date is exactly 52 weeks ago from the Sunday of this week
-    const startDate = new Date(today);
-    startDate.setDate(today.getDate() - 364 - currentDayOfWeek);
+    // Start date is the Sunday preceding or equal to Jan 1st of statsYear
+    const startDate = new Date(statsYear, 0, 1);
+    startDate.setDate(startDate.getDate() - startDate.getDay());
     startDate.setHours(0, 0, 0, 0);
 
     let gridHtml = '';
@@ -1373,13 +1373,14 @@ function renderStatistics() {
             
             let bg = 'var(--bg-secondary)';
             let opacity = '0.35'; // base opacity for empty
-            let titleText = `${dateStr}: no activity`;
+            const isFuture = tempDate > today;
             
-            if (reviews > 0 && creations > 0) {
+            if (isFuture) {
+                opacity = '0.12';
+            } else if (reviews > 0 && creations > 0) {
                 // Combined activity (Gold-Green gradient)
                 const totalActivity = reviews + creations;
                 bg = 'linear-gradient(135deg, #d4a63b, #4a805a)';
-                titleText = `${dateStr}: ${creations} card${creations > 1 ? 's' : ''} created & ${reviews} review${reviews > 1 ? 's' : ''} done`;
                 
                 if (totalActivity <= 3) {
                     opacity = '0.4';
@@ -1391,7 +1392,6 @@ function renderStatistics() {
             } else if (creations > 0) {
                 // Gold / Yellow representing creations
                 bg = '#d4a63b';
-                titleText = `${dateStr}: ${creations} card${creations > 1 ? 's' : ''} created`;
                 
                 if (creations <= 1) {
                     opacity = '0.35';
@@ -1403,7 +1403,6 @@ function renderStatistics() {
             } else if (reviews > 0) {
                 // Green representing reviews
                 bg = '#4a805a';
-                titleText = `${dateStr}: ${reviews} review${reviews > 1 ? 's' : ''} done`;
                 
                 if (reviews <= 3) {
                     opacity = '0.35';
@@ -1485,6 +1484,47 @@ function renderStatistics() {
             if (!cell) return;
             tooltip.classList.remove('visible');
         };
+
+        // Setup Year navigation buttons
+        const prevBtn = document.getElementById('stats-year-prev');
+        const nextBtn = document.getElementById('stats-year-next');
+        const yearDisplay = document.getElementById('stats-year-display');
+        const heatmapPeriod = document.getElementById('stats-heatmap-period');
+
+        if (prevBtn && nextBtn && yearDisplay) {
+            yearDisplay.textContent = statsYear;
+            
+            const maxYear = new Date().getFullYear();
+            if (heatmapPeriod) {
+                if (statsYear === maxYear) {
+                    heatmapPeriod.textContent = `this year (${statsYear})`;
+                } else {
+                    heatmapPeriod.textContent = `the year ${statsYear}`;
+                }
+            }
+
+            // Enable/Disable next button visual states
+            nextBtn.style.opacity = statsYear >= maxYear ? '0.3' : '1';
+            nextBtn.style.pointerEvents = statsYear >= maxYear ? 'none' : 'auto';
+
+            prevBtn.onclick = () => {
+                statsYear--;
+                if (typeof playUISound === 'function') {
+                    try { playUISound('click'); } catch(err) {}
+                }
+                renderStatistics();
+            };
+
+            nextBtn.onclick = () => {
+                if (statsYear < maxYear) {
+                    statsYear++;
+                    if (typeof playUISound === 'function') {
+                        try { playUISound('click'); } catch(err) {}
+                    }
+                    renderStatistics();
+                }
+            };
+        }
     }
 
     // 2. Memory Strength calculations
