@@ -1033,7 +1033,11 @@ function switchView(viewId) {
         });
 
         if (viewId === 'dashboard') {
-            updateDashboard();
+            if (userSession && supabase) {
+                loadData(); // Reload all data from Supabase DB to ensure absolute UI accuracy
+            } else {
+                updateDashboard();
+            }
         } else if (viewId === 'stats') {
             renderStatistics();
         }
@@ -1273,7 +1277,7 @@ function updateDashboard() {
     const now = Date.now();
     const dueCards = filteredCards.filter(c => c.nextReview <= now);
 
-    if (totalElement) totalElement.textContent = total;
+    if (totalElement) totalElement.textContent = cards.length;
     if (dueElement) {
         dueElement.textContent = dueCards.length;
         const duePill = dueElement.closest('.stat-pill');
@@ -1879,9 +1883,8 @@ async function batchDeleteCards(ids) {
         });
         localStorage.setItem('exampleSentences', JSON.stringify(exampleSentences));
 
-        cards = cards.filter(c => !idSet.has(c.id));
+        await loadData();
         renderManageView();
-        updateDashboard();
     }
 }
 
@@ -1974,12 +1977,11 @@ async function handleCreateCard(e) {
 
     if (!error && data) {
         const createdCard = data[0];
-        cards.push(createdCard); 
         if (draftCreateSentences.length > 0 && activeType !== 'Memory Map') {
             exampleSentences[createdCard.id] = [...draftCreateSentences];
             localStorage.setItem('exampleSentences', JSON.stringify(exampleSentences));
         }
-        updateDashboard();
+        await loadData();
     } else {
         console.error("Failed to insert core memory:", error);
     }
@@ -2222,8 +2224,6 @@ async function handleEditCardSubmit(e) {
         .select();
 
     if (!error && data) {
-        cards[cardIndex] = data[0];
-        
         // Save example sentences clues
         if (editSentences.length > 0) {
             exampleSentences[cardId] = [...editSentences];
@@ -2232,7 +2232,7 @@ async function handleEditCardSubmit(e) {
         }
         localStorage.setItem('exampleSentences', JSON.stringify(exampleSentences));
         
-        updateDashboard();
+        await loadData();
         renderManageView();
         
         btn.innerHTML = "Changes Saved! " + ICONS.check;
@@ -2318,7 +2318,21 @@ function renderCurrentCard() {
 
     // Reset standard input and submit button visibility
     document.getElementById('practice-input').classList.remove('hidden');
+    document.getElementById('practice-input').value = '';
     document.getElementById('btn-submit-answer').classList.remove('hidden');
+    document.getElementById('evaluation-area').classList.add('hidden');
+    
+    if (spellingArea) {
+        spellingArea.classList.add('hidden');
+        const letterBoxes = document.getElementById('practice-letter-boxes');
+        if (letterBoxes) letterBoxes.innerHTML = '';
+    }
+    
+    const seqContainer = document.getElementById('practice-sequence-container');
+    if (seqContainer) {
+        seqContainer.classList.add('hidden');
+        seqContainer.innerHTML = '';
+    }
 
     let isMap = false;
     let mapData = null;
@@ -2499,11 +2513,7 @@ function renderCurrentCard() {
         if (cardBack) cardBack.style.padding = '';
     }
 
-    const seqContainer = document.getElementById('practice-sequence-container');
-    if (seqContainer) {
-        seqContainer.classList.add('hidden');
-        seqContainer.innerHTML = '';
-    }
+
 
     if (card.type === 'Image Card') {
         if (exerciseTitleEl) exerciseTitleEl.style.display = 'none';
@@ -3501,7 +3511,7 @@ function proceedToNextCard() {
     }, 300);
 }
 
-function finishSession() {
+async function finishSession() {
     playUISound('complete');
     try {
         if (typeof confetti === 'function') {
@@ -3515,7 +3525,12 @@ function finishSession() {
         console.warn("Confetti call failed:", err);
     }
 
-    updateDashboard(); // Re-calculate due
+    if (userSession && supabase) {
+        await loadData(); // Reload all data from Supabase DB to ensure absolute UI accuracy
+    } else {
+        updateDashboard();
+    }
+    
     document.getElementById('active-card').style.display = 'none';
     document.querySelector('.practice-controls').style.display = 'none';
     
