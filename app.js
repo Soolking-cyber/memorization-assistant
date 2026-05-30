@@ -1414,8 +1414,14 @@ function renderStatistics() {
                 }
             }
             
+            const friendlyDate = tempDate.toLocaleDateString(undefined, {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
             let styleStr = `background: ${bg}; opacity: ${opacity}; border: 1px solid var(--border-color);`;
-            colHtml += `<div class="contribution-cell" style="${styleStr}" title="${titleText}"></div>`;
+            colHtml += `<div class="contribution-cell" style="${styleStr}" data-date="${friendlyDate}" data-reviews="${reviews}" data-creations="${creations}"></div>`;
             
             tempDate.setDate(tempDate.getDate() + 1);
         }
@@ -1426,6 +1432,59 @@ function renderStatistics() {
     const gridContainer = document.getElementById('contribution-grid-container');
     if (gridContainer) {
         gridContainer.innerHTML = gridHtml;
+        
+        // Custom instant premium hover tooltip
+        let tooltip = document.getElementById('heatmap-tooltip');
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.id = 'heatmap-tooltip';
+            tooltip.className = 'heatmap-tooltip';
+            document.body.appendChild(tooltip);
+        }
+
+        gridContainer.onmouseover = (e) => {
+            const cell = e.target.closest('.contribution-cell');
+            if (!cell) return;
+
+            if (typeof playUISound === 'function') {
+                try { playUISound('tooltip'); } catch(err) {}
+            }
+
+            const friendlyDate = cell.getAttribute('data-date');
+            const creations = parseInt(cell.getAttribute('data-creations') || '0', 10);
+            const reviews = parseInt(cell.getAttribute('data-reviews') || '0', 10);
+
+            let activityHtml = '';
+            if (creations === 0 && reviews === 0) {
+                activityHtml = `<span style="color: var(--text-secondary);">No activity</span>`;
+            } else {
+                activityHtml = `<div style="display: flex; gap: 6px; flex-wrap: wrap;">`;
+                if (creations > 0) {
+                    activityHtml += `<span class="heatmap-tooltip-pill creation">${creations} card${creations > 1 ? 's' : ''} added</span>`;
+                }
+                if (reviews > 0) {
+                    activityHtml += `<span class="heatmap-tooltip-pill review">${reviews} review${reviews > 1 ? 's' : ''} done</span>`;
+                }
+                activityHtml += `</div>`;
+            }
+
+            tooltip.innerHTML = `
+                <div class="heatmap-tooltip-date">${friendlyDate}</div>
+                <div class="heatmap-tooltip-activity">${activityHtml}</div>
+            `;
+
+            const rect = cell.getBoundingClientRect();
+            // Position horizontally centered, and vertical offset above the element
+            tooltip.style.left = `${rect.left + rect.width / 2 + window.scrollX}px`;
+            tooltip.style.top = `${rect.top + window.scrollY}px`;
+            tooltip.classList.add('visible');
+        };
+
+        gridContainer.onmouseout = (e) => {
+            const cell = e.target.closest('.contribution-cell');
+            if (!cell) return;
+            tooltip.classList.remove('visible');
+        };
     }
 
     // 2. Memory Strength calculations

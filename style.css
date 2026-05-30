@@ -2564,6 +2564,79 @@ input.letter-box:focus {
 }
 
 
+/* Interactive Premium Heatmap Hover Tooltip */
+.heatmap-tooltip {
+    position: absolute;
+    z-index: 10000;
+    pointer-events: none;
+    background: rgba(18, 18, 18, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 10px 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    transform: translate(-50%, -100%) scale(0.95);
+    opacity: 0;
+    transition: opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 160px;
+}
 
+.heatmap-tooltip.visible {
+    opacity: 1;
+    transform: translate(-50%, -100%) scale(1) translateY(-8px);
+}
 
+.heatmap-tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 10px;
+    height: 10px;
+    background: rgba(18, 18, 18, 0.95);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
 
+.heatmap-tooltip-date {
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 0.8rem;
+    letter-spacing: -0.01em;
+}
+
+.heatmap-tooltip-activity {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.heatmap-tooltip-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.7rem;
+}
+
+.heatmap-tooltip-pill.creation {
+    background: rgba(212, 166, 59, 0.15);
+    color: #e5b955;
+    border: 1px solid rgba(212, 166, 59, 0.3);
+}
+
+.heatmap-tooltip-pill.review {
+    background: rgba(74, 128, 90, 0.15);
+    color: #62c37e;
+    border: 1px solid rgba(74, 128, 90, 0.3);
+}
