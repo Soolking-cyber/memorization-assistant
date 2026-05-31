@@ -8,6 +8,7 @@ import { renderPracticeNodes, setPracticeMapZoom, adjustPracticeViewportCenterin
 import { updateDashboard, getSelectedTypes } from './dashboard.js';
 import { switchView } from './navigation.js';
 import { loadData } from './flashcardCrud.js';
+import { dbGet, dbSet } from './db.js';
 
 export function startForcedPractice(count) {
     const now = Date.now();
@@ -798,7 +799,7 @@ export function validateExampleSentence(sentenceText, targetWordText) {
 export async function logReviewAttempt(cardId, gradeInt, score) {
     let logs = [];
     try {
-        logs = JSON.parse(localStorage.getItem('review_activity_logs')) || [];
+        logs = await dbGet('review_activity_logs') || [];
     } catch(e) {
         logs = [];
     }
@@ -819,7 +820,7 @@ export async function logReviewAttempt(cardId, gradeInt, score) {
         logs.shift();
     }
     
-    localStorage.setItem('review_activity_logs', JSON.stringify(logs));
+    await dbSet('review_activity_logs', logs);
 
     if (state.userSession && supabase) {
         const { error } = await supabase
@@ -1091,7 +1092,7 @@ export async function saveIncorrectExampleSentence() {
     
     sentencesArray.push(sentenceText);
     state.exampleSentences[card.id] = sentencesArray;
-    localStorage.setItem('exampleSentences', JSON.stringify(state.exampleSentences));
+    await dbSet('exampleSentences', state.exampleSentences);
 
     card.example_sentences = sentencesArray;
 

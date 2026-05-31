@@ -52,7 +52,7 @@ export function initNavigation() {
     });
 }
 
-export function switchView(viewId) {
+export async function switchView(viewId) {
     hideExplanationTooltip();
 
     const fullscreens = document.querySelectorAll('.canvas-container-fullscreen');
@@ -128,7 +128,7 @@ export function switchView(viewId) {
             updateDashboard();
         }
     } else if (viewId === 'stats') {
-        renderStatistics();
+        await renderStatistics();
     }
     if (viewId === 'create') {
         state.draftCreateSentences = [];

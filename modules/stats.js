@@ -3,11 +3,12 @@ import { playUISound } from './sound.js';
 import { buildCustomDropdownUI } from './uiHelpers.js';
 import { updateDashboard } from './flashcardCrud.js';
 import { startPractice } from './practice.js';
+import { dbGet } from './db.js';
 
-export function renderStatistics() {
+export async function renderStatistics() {
     let logs = [];
     try {
-        logs = JSON.parse(localStorage.getItem('review_activity_logs')) || [];
+        logs = await dbGet('review_activity_logs') || [];
     } catch(e) {
         logs = [];
     }
