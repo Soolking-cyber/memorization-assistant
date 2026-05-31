@@ -243,9 +243,8 @@ function renderActiveStackCard() {
         logs = l || [];
         const stats = calculateCardStats(card, logs);
         const titleText = getCardTitle(card);
-        const displayTitle = titleText.length > 25 ? titleText.substring(0, 22) + '...' : titleText;
         
-        let illustrationContent = `<div class="illustration-text" style="font-size: 0.95rem; font-weight: 500; line-height: 1.45; overflow-y: auto; max-height: 100%; text-align: left; padding: 12px; font-family: 'Inter', sans-serif; color: var(--text-primary);">${titleText}</div>`;
+        let illustrationContent = `<div class="illustration-text" style="font-size: 1.15rem; font-weight: 800; line-height: 1.55; overflow-y: auto; max-height: 100%; text-align: center; padding: 16px 20px; font-family: 'Outfit', sans-serif; color: var(--text-primary);">${titleText}</div>`;
         if (card.type === 'Image Card' && card.image_front_url) {
             illustrationContent = `<img class="illustration-img" src="${card.image_front_url}" alt="Memory Art">`;
         }
@@ -258,7 +257,7 @@ function renderActiveStackCard() {
                 <div class="card-header">
                     <div class="card-title-area">
                         <span class="card-rarity-badge">${stats.tier.name}</span>
-                        <h4 class="card-title-text" title="${titleText}">${displayTitle}</h4>
+                        <h4 class="card-title-text" style="font-size: 1.1rem; font-weight: 800; color: var(--text-primary);">Untamed Memory</h4>
                     </div>
                     <span class="card-type-indicator">${card.type || 'Unknown'}</span>
                 </div>
@@ -291,8 +290,8 @@ function renderActiveStackCard() {
                         <span>Attack Move: Active Recall</span>
                     </div>
                     
-                    <div class="attack-input-wrapper">
-                        <input type="text" id="deck-practice-input" class="deck-practice-input" autocomplete="off" placeholder="Type answer translation..." autofocus>
+                    <div class="attack-input-wrapper" style="display: flex; justify-content: center; width: 100%; overflow: visible;">
+                        ${generateSpellingBoxesHTML(card.back)}
                     </div>
                     
                     <div id="deck-attack-feedback" class="attack-feedback hidden"></div>
@@ -303,7 +302,6 @@ function renderActiveStackCard() {
         `;
         
         const cardEl = container.querySelector('.study-pokemon-card');
-        const inputField = container.querySelector('#deck-practice-input');
         const attackBtn = container.querySelector('#btn-deck-attack');
         const feedbackBox = container.querySelector('#deck-attack-feedback');
         
@@ -362,14 +360,21 @@ function renderActiveStackCard() {
         
         updateSentenceClueUI();
         
-        if (inputField) {
-            setTimeout(() => inputField.focus(), 50);
+        // Handle Letter Boxes Active Focus and enter triggers
+        const letterBoxes = container.querySelector('#deck-letter-boxes');
+        if (letterBoxes) {
+            const firstInput = letterBoxes.querySelector('.deck-letter-input');
+            if (firstInput) {
+                setTimeout(() => firstInput.focus(), 50);
+            }
             
-            // Handle inline submit on Enter keypress
-            inputField.addEventListener('keyup', (e) => {
+            letterBoxes.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
                     if (!attackBtn.dataset.nextMode) {
-                        evaluateStackAnswer(card, inputField.value.trim(), feedbackBox, attackBtn);
+                        const compiledTyped = getTypedAnswer(card.back);
+                        evaluateStackAnswer(card, compiledTyped, feedbackBox, attackBtn);
                     } else {
                         proceedToNextStackCard(cardEl);
                     }
@@ -380,7 +385,8 @@ function renderActiveStackCard() {
         if (attackBtn) {
             attackBtn.addEventListener('click', () => {
                 if (!attackBtn.dataset.nextMode) {
-                    evaluateStackAnswer(card, inputField.value.trim(), feedbackBox, attackBtn);
+                    const compiledTyped = getTypedAnswer(card.back);
+                    evaluateStackAnswer(card, compiledTyped, feedbackBox, attackBtn);
                 } else {
                     proceedToNextStackCard(cardEl);
                 }
@@ -418,6 +424,7 @@ function renderActiveStackCard() {
         });
     });
 }
+
 
 /**
  * Dynamic answering evaluation for Poké Deck in-place Active Recall.
@@ -584,6 +591,55 @@ function blurWordInSentence(sentence, targetWord) {
     }
     
     return blurred;
+}
+
+/**
+ * Generates custom letter box inputs HTML styled for spelling and active recall.
+ */
+function generateSpellingBoxesHTML(word) {
+    if (!word) return '';
+    let html = '<div class="letter-boxes-container" id="deck-letter-boxes" style="display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; margin: 10px auto;">';
+    let inputCount = 0;
+    
+    for (let i = 0; i < word.length; i++) {
+        const char = word.charAt(i);
+        if (/\s/.test(char)) {
+            html += `<span class="letter-box-space" style="margin: 0 4px; display: inline-block; width: 12px; height: 36px;">&nbsp;</span>`;
+        } else if (/[.,\/#!$%\^&\*;:{}=\-_`~()]/.test(char)) {
+            html += `<span class="letter-box-punctuation" style="margin: 0 2px; font-weight: 800; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; color: var(--text-secondary);">${char}</span>`;
+        } else {
+            html += `<input type="text" class="letter-box letter-input deck-letter-input" max-length="1" data-index="${inputCount}" style="width: 28px; height: 36px; text-align: center; outline: none; padding: 0; caret-color: transparent; font-family: inherit; font-size: 1.1rem; font-weight: 800; border: 2px solid var(--border-color); box-shadow: inset 0 -2px 0 var(--border-color); border-radius: 8px; background: var(--bg-card); color: var(--text-primary); transition: all 0.15s ease;" autocomplete="off">`;
+            inputCount++;
+        }
+    }
+    html += '</div>';
+    return html;
+}
+
+/**
+ * Compiles character input letters into a single text answer.
+ */
+function getTypedAnswer(word) {
+    if (!word) return '';
+    const inputs = Array.from(document.querySelectorAll('.deck-letter-input'));
+    let typed = '';
+    let inputIndex = 0;
+    
+    for (let i = 0; i < word.length; i++) {
+        const char = word.charAt(i);
+        if (/\s/.test(char)) {
+            typed += ' ';
+        } else if (/[.,\/#!$%\^&\*;:{}=\-_`~()]/.test(char)) {
+            typed += char;
+        } else {
+            const input = inputs[inputIndex];
+            if (input) {
+                typed += input.value || '';
+                inputIndex++;
+            }
+        }
+    }
+    return typed.trim();
 }
 
 // Global back to stacks click navigation binder
