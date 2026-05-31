@@ -24,6 +24,22 @@
     --danger: #b0524b;
     --warning: #b38815;
     --success: #4a805a;
+
+    /* Heatmap styling variables for Light Mode - subtle yet distinctive pastels to solid midtones */
+    --heatmap-empty: #ebeae4;
+    --heatmap-future: rgba(235, 234, 228, 0.4);
+
+    --heatmap-create-1: #fdf1d2;
+    --heatmap-create-2: #f6d27d;
+    --heatmap-create-3: #d99e2b;
+
+    --heatmap-review-1: #def7e7;
+    --heatmap-review-2: #8cd9a4;
+    --heatmap-review-3: #43a067;
+
+    --heatmap-combined-1: linear-gradient(135deg, #fdf1d2, #def7e7);
+    --heatmap-combined-2: linear-gradient(135deg, #f6d27d, #8cd9a4);
+    --heatmap-combined-3: linear-gradient(135deg, #d99e2b, #43a067);
 }
 
 body.dark-theme {
@@ -52,6 +68,22 @@ body.dark-theme {
     --danger: #b55e5e;
     --warning: #ab9351;
     --success: #488b72;
+
+    /* Heatmap styling variables for Dark Mode - premium deep jewel tones and golds */
+    --heatmap-empty: rgba(255, 255, 255, 0.06);
+    --heatmap-future: rgba(255, 255, 255, 0.018);
+
+    --heatmap-create-1: #4d3c1a;
+    --heatmap-create-2: #94722a;
+    --heatmap-create-3: #e5b955;
+
+    --heatmap-review-1: #1a3322;
+    --heatmap-review-2: #346644;
+    --heatmap-review-3: #52b76e;
+
+    --heatmap-combined-1: linear-gradient(135deg, #4d3c1a, #1a3322);
+    --heatmap-combined-2: linear-gradient(135deg, #94722a, #346644);
+    --heatmap-combined-3: linear-gradient(135deg, #e5b955, #52b76e);
 }
 
 /* Global Premium Transition Rules for Seamless Color/Background Switching */

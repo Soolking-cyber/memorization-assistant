@@ -1470,39 +1470,39 @@ function renderStatistics() {
             const reviews = dailyReviews[dateStr] || 0;
             const creations = dailyCreations[dateStr] || 0;
             
-            let bg = 'rgba(255, 255, 255, 0.06)';
+            let bg = 'var(--heatmap-empty)';
             let opacity = '1.0';
             const isFuture = tempDate > today;
             
             if (isFuture) {
-                bg = 'rgba(255, 255, 255, 0.018)';
+                bg = 'var(--heatmap-future)';
             } else if (reviews > 0 && creations > 0) {
                 // Combined activity (Gold-Green gradient)
                 const totalActivity = reviews + creations;
                 if (totalActivity <= 3) {
-                    bg = 'linear-gradient(135deg, #4d3c1a, #1a3322)';
+                    bg = 'var(--heatmap-combined-1)';
                 } else if (totalActivity <= 8) {
-                    bg = 'linear-gradient(135deg, #94722a, #346644)';
+                    bg = 'var(--heatmap-combined-2)';
                 } else {
-                    bg = 'linear-gradient(135deg, #e5b955, #52b76e)';
+                    bg = 'var(--heatmap-combined-3)';
                 }
             } else if (creations > 0) {
                 // Gold / Yellow representing creations
                 if (creations <= 1) {
-                    bg = '#4d3c1a';
+                    bg = 'var(--heatmap-create-1)';
                 } else if (creations <= 3) {
-                    bg = '#94722a';
+                    bg = 'var(--heatmap-create-2)';
                 } else {
-                    bg = '#e5b955';
+                    bg = 'var(--heatmap-create-3)';
                 }
             } else if (reviews > 0) {
                 // Green representing reviews
                 if (reviews <= 3) {
-                    bg = '#1a3322';
+                    bg = 'var(--heatmap-review-1)';
                 } else if (reviews <= 8) {
-                    bg = '#346644';
+                    bg = 'var(--heatmap-review-2)';
                 } else {
-                    bg = '#52b76e';
+                    bg = 'var(--heatmap-review-3)';
                 }
             }
             
