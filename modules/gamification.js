@@ -1,6 +1,7 @@
 import { state } from './state.js';
-import { dbGet } from './db.js';
+import { dbGet, dbSet } from './db.js';
 import { switchView } from './navigation.js';
+import { supabase } from './supabaseClient.js';
 import { calculateMatchPercentage } from './practice/spellingEngine.js';
 import { applySM2Grade } from './spacedRepetition.js';
 import { logReviewAttempt } from './practice.js';
@@ -544,6 +545,92 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
             <div>Correct Spelling:</div>
             <div class="feedback-correct-val">${card.back}</div>
         `;
+        
+        // Show custom interactive Pokémon style clue-attachment form if guess failed
+        const abilitiesContainer = document.querySelector('.study-card-container .card-abilities-section');
+        if (abilitiesContainer) {
+            abilitiesContainer.innerHTML = `
+                <div class="ability-slot attach-clue-container" style="display: flex; flex-direction: column; gap: 8px; width: 100%; padding: 12px; background: rgba(229, 185, 85, 0.04); border: 2px dashed rgba(229, 185, 85, 0.25); border-radius: 12px; margin-top: 8px;">
+                    <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--warning); display: flex; align-items: center; gap: 6px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" style="vertical-align: middle;">
+                            <polygon points="12 2 2 22 22 22 12 2"></polygon>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <span>Unlock Clue Modifier (Attach Clue)</span>
+                    </div>
+                    <span style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
+                        Teach this card a clue sentence containing the target word <strong>"${card.back}"</strong> to tame it easily next time!
+                    </span>
+                    <div style="display: flex; gap: 8px; width: 100%; margin-top: 4px;">
+                        <input type="text" id="deck-attach-sentence-input" class="input-field" placeholder="e.g. He showed high affinity for the task." style="flex: 1; padding: 6px 10px; font-size: 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); outline: none;">
+                        <button id="btn-deck-save-sentence" class="btn" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 800; background: var(--warning); color: #000; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s;">Save Clue</button>
+                    </div>
+                    <div id="deck-sentence-error" style="font-size: 0.75rem; font-weight: 700; color: var(--danger); margin-top: 2px;" class="hidden"></div>
+                </div>
+            `;
+            
+            const saveBtn = abilitiesContainer.querySelector('#btn-deck-save-sentence');
+            const inputEl = abilitiesContainer.querySelector('#deck-attach-sentence-input');
+            const errorEl = abilitiesContainer.querySelector('#deck-sentence-error');
+            
+            if (saveBtn && inputEl && errorEl) {
+                // Focus the attachment field automatically so they can type immediately
+                setTimeout(() => inputEl.focus(), 150);
+                
+                saveBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const sentenceText = inputEl.value.trim();
+                    if (!sentenceText) {
+                        errorEl.textContent = "Please enter an example sentence clue!";
+                        errorEl.style.color = "var(--danger)";
+                        errorEl.classList.remove('hidden');
+                        return;
+                    }
+                    
+                    const escapedTarget = card.back.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                    const substringCheckRegex = new RegExp(escapedTarget, 'i');
+                    if (!substringCheckRegex.test(sentenceText)) {
+                        errorEl.textContent = `The sentence must contain the target word "${card.back}"!`;
+                        errorEl.style.color = "var(--danger)";
+                        errorEl.classList.remove('hidden');
+                        return;
+                    }
+                    
+                    const savedSentences = state.exampleSentences[card.id];
+                    let sentencesArray = [];
+                    if (Array.isArray(savedSentences)) {
+                        sentencesArray = [...savedSentences];
+                    } else if (typeof savedSentences === 'string' && savedSentences.trim().length > 0) {
+                        sentencesArray = [savedSentences];
+                    }
+                    sentencesArray.push(sentenceText);
+                    state.exampleSentences[card.id] = sentencesArray;
+                    await dbSet('exampleSentences', state.exampleSentences);
+                    
+                    card.example_sentences = sentencesArray;
+                    
+                    if (state.userSession && supabase) {
+                        try {
+                            await supabase
+                                .from('flashcards')
+                                .update({ example_sentences: sentencesArray })
+                                .eq('id', card.id)
+                                .eq('user_id', state.userSession.user.id);
+                        } catch(err) {
+                            console.error("Failed to sync example sentence from Poke card stack:", err);
+                        }
+                    }
+                    
+                    errorEl.innerHTML = `Clue saved successfully! Ability unlocked. <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="12" height="12" style="vertical-align: middle; margin-left: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+                    errorEl.style.color = "var(--success)";
+                    errorEl.classList.remove('hidden');
+                    saveBtn.disabled = true;
+                    inputEl.disabled = true;
+                    try { playUISound('success'); } catch(soundErr) {}
+                });
+            }
+        }
     }
     
     // Modify button text to prompt proceeding
