@@ -475,11 +475,14 @@ body.logged-out .app-container {
     color: var(--text-primary);
 }
 .pill-value.highlight {
-    color: var(--success) !important;
+    color: var(--text-primary);
 }
-.stat-pill.active {
+.stat-pill.streak-completed {
     border-color: var(--success) !important;
     box-shadow: none !important;
+}
+.stat-pill.streak-completed .pill-value {
+    color: var(--success) !important;
 }
 
 /* Duolingo Practice Skills Grid Section & Dynamic Tabs */
