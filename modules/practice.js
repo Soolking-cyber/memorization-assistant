@@ -286,43 +286,43 @@ export function renderCurrentCard() {
     }
     
     if (sentences.length > 0) {
-        exerciseTitleEl.textContent = "Fill in the blank clues";
+        exerciseTitleEl.textContent = "Complete the sentences with the correct word";
         
-        let blanksHtml = '';
-        const targetWords = getTargetWordsForSentences(card.back.trim(), sentences);
+        const explanationHtml = card.front.replace(/\n/g, '<br>');
         
-        sentences.forEach((sentence, idx) => {
-            const targetWord = targetWords[idx] || card.back.trim();
-            const blanked = blankOutWordInSentence(sentence, targetWord);
-            blanksHtml += `
-                <div class="blank-sentence-clue" style="margin-bottom: 24px; padding: 12px; border-radius: 8px; background: var(--bg-hover); border-left: 4px solid var(--accent); text-align: left;">
-                    <p style="font-size: 0.95rem; font-weight: 600; line-height: 1.4; color: var(--text-primary); margin-bottom: 8px;">${blanked}</p>
-                    <div class="sentence-boxes-wrapper" data-sentence-index="${idx}" style="display: flex; gap: 4px; align-items: center; justify-content: flex-start; flex-wrap: wrap;"></div>
+        let sentencesHtml = '<div class="practice-sentence-list" style="display: flex; flex-direction: column; gap: 20px; width: 100%; text-align: left; margin: 10px 0;">';
+        let currentInputIndex = 0;
+        sentences.forEach((s, idx) => {
+            const blankedObj = blankOutWordInSentence(s, targetWord, currentInputIndex);
+            currentInputIndex = blankedObj.nextIndex;
+            
+            sentencesHtml += `
+                <div class="practice-sentence-item" style="display: flex; gap: 12px; font-size: 1.3rem; font-weight: 700; color: var(--text-primary); line-height: 1.8; word-break: normal; overflow-wrap: break-word; align-items: flex-start;">
+                    <span class="sentence-number" style="color: var(--accent); min-width: 24px; font-size: 1.15rem; font-weight: 800; text-align: right; padding-top: 2px;">${idx + 1}.</span>
+                    <div class="sentence-text" style="flex: 1;">
+                        ${blankedObj.html}
+                    </div>
                 </div>
             `;
         });
+        sentencesHtml += '</div>';
         
         frontEl.innerHTML = `
-            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; text-align: center;">
-                <strong style="color: var(--accent); font-size: 1rem;">Recall:</strong>
-                <span style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">${card.front}</span>
-                <div class="blank-clues-container" style="margin-top: 16px;">
-                    ${blanksHtml}
+            <div class="practice-prompt-container" style="display: flex; flex-direction: column; gap: 16px; width: 100%; justify-content: center; align-items: center; text-align: center; margin: auto 0;">
+                <div class="practice-explanation" style="font-size: 1.15rem; font-weight: 600; color: var(--text-secondary); max-width: 100%; line-height: 1.5; word-break: normal; overflow-wrap: break-word;">
+                    ${explanationHtml}
                 </div>
+                <div class="practice-divider" style="width: 60px; height: 2px; background: var(--bg-tertiary); margin: 4px 0;"></div>
+                ${sentencesHtml}
             </div>
         `;
-        
-        setTimeout(() => {
-            const wrappers = document.querySelectorAll('.sentence-boxes-wrapper');
-            wrappers.forEach((wrapper, idx) => {
-                const targetWord = targetWords[idx] || card.back.trim();
-                renderBoxesForWord(targetWord, wrapper, idx);
-            });
-            initSpellingInputListeners();
-        }, 10);
-        
-        spellingArea.classList.remove('hidden');
+        spellingArea.classList.add('hidden');
         document.getElementById('typing-area').classList.add('hidden');
+        setTimeout(() => {
+            initSpellingInputListeners();
+            const firstInput = document.querySelector('.letter-input');
+            if (firstInput) firstInput.focus();
+        }, 50);
     } else {
         exerciseTitleEl.textContent = "Spelling Practice";
         frontEl.innerHTML = card.front;
