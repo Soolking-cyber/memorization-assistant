@@ -318,20 +318,20 @@ function renderActiveStackCard() {
                 let navigationHTML = '';
                 if (stats.sentences.length > 1) {
                     navigationHTML = `
-                        <div class="clue-nav-buttons" style="display: flex; gap: 6px;">
-                            <button class="clue-nav-btn btn-up" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 6px; padding: 2px 8px; cursor: pointer; font-size: 0.65rem; font-weight: 800;" title="Previous Clue">▲</button>
-                            <button class="clue-nav-btn btn-down" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 6px; padding: 2px 8px; cursor: pointer; font-size: 0.65rem; font-weight: 800;" title="Next Clue">▼</button>
+                        <div class="clue-nav-buttons">
+                            <button class="clue-nav-btn btn-up" title="Previous Clue">▲</button>
+                            <button class="clue-nav-btn btn-down" title="Next Clue">▼</button>
                         </div>
                     `;
                 }
                 
                 abilitiesContainer.innerHTML = `
-                    <div class="ability-slot" style="display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 8px 12px;">
+                    <div class="ability-slot">
                         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                             <span class="ability-badge">Clue ${activeSentenceIndex + 1} of ${stats.sentences.length}</span>
                             ${navigationHTML}
                         </div>
-                        <span class="ability-description" title="${rawSentence}" style="font-size: 0.85rem; font-style: normal; white-space: normal; line-height: 1.45; color: var(--text-secondary);">
+                        <span class="ability-description" title="${rawSentence}">
                             "${blurredSentence}"
                         </span>
                     </div>
@@ -366,6 +366,32 @@ function renderActiveStackCard() {
             if (firstInput) {
                 setTimeout(() => firstInput.focus(), 50);
             }
+            
+            // Bind satisfying sound effects and active visual pop-up animations to letters
+            const inputs = Array.from(letterBoxes.querySelectorAll('.deck-letter-input'));
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    try { playUISound('tooltip'); } catch(e) {}
+                });
+                
+                input.addEventListener('input', (e) => {
+                    if (e.target.value.length > 0) {
+                        try { playUISound('click'); } catch(e) {}
+                        
+                        // Apply micro-animation class and clear it
+                        e.target.classList.add('just-typed');
+                        setTimeout(() => {
+                            e.target.classList.remove('just-typed');
+                        }, 150);
+                    }
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace') {
+                        try { playUISound('click'); } catch(err) {}
+                    }
+                });
+            });
             
             letterBoxes.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
@@ -460,8 +486,8 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
     }
     
     // Disable typed text inputs
-    const input = document.getElementById('deck-practice-input');
-    if (input) input.disabled = true;
+    const inputs = document.querySelectorAll('.deck-letter-input');
+    inputs.forEach(inp => inp.disabled = true);
     
     // Recalculate SM-2 Intervals & Log attempt
     applySM2Grade(gradeInt);
@@ -607,7 +633,7 @@ function generateSpellingBoxesHTML(word) {
         } else if (/[.,\/#!$%\^&\*;:{}=\-_`~()]/.test(char)) {
             html += `<span class="letter-box-punctuation" style="margin: 0 2px; font-weight: 800; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; color: var(--text-secondary);">${char}</span>`;
         } else {
-            html += `<input type="text" class="letter-box letter-input deck-letter-input" max-length="1" data-index="${inputCount}" style="width: 28px; height: 36px; text-align: center; outline: none; padding: 0; caret-color: transparent; font-family: inherit; font-size: 1.1rem; font-weight: 800; border: 2px solid var(--border-color); box-shadow: inset 0 -2px 0 var(--border-color); border-radius: 8px; background: var(--bg-card); color: var(--text-primary); transition: all 0.15s ease;" autocomplete="off">`;
+            html += `<input type="text" class="letter-box letter-input deck-letter-input" maxlength="1" data-index="${inputCount}" autocomplete="off">`;
             inputCount++;
         }
     }
