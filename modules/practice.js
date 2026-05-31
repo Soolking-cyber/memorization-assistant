@@ -3,7 +3,7 @@ import { supabase } from './supabaseClient.js';
 import { playUISound } from './sound.js';
 import { toggleFullscreen } from './uiHelpers.js';
 import { applySM2Grade } from './spacedRepetition.js';
-import { queueTransaction } from './syncQueue';
+import { queueTransaction } from './syncQueue.js';
 
 import {
     blankOutWordInSentence,
