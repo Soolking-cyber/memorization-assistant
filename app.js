@@ -1073,65 +1073,62 @@ function switchView(viewId) {
     }
 
     document.querySelectorAll('.view').forEach(v => {
-        if (!v.classList.contains('hidden')) {
-            v.style.opacity = '0';
-            v.style.transform = 'translateY(10px) scale(0.995)';
-            setTimeout(() => {
-                v.classList.add('hidden');
-            }, 300);
-        }
+        v.style.opacity = '0';
+        v.style.transform = 'translateY(10px) scale(0.995)';
+        v.classList.add('hidden');
     });
 
-    setTimeout(() => {
-        const target = document.getElementById(`view-${viewId}`);
+    const target = document.getElementById(`view-${viewId}`);
+    if (target) {
         target.classList.remove('hidden');
         // trigger reflow
         void target.offsetWidth;
         target.style.opacity = '1';
         target.style.transform = 'translateY(0) scale(1)';
-        
-        // Update nav active states
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            if (btn.dataset.view === viewId) {
-                btn.classList.add('active');
-            } else {
-                if(!btn.classList.contains('primary-nav-btn')) btn.classList.remove('active');
-            }
-        });
+    }
 
-        if (viewId === 'dashboard') {
-            if (userSession && supabase) {
-                loadData(); // Reload all data from Supabase DB to ensure absolute UI accuracy
-            } else {
-                updateDashboard();
-            }
-        } else if (viewId === 'stats') {
-            renderStatistics();
+    // Update nav active states
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.dataset.view === viewId) {
+            btn.classList.add('active');
+        } else {
+            if(!btn.classList.contains('primary-nav-btn')) btn.classList.remove('active');
         }
-        if (viewId === 'create') {
-            draftCreateSentences = [];
-            const createSentencesInput = document.getElementById('create-new-sentence');
-            if (createSentencesInput) createSentencesInput.value = '';
-            const createError = document.getElementById('create-sentence-error');
-            if (createError) createError.style.display = 'none';
-            renderCreateSentencesList();
-            
-            // Default select type to 'Vocabulary'
-            const cardTypeSelect = document.getElementById('card-type');
-            if (cardTypeSelect) {
-                cardTypeSelect.value = 'Vocabulary';
-                // Trigger change toggle dynamically
-                handleTypeSelectChange({ target: cardTypeSelect });
-            }
-            
-            document.getElementById('card-front').focus();
+    });
+
+    if (viewId === 'dashboard') {
+        if (userSession && supabase) {
+            loadData(); // Reload all data from Supabase DB to ensure absolute UI accuracy
+        } else {
+            updateDashboard();
         }
-        if (viewId === 'manage') {
-            const searchInput = document.getElementById('manage-search-input');
-            if (searchInput) searchInput.value = '';
-            renderManageView();
+    } else if (viewId === 'stats') {
+        renderStatistics();
+    }
+    if (viewId === 'create') {
+        draftCreateSentences = [];
+        const createSentencesInput = document.getElementById('create-new-sentence');
+        if (createSentencesInput) createSentencesInput.value = '';
+        const createError = document.getElementById('create-sentence-error');
+        if (createError) createError.style.display = 'none';
+        renderCreateSentencesList();
+        
+        // Default select type to 'Vocabulary'
+        const cardTypeSelect = document.getElementById('card-type');
+        if (cardTypeSelect) {
+            cardTypeSelect.value = 'Vocabulary';
+            // Trigger change toggle dynamically
+            handleTypeSelectChange({ target: cardTypeSelect });
         }
-    }, 300);
+        
+        const cardFrontInput = document.getElementById('card-front');
+        if (cardFrontInput) cardFrontInput.focus();
+    }
+    if (viewId === 'manage') {
+        const searchInput = document.getElementById('manage-search-input');
+        if (searchInput) searchInput.value = '';
+        renderManageView();
+    }
 }
 
 async function removeType(typeToRemove) {
