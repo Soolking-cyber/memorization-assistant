@@ -1,13 +1,10 @@
 import { state } from './state.js';
 import { supabase } from './supabaseClient.js';
-import { ICONS } from './icons.js';
 import { playUISound } from './sound.js';
 import { toggleFullscreen } from './uiHelpers.js';
 import { applySM2Grade } from './spacedRepetition.js';
-import { renderPracticeNodes, setPracticeMapZoom, adjustPracticeViewportCentering } from './canvas.js';
-import { updateDashboard, getSelectedTypes } from './dashboard.js';
-import { switchView } from './navigation.js';
-import { loadData } from './flashcardCrud.js';
+import { queueTransaction } from './syncQueue';
+
 import {
     blankOutWordInSentence,
     renderBoxesForWord,
@@ -22,6 +19,22 @@ import {
     validateExampleSentence
 } from './practice/spellingEngine.js';
 
+import {
+    renderPracticeNodes,
+    initPracticeCanvasControls
+} from './practice/practiceCanvas.js';
+
+import {
+    saveIncorrectExampleSentence
+} from './practice/clueCollector.js';
+
+import {
+    startForcedPractice,
+    startPractice,
+    proceedToNextCard,
+    finishSession
+} from './practice/sessionManager.js';
+
 export {
     blankOutWordInSentence,
     renderBoxesForWord,
@@ -33,60 +46,18 @@ export {
     getEditDistance,
     calculateMatchPercentage,
     parseSequencingSteps,
-    validateExampleSentence
+    validateExampleSentence,
+    
+    renderPracticeNodes,
+    initPracticeCanvasControls,
+    
+    saveIncorrectExampleSentence,
+    
+    startForcedPractice,
+    startPractice,
+    proceedToNextCard,
+    finishSession
 };
-
-import { dbGet, dbSet } from './db.js';
-import { queueTransaction } from './syncQueue.js';
-
-export function startForcedPractice(count) {
-    const now = Date.now();
-    state.reviewQueue = state.cards.filter(c => c.nextReview <= now)
-                       .sort((a, b) => a.nextReview - b.nextReview);
-                       
-    if (state.reviewQueue.length === 0) {
-        document.getElementById('nav-buttons').classList.remove('hidden');
-        switchView('dashboard');
-        return;
-    }
-    
-    state.reviewQueue = state.reviewQueue.slice(0, count);
-    state.currentReviewIndex = 0;
-    document.getElementById('practice-total').textContent = state.reviewQueue.length;
-    
-    document.getElementById('active-card').style.display = 'block';
-    document.querySelector('.practice-controls').style.display = 'flex';
-    document.getElementById('practice-completed').classList.add('hidden');
-    document.querySelector('#view-practice .close-view').style.display = 'none';
-    
-    switchView('practice');
-    renderCurrentCard();
-}
-
-export function startPractice(forceStudyAhead = false) {
-    state.isForcedMode = false;
-    const now = Date.now();
-    const activeTypes = getSelectedTypes('practice-type-select');
-    if (forceStudyAhead) {
-        state.reviewQueue = state.cards.filter(c => activeTypes.includes(c.type));
-    } else {
-        state.reviewQueue = state.cards.filter(c => c.nextReview <= now && activeTypes.includes(c.type))
-                           .sort((a, b) => a.nextReview - b.nextReview);
-    }
-                       
-    if (state.reviewQueue.length === 0) return;
-    
-    state.currentReviewIndex = 0;
-    document.getElementById('practice-total').textContent = state.reviewQueue.length;
-    
-    document.getElementById('active-card').style.display = 'block';
-    document.querySelector('.practice-controls').style.display = 'flex';
-    document.getElementById('practice-completed').classList.add('hidden');
-    document.querySelector('#view-practice .close-view').style.display = 'block';
-    
-    switchView('practice');
-    renderCurrentCard();
-}
 
 export function renderCurrentCard() {
     const card = state.reviewQueue[state.currentReviewIndex];
@@ -192,55 +163,7 @@ export function renderCurrentCard() {
         
         if (mapData) {
             renderPracticeNodes('practice-map-nodes-container', mapData.nodes, mapData.links, 'practice-map-svg', 'practice-arrowhead');
-        }
-        
-        setTimeout(() => {
-            const scrollContainer = document.getElementById('practice-map-canvas-container');
-            const viewport = document.getElementById('practice-map-viewport');
-            if (scrollContainer && viewport && mapData && mapData.nodes && mapData.nodes.length > 0) {
-                let minX = Infinity;
-                let maxX = -Infinity;
-                let minY = Infinity;
-                let maxY = -Infinity;
-                
-                mapData.nodes.forEach(node => {
-                    const nx = Number(node.x) || 0;
-                    const ny = Number(node.y) || 0;
-                    if (nx < minX) minX = nx;
-                    if (nx > maxX) maxX = nx;
-                    if (ny < minY) minY = ny;
-                    if (ny > maxY) maxY = ny;
-                });
-                
-                const mapWidth = maxX - minX + 180;
-                const mapHeight = maxY - minY + 90;
-                const viewportWidth = mapWidth + 80;
-                const viewportHeight = mapHeight + 80;
-                
-                const containerWidth = scrollContainer.clientWidth || 400;
-                const containerHeight = scrollContainer.clientHeight || 400;
-                
-                let initialZoom = Math.min(1.0, Math.min(containerWidth / viewportWidth, containerHeight / viewportHeight));
-                initialZoom = Math.max(0.6, initialZoom);
-                
-                setPracticeMapZoom(initialZoom);
-                adjustPracticeViewportCentering(viewportWidth, viewportHeight);
-            }
-        }, 120);
-        
-        const btnPracticeZoomIn = document.getElementById('btn-practice-zoom-in');
-        if (btnPracticeZoomIn) btnPracticeZoomIn.addEventListener('click', () => setPracticeMapZoom(state.practiceMapZoom + 0.1));
-        const btnPracticeZoomOut = document.getElementById('btn-practice-zoom-out');
-        if (btnPracticeZoomOut) btnPracticeZoomOut.addEventListener('click', () => setPracticeMapZoom(state.practiceMapZoom - 0.1));
-        const btnPracticeZoomReset = document.getElementById('btn-practice-zoom-reset');
-        if (btnPracticeZoomReset) btnPracticeZoomReset.addEventListener('click', () => setPracticeMapZoom(1.0));
-        const btnPracticeFullscreen = document.getElementById('btn-practice-fullscreen');
-        if (btnPracticeFullscreen) {
-            btnPracticeFullscreen.addEventListener('click', () => toggleFullscreen('practice-map-canvas-container', 'btn-practice-fullscreen'));
-        }
-        const btnPracticeClose = document.querySelector('#practice-map-canvas-container .fullscreen-close-btn');
-        if (btnPracticeClose) {
-            btnPracticeClose.addEventListener('click', () => toggleFullscreen('practice-map-canvas-container', 'btn-practice-fullscreen'));
+            initPracticeCanvasControls(mapData);
         }
         
         backEl.innerHTML = `<strong style="color:var(--accent);">Memory Map Title:</strong> ${mapData ? mapData.title : ''}`;
@@ -301,41 +224,32 @@ export function renderCurrentCard() {
                         ${card.front}
                     </div>
                 </div>
-                
-                ${card.image_front_url ? `
-                    <div class="image-card-frame" style="position: relative; overflow: hidden; border-radius: 16px; border: 2px solid var(--border-color); background: rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; width: auto; max-width: 100%; height: 100%; max-height: 520px; align-self: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3); transition: border-color 0.3s ease; flex-grow: 1;">
-                        <img src="${card.image_front_url}" style="height: 100%; max-height: 520px; width: auto; max-width: 100%; object-fit: contain; display: block;" alt="Image Card Prompt">
-                    </div>
-                ` : `
-                    <div class="practice-explanation" style="font-size: 1.45rem; font-weight: 700; color: var(--text-primary); text-align: center; max-width: 100%; line-height: 1.5; word-break: normal; overflow-wrap: break-word; margin: auto 0;">
-                        ${card.front.replace(/\n/g, '<br>')}
-                    </div>
-                `}
+                <div class="image-card-frame">
+                    <img src="${card.image_front_url || card.image_back_url}" alt="Memory step image" />
+                </div>
             </div>
         `;
         
-        const targetSteps = parseSequencingSteps(card.back);
-        let seqHtml = '';
-        targetSteps.forEach((step, idx) => {
-            seqHtml += `
-                <div class="sequencing-input-row" style="margin-bottom: 4px;">
-                    <span style="font-weight: 800; font-size: 1.15rem; color: var(--accent); min-width: 24px; text-align: right;">${idx + 1}.</span>
-                    <input type="text" class="practice-sequence-input" data-step-index="${idx}" placeholder="Enter step ${idx + 1}..." style="flex: 1; background: transparent; border: none; outline: none; color: var(--text-primary); font-family: inherit; font-size: 1rem; padding: 0;">
-                </div>
-            `;
-        });
+        backEl.innerHTML = `<strong style="color:var(--accent);">Target sequence:</strong> ${card.back}`;
         
-        if (seqContainer) {
-            seqContainer.innerHTML = seqHtml;
-            seqContainer.classList.remove('hidden');
-            
-            seqContainer.querySelectorAll('.practice-sequence-input').forEach(input => {
-                input.addEventListener('keydown', (evt) => {
-                    if (evt.key === 'Enter') {
-                        evt.preventDefault();
-                        evt.stopPropagation();
-                        const nextIdx = parseInt(input.dataset.stepIndex) + 1;
-                        const nextInput = seqContainer.querySelector(`.practice-sequence-input[data-step-index="${nextIdx}"]`);
+        const steps = parseSequencingSteps(card.back);
+        if (seqContainer && steps.length > 0) {
+            seqContainer.innerHTML = '';
+            steps.forEach((step, idx) => {
+                const row = document.createElement('div');
+                row.className = 'sequencing-input-row';
+                row.innerHTML = `
+                    <span class="sequencing-step-number">${idx + 1}</span>
+                    <input type="text" class="practice-sequence-input" placeholder="Recall step ${idx + 1}..." data-step-index="${idx}" />
+                `;
+                seqContainer.appendChild(row);
+                
+                const input = row.querySelector('.practice-sequence-input');
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const allInputs = document.querySelectorAll('.practice-sequence-input');
+                        const nextInput = allInputs[idx + 1];
                         if (nextInput) {
                             nextInput.focus();
                         } else {
@@ -344,35 +258,19 @@ export function renderCurrentCard() {
                     }
                 });
             });
-        }
-        
-        document.getElementById('practice-input').classList.add('hidden');
-        spellingArea.classList.add('hidden');
-        
-        backEl.innerHTML = card.back.replace(/\n/g, '<br>');
-        
-        const frontImg = document.getElementById('practice-front-img');
-        if (frontImg) frontImg.classList.add('hidden');
-        
-        const backImg = document.getElementById('practice-back-img');
-        if (card.image_back_url) {
-            backImg.src = card.image_back_url;
-            backImg.classList.remove('hidden');
-        } else {
-            backImg.classList.add('hidden');
+            seqContainer.classList.remove('hidden');
         }
         
         document.querySelector('.card-front').classList.remove('hidden');
         document.querySelector('.card-back').classList.add('hidden');
         
         document.getElementById('typing-area').classList.remove('hidden');
+        document.getElementById('practice-input').classList.add('hidden');
         document.getElementById('evaluation-area').classList.add('hidden');
         
         setTimeout(() => {
-            if (seqContainer) {
-                const firstSeqInput = seqContainer.querySelector('.practice-sequence-input');
-                if (firstSeqInput) firstSeqInput.focus();
-            }
+            const firstInput = document.querySelector('.practice-sequence-input');
+            if (firstInput) firstInput.focus();
         }, 100);
         return;
     }
@@ -386,137 +284,89 @@ export function renderCurrentCard() {
             sentences = [savedSentences];
         }
     }
-    const targetWord = card.back.trim();
-    const isSingleWord = !targetWord.includes(' ') && targetWord.length > 0;
     
     if (sentences.length > 0) {
-        exerciseTitleEl.textContent = "Complete the sentences with the correct word";
+        exerciseTitleEl.textContent = "Fill in the blank clues";
         
-        const explanationHtml = card.front.replace(/\n/g, '<br>');
+        let blanksHtml = '';
+        const targetWords = getTargetWordsForSentences(card.back.trim(), sentences);
         
-        let sentencesHtml = '<div class="practice-sentence-list" style="display: flex; flex-direction: column; gap: 20px; width: 100%; text-align: left; margin: 10px 0;">';
-        let currentInputIndex = 0;
-        sentences.forEach((s, idx) => {
-            const blankedObj = blankOutWordInSentence(s, targetWord, currentInputIndex);
-            currentInputIndex = blankedObj.nextIndex;
-            
-            sentencesHtml += `
-                <div class="practice-sentence-item" style="display: flex; gap: 12px; font-size: 1.3rem; font-weight: 700; color: var(--text-primary); line-height: 1.8; word-break: normal; overflow-wrap: break-word; align-items: flex-start;">
-                    <span class="sentence-number" style="color: var(--accent); min-width: 24px; font-size: 1.15rem; font-weight: 800; text-align: right; padding-top: 2px;">${idx + 1}.</span>
-                    <div class="sentence-text" style="flex: 1;">
-                        ${blankedObj.html}
-                    </div>
+        sentences.forEach((sentence, idx) => {
+            const targetWord = targetWords[idx] || card.back.trim();
+            const blanked = blankOutWordInSentence(sentence, targetWord);
+            blanksHtml += `
+                <div class="blank-sentence-clue" style="margin-bottom: 24px; padding: 12px; border-radius: 8px; background: var(--bg-hover); border-left: 4px solid var(--accent); text-align: left;">
+                    <p style="font-size: 0.95rem; font-weight: 600; line-height: 1.4; color: var(--text-primary); margin-bottom: 8px;">${blanked}</p>
+                    <div class="sentence-boxes-wrapper" data-sentence-index="${idx}" style="display: flex; gap: 4px; align-items: center; justify-content: flex-start; flex-wrap: wrap;"></div>
                 </div>
             `;
         });
-        sentencesHtml += '</div>';
         
         frontEl.innerHTML = `
-            <div class="practice-prompt-container" style="display: flex; flex-direction: column; gap: 16px; width: 100%; justify-content: center; align-items: center; text-align: center; margin: auto 0;">
-                <div class="practice-explanation" style="font-size: 1.15rem; font-weight: 600; color: var(--text-secondary); max-width: 100%; line-height: 1.5; word-break: normal; overflow-wrap: break-word;">
-                    ${explanationHtml}
+            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; text-align: center;">
+                <strong style="color: var(--accent); font-size: 1rem;">Recall:</strong>
+                <span style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">${card.front}</span>
+                <div class="blank-clues-container" style="margin-top: 16px;">
+                    ${blanksHtml}
                 </div>
-                <div class="practice-divider" style="width: 60px; height: 2px; background: var(--bg-tertiary); margin: 4px 0;"></div>
-                ${sentencesHtml}
             </div>
         `;
-        spellingArea.classList.add('hidden');
+        
+        setTimeout(() => {
+            const wrappers = document.querySelectorAll('.sentence-boxes-wrapper');
+            wrappers.forEach((wrapper, idx) => {
+                const targetWord = targetWords[idx] || card.back.trim();
+                renderBoxesForWord(targetWord, wrapper, idx);
+            });
+            initSpellingInputListeners();
+        }, 10);
+        
+        spellingArea.classList.remove('hidden');
+        document.getElementById('typing-area').classList.add('hidden');
     } else {
-        exerciseTitleEl.textContent = "Question";
-        
-        const explanationHtml = card.front.replace(/\n/g, '<br>');
-        frontEl.innerHTML = `
-            <div class="practice-explanation-only" style="font-size: 1.45rem; font-weight: 700; color: var(--text-primary); max-width: 100%; line-height: 1.5; word-break: normal; overflow-wrap: break-word; text-align: center; margin: auto 0;">
-                ${explanationHtml}
-            </div>
-        `;
-        
-        if (isSingleWord && targetWord.length > 1) {
-            spellingArea.classList.remove('hidden');
-            renderSpellingBoxes(targetWord);
-        } else {
-            spellingArea.classList.add('hidden');
-        }
+        exerciseTitleEl.textContent = "Spelling Practice";
+        frontEl.innerHTML = card.front;
+        spellingArea.classList.remove('hidden');
+        renderSpellingBoxes(card.back.trim());
+        document.getElementById('typing-area').classList.add('hidden');
+        initSpellingInputListeners();
     }
     
-    backEl.innerHTML = card.back.replace(/\n/g, '<br>');
+    backEl.innerHTML = card.back;
     
     const frontImg = document.getElementById('practice-front-img');
-    if (card.image_front_url) {
-        frontImg.src = card.image_front_url;
-        frontImg.classList.remove('hidden');
-    } else {
-        frontImg.classList.add('hidden');
+    if (frontImg) {
+        if (card.image_front_url) {
+            frontImg.src = card.image_front_url;
+            frontImg.classList.remove('hidden');
+        } else {
+            frontImg.classList.add('hidden');
+        }
     }
-
     const backImg = document.getElementById('practice-back-img');
-    if (card.image_back_url) {
-        backImg.src = card.image_back_url;
-        backImg.classList.remove('hidden');
-    } else {
-        backImg.classList.add('hidden');
+    if (backImg) {
+        if (card.image_back_url) {
+            backImg.src = card.image_back_url;
+            backImg.classList.remove('hidden');
+        } else {
+            backImg.classList.add('hidden');
+        }
     }
     
     document.querySelector('.card-front').classList.remove('hidden');
     document.querySelector('.card-back').classList.add('hidden');
-    
-    document.getElementById('typing-area').classList.remove('hidden');
-    document.getElementById('practice-input').value = '';
-    document.getElementById('evaluation-area').classList.add('hidden');
-    
-    const firstSpellingInput = document.querySelector('.letter-input');
-    if (firstSpellingInput) {
-        document.getElementById('practice-input').classList.add('hidden');
-        setTimeout(() => {
-            firstSpellingInput.focus();
-        }, 50);
-    } else {
-        document.getElementById('practice-input').classList.remove('hidden');
-        document.getElementById('practice-input').focus();
-    }
 }
 
 export async function logReviewAttempt(cardId, gradeInt, score) {
-    let logs = [];
-    try {
-        logs = await dbGet('review_activity_logs') || [];
-    } catch(e) {
-        logs = [];
-    }
-    
-    if (!Array.isArray(logs)) {
-        logs = [];
-    }
-    
-    const newAttempt = {
-        timestamp: Date.now(),
-        cardId: cardId,
-        grade: gradeInt,
-        score: score
-    };
-    logs.push(newAttempt);
-    
-    if (logs.length > 10000) {
-        logs.shift();
-    }
-    
-    await dbSet('review_activity_logs', logs);
-
-    if (!state.userSession || !supabase) return;
-
     const payload = {
         card_id: cardId,
         grade: gradeInt,
         score: score
     };
-
-    if (!navigator.onLine) {
-        console.log("[Offline] Queued review log transaction.");
-        await queueTransaction('insert_log', payload);
-        return;
-    }
-
+    
     try {
+        if (!state.userSession || !supabase) return;
+        
         const { error } = await supabase
             .from('review_logs')
             .insert([{
@@ -755,121 +605,4 @@ export async function evaluateAnswer() {
     }
     
     document.getElementById('evaluation-area').classList.remove('hidden');
-}
-
-export async function saveIncorrectExampleSentence() {
-    const card = state.reviewQueue[state.currentReviewIndex];
-    if (!card) return;
-    
-    const sentenceInput = document.getElementById('incorrect-sentence-input');
-    const sentenceText = sentenceInput.value.trim();
-    const errorMsg = document.getElementById('sentence-error-msg');
-    const saveBtn = document.getElementById('btn-save-sentence');
-    
-    if (!sentenceText) {
-        errorMsg.textContent = "Please enter an example sentence!";
-        errorMsg.style.color = "#ea4335";
-        errorMsg.classList.remove('hidden');
-        return;
-    }
-    
-    if (!validateExampleSentence(sentenceText, card.back)) {
-        errorMsg.textContent = `The sentence must contain the target word "${card.back}"!`;
-        errorMsg.style.color = "#ea4335";
-        errorMsg.classList.remove('hidden');
-        return;
-    }
-    
-    const savedSentences = state.exampleSentences[card.id];
-    let sentencesArray = [];
-    if (Array.isArray(savedSentences)) {
-        sentencesArray = [...savedSentences];
-    } else if (typeof savedSentences === 'string') {
-        sentencesArray = [savedSentences];
-    }
-    
-    sentencesArray.push(sentenceText);
-    state.exampleSentences[card.id] = sentencesArray;
-    await dbSet('exampleSentences', state.exampleSentences);
-
-    card.example_sentences = sentencesArray;
-
-    if (state.userSession && supabase) {
-        try {
-            const { error } = await supabase
-                .from('flashcards')
-                .update({ example_sentences: sentencesArray })
-                .eq('id', card.id)
-                .eq('user_id', state.userSession.user.id);
-            if (error) {
-                console.error('Error updating example sentences in Supabase:', error);
-            }
-        } catch (err) {
-            console.error('Error syncing example sentences update to DB:', err);
-        }
-    }
-    
-    errorMsg.innerHTML = "Sentence saved as memory clue! " + ICONS.check;
-    errorMsg.style.color = "#34a853";
-    errorMsg.classList.remove('hidden');
-    
-    saveBtn.disabled = true;
-    setTimeout(() => {
-        saveBtn.disabled = false;
-        errorMsg.classList.add('hidden');
-        document.getElementById('incorrect-sentence-container').classList.add('hidden');
-        document.getElementById('btn-next-card').classList.remove('hidden');
-    }, 1500);
-}
-
-export function proceedToNextCard() {
-    const flashcardEl = document.getElementById('active-card');
-    flashcardEl.style.transform = 'translateY(-20px) scale(0.95)';
-    flashcardEl.style.opacity = '0';
-    
-    setTimeout(() => {
-        flashcardEl.style.transform = 'none';
-        flashcardEl.style.opacity = '1';
-        
-        state.currentReviewIndex++;
-        if (state.currentReviewIndex >= state.reviewQueue.length) {
-            finishSession();
-        } else {
-            renderCurrentCard();
-        }
-    }, 300);
-}
-
-export async function finishSession() {
-    playUISound('complete');
-    try {
-        if (typeof window.confetti === 'function') {
-            window.confetti({
-                particleCount: 150,
-                spread: 80,
-                origin: { y: 0.6 }
-            });
-        }
-    } catch (err) {
-        console.warn("Confetti call failed:", err);
-    }
-
-    if (state.userSession && supabase) {
-        await loadData();
-    } else {
-        updateDashboard();
-    }
-    
-    document.getElementById('active-card').style.display = 'none';
-    document.querySelector('.practice-controls').style.display = 'none';
-    
-    if (state.isForcedMode) {
-        document.getElementById('nav-buttons').classList.remove('hidden');
-        switchView('dashboard');
-    } else {
-        const completedMsg = document.getElementById('practice-completed');
-        completedMsg.innerHTML = `<h2>Session Complete</h2><p style="color: var(--text-secondary); margin-bottom: 24px;">Your brain is getting stronger.</p><button class="btn primary" id="btn-finish-practice">Back to Dashboard</button>`;
-        document.getElementById('btn-finish-practice').addEventListener('click', () => switchView('dashboard'));
-        completedMsg.classList.remove('hidden');
-    }
 }
