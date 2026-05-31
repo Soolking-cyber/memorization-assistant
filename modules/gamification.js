@@ -257,7 +257,6 @@ function renderActiveStackCard() {
                 <div class="card-header">
                     <div class="card-title-area">
                         <span class="card-rarity-badge">${stats.tier.name}</span>
-                        <h4 class="card-title-text" style="font-size: 1.1rem; font-weight: 800; color: var(--text-primary);">Untamed Memory</h4>
                     </div>
                     <span class="card-type-indicator">${card.type || 'Unknown'}</span>
                 </div>
