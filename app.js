@@ -2796,6 +2796,7 @@ function renderCurrentCard() {
                 input.addEventListener('keydown', (evt) => {
                     if (evt.key === 'Enter') {
                         evt.preventDefault();
+                        evt.stopPropagation(); // Prevent bubbling up to document and double triggering!
                         const nextIdx = parseInt(input.dataset.stepIndex) + 1;
                         const nextInput = seqContainer.querySelector(`.practice-sequence-input[data-step-index="${nextIdx}"]`);
                         if (nextInput) {
@@ -3191,6 +3192,7 @@ function initSpellingInputListeners() {
                 }
             } else if (e.key === 'Enter') {
                 e.preventDefault();
+                e.stopImmediatePropagation(); // Prevent double trigger!
                 document.getElementById('btn-submit-answer').click();
             }
         }
@@ -5777,6 +5779,7 @@ function renderPracticeNodes(containerId, originalNodes, links, svgId, arrowhead
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
+                    e.stopPropagation(); // Prevent bubbling up to document and double triggering!
                     document.getElementById('btn-submit-answer').click();
                 }
             });
