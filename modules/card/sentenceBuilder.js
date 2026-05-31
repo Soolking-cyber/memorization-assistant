@@ -1,5 +1,6 @@
 import { state } from '../state.js';
 import { validateExampleSentence } from '../practice.js';
+import { ICONS } from '../icons.js';
 
 export function handleCreateAddSentence() {
     const sentenceInput = document.getElementById('create-new-sentence');
@@ -174,4 +175,3 @@ export function deleteEditSentence(index) {
 
 window.deleteDraftCreateSentence = deleteDraftCreateSentence;
 window.deleteEditSentence = deleteEditSentence;
-window.renderManageView = renderManageView;
