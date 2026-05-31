@@ -1120,9 +1120,6 @@ function switchView(viewId) {
             // Trigger change toggle dynamically
             handleTypeSelectChange({ target: cardTypeSelect });
         }
-        
-        const cardFrontInput = document.getElementById('card-front');
-        if (cardFrontInput) cardFrontInput.focus();
     }
     if (viewId === 'manage') {
         const searchInput = document.getElementById('manage-search-input');
