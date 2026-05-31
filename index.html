@@ -19,6 +19,14 @@
         <div class="top-header-content">
             <h1 class="logo" data-view="dashboard" style="cursor: pointer;">8<span>eacher</span></h1>
             <div class="top-header-right">
+                <!-- Premium Dynamic Sync Indicator -->
+                <div id="sync-indicator" class="sync-indicator hidden" title="Syncing with database...">
+                    <svg class="spin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                    </svg>
+                    <span>Syncing...</span>
+                </div>
+                
                 <!-- Monochromatic Theme Toggle Button -->
                 <button class="header-icon-btn" id="btn-theme-toggle" title="Toggle Theme">
                     <!-- Moon icon for light mode (meaning switch to dark) -->

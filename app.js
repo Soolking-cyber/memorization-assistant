@@ -715,6 +715,18 @@ async function checkAuth() {
     if (session) {
         userSession = session;
         updateUserAvatarBadge();
+        
+        // Stale-While-Revalidate: Load local storage cache immediately for instant snapping UI
+        try {
+            const cached = localStorage.getItem('cached_cards');
+            if (cached) {
+                cards = JSON.parse(cached) || [];
+                updateDashboard();
+            }
+        } catch (e) {
+            console.warn("Failed to load cached cards on startup:", e);
+        }
+        
         await loadData();
         handleSessionStart();
     } else {
@@ -728,6 +740,18 @@ async function checkAuth() {
         if (session && !userSession) {
             userSession = session;
             updateUserAvatarBadge();
+            
+            // Load local storage cache immediately
+            try {
+                const cached = localStorage.getItem('cached_cards');
+                if (cached) {
+                    cards = JSON.parse(cached) || [];
+                    updateDashboard();
+                }
+            } catch (e) {
+                console.warn("Failed to load cached cards on auth change:", e);
+            }
+            
             await loadData();
             handleSessionStart();
         } else if (!session && userSession) {
@@ -835,65 +859,77 @@ async function handleLogout() {
 async function loadData() {
     if (!userSession) return;
     
-    const { data, error } = await supabase
-        .from('flashcards')
-        .select('*')
-        .eq('user_id', userSession.user.id);
+    const syncInd = document.getElementById('sync-indicator');
+    if (syncInd) syncInd.classList.remove('hidden');
+    
+    try {
+        const { data, error } = await supabase
+            .from('flashcards')
+            .select('*')
+            .eq('user_id', userSession.user.id);
 
-    if (error) {
-        console.error("Error loading cards:", error);
-    } else {
-        cards = data || [];
-        
-        // Ensure all cards have a valid type and precise created_at timestamp
-        let migratedCards = [];
-        cards.forEach(card => {
-            let needsUpdate = false;
-            if (!card.type || card.type === 'General' || card.type === 'mixed') {
-                card.type = 'Unknown';
-                needsUpdate = true;
-            }
-            if (!card.created_at) {
-                // Initialise missing created_at to the current time so it's tracked precisely and saved in the DB
-                card.created_at = new Date().toISOString();
-                needsUpdate = true;
-            }
-            if (needsUpdate) {
-                migratedCards.push(card);
-            }
-            if (card.example_sentences) {
-                exampleSentences[card.id] = card.example_sentences;
-            } else {
-                // Backwards compatibility/fallback to local storage if not in DB yet
-                if (!exampleSentences[card.id]) {
-                    exampleSentences[card.id] = [];
+        if (error) {
+            console.error("Error loading cards:", error);
+        } else {
+            cards = data || [];
+            
+            // Save fresh cards to local cache immediately
+            localStorage.setItem('cached_cards', JSON.stringify(cards));
+            
+            // Ensure all cards have a valid type and precise created_at timestamp
+            let migratedCards = [];
+            cards.forEach(card => {
+                let needsUpdate = false;
+                if (!card.type || card.type === 'General' || card.type === 'mixed') {
+                    card.type = 'Unknown';
+                    needsUpdate = true;
                 }
-            }
-        });
-        localStorage.setItem('exampleSentences', JSON.stringify(exampleSentences));
-        
-        // Batch sync migrated cards to the database
-        if (migratedCards.length > 0) {
-            console.log(`Migrating ${migratedCards.length} cards with missing types/timestamps...`);
-            Promise.all(migratedCards.map(card => 
-                supabase.from('flashcards')
-                    .update({
-                        type: card.type,
-                        created_at: card.created_at
-                    })
-                    .eq('id', card.id)
-                    .eq('user_id', userSession.user.id)
-            )).then(() => {
-                console.log("Database migration and synchronization complete!");
-            }).catch(err => {
-                console.error("Failed to sync migrated cards to database:", err);
+                if (!card.created_at) {
+                    // Initialise missing created_at to the current time so it's tracked precisely and saved in the DB
+                    card.created_at = new Date().toISOString();
+                    needsUpdate = true;
+                }
+                if (needsUpdate) {
+                    migratedCards.push(card);
+                }
+                if (card.example_sentences) {
+                    exampleSentences[card.id] = card.example_sentences;
+                } else {
+                    // Backwards compatibility/fallback to local storage if not in DB yet
+                    if (!exampleSentences[card.id]) {
+                        exampleSentences[card.id] = [];
+                    }
+                }
             });
+            localStorage.setItem('exampleSentences', JSON.stringify(exampleSentences));
+            
+            // Batch sync migrated cards to the database in the background
+            if (migratedCards.length > 0) {
+                console.log(`Migrating ${migratedCards.length} cards with missing types/timestamps...`);
+                Promise.all(migratedCards.map(card => 
+                    supabase.from('flashcards')
+                        .update({
+                            type: card.type,
+                            created_at: card.created_at
+                        })
+                        .eq('id', card.id)
+                        .eq('user_id', userSession.user.id)
+                )).then(() => {
+                    console.log("Database migration and synchronization complete!");
+                }).catch(err => {
+                    console.error("Failed to sync migrated cards to database:", err);
+                });
+            }
+            
+            // Fetch and cache review logs in localStorage
+            await fetchAndCacheReviewLogs();
+            
+            updateDashboard();
         }
-        
-        // Fetch and cache review logs in localStorage
-        await fetchAndCacheReviewLogs();
-        
-        updateDashboard();
+    } catch (err) {
+        console.error("Critical error inside loadData background fetch:", err);
+    } finally {
+        if (syncInd) syncInd.classList.add('hidden');
     }
 }
 
