@@ -32,11 +32,11 @@ import {
 import {
     setCreateMapZoom,
     setEditMapZoom,
-    toggleFullscreen,
     toggleGridSnapping,
     initMapCanvasListeners,
     renderEditorNodes
 } from './modules/canvas.js';
+import { toggleFullscreen } from './modules/uiHelpers.js';
 
 // Bind necessary functions to window for DOM/inline event listeners
 window.switchView = switchView;

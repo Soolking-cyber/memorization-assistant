@@ -3,6 +3,8 @@ import { supabase } from './supabaseClient.js';
 import { ICONS } from './icons.js';
 import { buildCustomDropdownUI } from './uiHelpers.js';
 import { renderCategoryTabs, renderCategoryCards } from './stats.js';
+import { updateFormLabelsAndPlaceholders } from './flashcardCrud.js';
+import { renderEditorNodes } from './canvas.js';
 
 export function renderTypeTags() {
     const createContainer = document.getElementById('create-type-tags');
@@ -201,6 +203,53 @@ export async function removeType(typeToRemove) {
         // Render manage view dynamically (to be resolved at runtime)
         if (window.renderManageView) {
             window.renderManageView();
+        }
+    }
+}
+
+export async function handleTypeSelectChange(e) {
+    let val = e.target.value;
+    if (val === 'add_new') {
+        const newType = await window.prompt("Enter new memory type:");
+        if (newType && newType.trim() !== '') {
+            const cleanType = newType.trim();
+            if (!state.customTypes.includes(cleanType)) {
+                state.customTypes.push(cleanType);
+                localStorage.setItem('customTypes', JSON.stringify(state.customTypes));
+            }
+            updateTypeDatalists();
+            e.target.value = cleanType;
+            val = cleanType;
+        } else {
+            e.target.value = 'mixed';
+            val = 'mixed';
+        }
+    }
+    
+    // Toggle the visible fields based on the selected type
+    const isEdit = e.target.id === 'edit-card-type';
+    const vocabFields = document.getElementById(isEdit ? 'edit-vocab-fields' : 'create-vocab-fields');
+    const mapFields = document.getElementById(isEdit ? 'edit-map-fields' : 'create-map-fields');
+    
+    if (vocabFields && mapFields) {
+        if (val === 'Memory Map') {
+            vocabFields.classList.add('hidden');
+            mapFields.classList.remove('hidden');
+            
+            // For Edit mode, if it's already rendered, we need to trigger links redraw
+            if (isEdit) {
+                setTimeout(() => {
+                    renderEditorNodes('edit-map-nodes-container', state.editMapNodes, state.editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
+                }, 50);
+            } else {
+                setTimeout(() => {
+                    renderEditorNodes('create-map-nodes-container', state.createMapNodes, state.createMapLinks, 'create-map-svg', 'create-arrowhead');
+                }, 50);
+            }
+        } else {
+            vocabFields.classList.remove('hidden');
+            mapFields.classList.add('hidden');
+            updateFormLabelsAndPlaceholders(isEdit, val);
         }
     }
 }

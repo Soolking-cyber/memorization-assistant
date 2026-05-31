@@ -1,7 +1,7 @@
 import { state } from './state.js';
 import { playUISound } from './sound.js';
 import { buildCustomDropdownUI } from './uiHelpers.js';
-import { updateDashboard } from './flashcardCrud.js';
+import { updateDashboard } from './dashboard.js';
 import { startPractice } from './practice.js';
 import { dbGet } from './db.js';
 
