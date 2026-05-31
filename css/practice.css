@@ -1,0 +1,316 @@
+/* === practice.css - Modular segment of 8eacher design system === */
+
+/* Practice View & Interactive Letter Boxes */
+.practice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.practice-header h2 { font-size: 1.15rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+#practice-progress { font-weight: 800; color: var(--text-primary); }
+
+.perspective { perspective: 1000px; width: 100%; }
+.flashcard { 
+    width: 100%; 
+    height: auto; 
+    min-height: 350px;
+    position: relative; 
+    margin-bottom: 24px; 
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+.card-face { 
+    position: relative; 
+    width: 100%; 
+    height: 100%; 
+    min-height: 350px;
+    display: flex; 
+    flex-direction: column; 
+    padding: 24px; 
+    box-shadow: inset 0 -2px 0 var(--border-color); 
+    border-radius: 16px; 
+    border: 2px solid var(--border-color);
+    background: var(--bg-card);
+    overflow-y: visible; 
+}
+.card-face h3 { 
+    font-size: 0.8rem; 
+    text-transform: uppercase; 
+    letter-spacing: 1.5px; 
+    color: var(--text-secondary); 
+    border-bottom: 2px solid var(--border-color); 
+    padding-bottom: 12px; 
+    margin-bottom: 20px; 
+    font-weight: 700; 
+}
+.card-content { 
+    flex-grow: 1; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 1.45rem; 
+    font-weight: 600; 
+    line-height: 1.5; 
+    text-align: center; 
+    word-break: break-word; 
+    color: var(--text-primary);
+}
+.card-img { 
+    align-self: center;
+    max-width: 100%; 
+    max-height: 320px; 
+    object-fit: contain; 
+    margin-top: 16px; 
+    border-radius: 10px; 
+    border: 2px solid var(--border-color); 
+}
+
+.card-back { 
+    background: var(--bg-secondary); 
+    border: 2px solid var(--border-color); 
+    box-shadow: inset 0 -2px 0 var(--border-color);
+}
+
+.practice-controls { display: flex; flex-direction: column; align-items: center; width: 100%; }
+
+
+/* Monochromatic spelling boxes matching the Duolingo screenshot */
+.letter-boxes-container {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    margin: 8px 0;
+}
+.letter-box {
+    width: 28px;
+    height: 36px;
+    border: 2px solid var(--border-color);
+    box-shadow: inset 0 -2px 0 var(--border-color);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    transition: all 0.1s ease;
+}
+input.letter-box {
+    text-align: center;
+    outline: none;
+    padding: 0;
+    caret-color: transparent;
+    cursor: text;
+    font-family: inherit;
+}
+input.letter-box:focus {
+    border-color: var(--text-primary);
+    background: var(--bg-secondary);
+    box-shadow: inset 0 -2px 0 var(--text-primary);
+}
+.letter-box.active-clue {
+    background: var(--accent-light);
+    border-color: var(--text-secondary);
+    color: var(--text-primary);
+}
+.letter-box.filled {
+    border-color: var(--text-primary);
+}
+
+
+/* Inline letter boxes used inside sentences */
+.letter-boxes-container.inline {
+    display: inline-flex;
+    gap: 4px;
+    margin: 0 4px;
+    vertical-align: middle;
+}
+.letter-boxes-container.inline .letter-box {
+    width: 22px;
+    height: 28px;
+    font-size: 0.9rem;
+    box-shadow: inset 0 -1.5px 0 var(--border-color);
+    border-radius: 6px;
+}
+
+
+
+/* Desktop Practice Workspace split-pane layout and scaling */
+@media (min-width: 769px) {
+    .view {
+        max-width: 960px;
+        margin: 0 auto;
+    }
+    #view-auth {
+        max-width: 550px;
+    }
+    #view-practice {
+        max-width: 960px; /* Standardize card width dynamically */
+        transition: max-width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #view-practice.practice-layout-split {
+        max-width: 1380px; /* Spacious split-pane layout for large maps/diagrams and inputs */
+    }
+    .practice-layout-split .practice-workspace {
+        display: grid;
+        grid-template-columns: 1.25fr 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+    .practice-layout-map .practice-workspace {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+    }
+    .practice-layout-split .flashcard {
+        margin-bottom: 0;
+    }
+    .card-img {
+        max-height: 450px;
+    }
+    .card-face h3 {
+        font-size: 0.9rem;
+    }
+}
+
+/* Image Card Clue Overlays & Mobile Stack Responsiveness */
+.image-card-clue-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+}
+
+.image-card-clue-header {
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    opacity: 0.75;
+}
+
+.image-card-clue-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    padding: 6px 14px;
+    border-radius: 12px;
+    max-width: 60%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-shadow: inset 0 -1px 0 var(--border-color);
+    transition: border-color 0.2s ease;
+}
+
+@media (max-width: 768px) {
+    .image-card-clue-row {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+    .image-card-clue-header {
+        font-size: 0.75rem;
+        text-align: center;
+        width: 100%;
+        opacity: 0.65;
+    }
+    .image-card-clue-title {
+        font-size: 0.85rem;
+        text-align: center;
+        max-width: 100%;
+        width: fit-content;
+    }
+    .practice-image-card-container {
+        padding: 16px !important;
+        justify-content: flex-start !important;
+    }
+}
+
+
+
+/* Interactive Premium Heatmap Hover Tooltip */
+.heatmap-tooltip {
+    position: absolute;
+    z-index: 10000;
+    pointer-events: none;
+    background: rgba(18, 18, 18, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 10px 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    transform: translate(-50%, -100%) scale(0.95);
+    opacity: 0;
+    transition: opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 160px;
+}
+
+.heatmap-tooltip.visible {
+    opacity: 1;
+    transform: translate(-50%, -100%) scale(1) translateY(-8px);
+}
+
+.heatmap-tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 10px;
+    height: 10px;
+    background: rgba(18, 18, 18, 0.95);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.heatmap-tooltip-date {
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 0.8rem;
+    letter-spacing: -0.01em;
+}
+
+.heatmap-tooltip-activity {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.heatmap-tooltip-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.7rem;
+}
+
+.heatmap-tooltip-pill.creation {
+    background: rgba(212, 166, 59, 0.15);
+    color: #e5b955;
+    border: 1px solid rgba(212, 166, 59, 0.3);
+}
+
+.heatmap-tooltip-pill.review {
+    background: rgba(74, 128, 90, 0.15);
+    color: #62c37e;
+    border: 1px solid rgba(74, 128, 90, 0.3);
+}
+
+
+

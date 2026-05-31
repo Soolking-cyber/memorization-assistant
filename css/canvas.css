@@ -1,0 +1,474 @@
+/* === canvas.css - Modular segment of 8eacher design system === */
+
+/* Memory Map Premium Stylings */
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.02); opacity: 0.85; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.map-node {
+    transition: box-shadow 0.1s ease, border-color 0.1s ease;
+}
+.map-node:hover {
+    box-shadow: inset 0 -4px 0 var(--border-color);
+}
+.map-node:active {
+    box-shadow: inset 0 -1px 0 var(--border-color);
+}
+
+.practice-map-node-input:focus {
+    border-bottom: 2px solid var(--accent) !important;
+}
+
+.practice-map-node-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.5;
+}
+
+/* Memory Map Node Buttons & Inner Inputs */
+.node-btn {
+    background: none;
+    border: none;
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: color 0.2s, transform 0.1s;
+}
+.node-btn:hover {
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+.node-btn.root-btn.active {
+    color: var(--warning) !important;
+    filter: drop-shadow(0 0 2px var(--warning));
+}
+.node-explanation-input {
+    width: 100%;
+    border: none;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    padding: 2px 4px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    box-sizing: border-box;
+    font-family: inherit;
+    text-align: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.node-explanation-input:focus {
+    outline: none;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+.node-input {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    padding: 2px 4px;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    box-sizing: border-box;
+    font-family: inherit;
+    text-align: center;
+    font-weight: 700;
+    transition: background 0.15s ease;
+}
+.node-input:focus {
+    outline: none;
+    background: var(--bg-tertiary);
+}
+.node-connector-plus {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--success);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: crosshair;
+    z-index: 100;
+    border: 2px solid var(--bg-card);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    transition: transform 0.1s ease, background 0.1s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+.node-connector-plus.active {
+    background: var(--accent) !important;
+    box-shadow: 0 0 8px var(--accent) !important;
+    transform: scale(1.2) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+.map-node:hover .node-connector-plus,
+.map-node:focus-within .node-connector-plus {
+    opacity: 1;
+    pointer-events: auto;
+}
+.node-connector-plus:hover {
+    transform: scale(1.2);
+    background: #16a34a;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+.correct-answer-label {
+    font-size: 0.7rem;
+    color: var(--success);
+    font-weight: 700;
+    display: block;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* Standardized Icon SVG Core Styles */
+.icon-svg {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: middle;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.icon-svg.inline-icon {
+    width: 14px;
+    height: 14px;
+    margin-right: 4px;
+    vertical-align: -2.5px;
+}
+
+.icon-svg.glow {
+    filter: drop-shadow(0 0 3px var(--accent));
+}
+
+.icon-svg.active {
+    color: var(--accent);
+}
+
+/* Adjust inline guides Bulb and Link styles to align perfectly */
+.guide-wrapper .icon-svg.inline-icon {
+    width: 15px;
+    height: 15px;
+    color: var(--accent);
+}
+
+/* Floating Link (Connection) Styling Toolbar */
+.map-link-toolbar {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 10px 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    width: 220px;
+    align-items: stretch;
+    box-sizing: border-box;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+/* Segmented Control for Style & Thickness */
+.segmented-control {
+    display: flex;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--bg-secondary);
+}
+
+.segmented-btn {
+    flex: 1;
+    border: none;
+    background: none;
+    padding: 4px 6px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.segmented-btn.active {
+    background: var(--accent);
+    color: var(--btn-primary-text);
+}
+
+.segmented-btn:not(.active):hover {
+    background: var(--border-color);
+    opacity: 0.95;
+}
+
+.toolbar-section-label {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    font-weight: 700;
+    margin-top: 6px;
+    margin-bottom: 2px;
+}
+
+
+.map-link-toolbar::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 12px;
+    height: 12px;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    pointer-events: none;
+}
+
+/* Colors and Styles hover effects */
+.color-dot:hover {
+    transform: scale(1.3) !important;
+}
+.color-dot:active {
+    transform: scale(1.1) !important;
+}
+
+.style-btn:hover {
+    filter: brightness(1.1);
+}
+
+.link-delete-btn:hover {
+    color: #f87171 !important;
+    transform: scale(1.15);
+}
+
+.link-delete-btn:active {
+    transform: scale(0.95);
+}
+
+/* Icon Picker Grid button styles */
+.icon-picker-dropdown button {
+    border: 1px solid transparent;
+}
+.icon-picker-dropdown button:hover {
+    border-color: var(--border-color);
+}
+
+/* Node Icon inline styling wrapper */
+.node-icon-wrapper svg {
+    width: 14px;
+    height: 14px;
+}
+
+
+
+/* Node container layer pointer events pass-through */
+#create-map-nodes-container,
+#edit-map-nodes-container,
+#practice-map-nodes-container {
+    pointer-events: none;
+}
+
+.map-node {
+    pointer-events: auto !important;
+}
+
+.map-link-toolbar {
+    pointer-events: auto !important;
+}
+
+.map-node-toolbar {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 10px 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    width: 220px;
+    align-items: stretch;
+    box-sizing: border-box;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    pointer-events: auto !important;
+}
+
+
+
+/* Glassmorphic Zoom Control Panel */
+.canvas-zoom-controls {
+    position: -webkit-sticky;
+    position: sticky;
+    left: calc(100% - 12px);
+    top: calc(100% - 12px);
+    transform: translate(-100%, -100%);
+    margin-right: 12px;
+    margin-bottom: 12px;
+    z-index: 10;
+    width: -webkit-max-content;
+    width: -moz-max-content;
+    width: max-content;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 3px 6px;
+    border-radius: 20px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    user-select: none;
+    pointer-events: auto !important;
+}
+
+.zoom-ctrl-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 800;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.15s, transform 0.1s;
+    padding: 0;
+}
+
+.zoom-ctrl-btn:hover {
+    background: var(--bg-secondary);
+    transform: scale(1.1);
+}
+
+.zoom-ctrl-btn:active {
+    transform: scale(0.95);
+}
+
+.zoom-percent {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    min-width: 32px;
+    text-align: center;
+    font-family: monospace;
+}
+/* Fullscreen Canvas Styling */
+.canvas-container-fullscreen {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    border-radius: 0 !important;
+    background: var(--bg-page) !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+#create-map-canvas-container,
+#edit-map-canvas-container {
+    height: calc(100vh - 360px);
+    min-height: 480px;
+    max-height: 800px;
+    width: 100%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#practice-map-canvas-container {
+    height: 100%;
+    width: 100%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.zoom-ctrl-btn.fullscreen-active,
+.zoom-ctrl-btn.grid-active {
+    background: var(--warning) !important;
+    color: var(--bg-card) !important;
+}
+
+.zoom-ctrl-text-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.72rem;
+    font-weight: 800;
+    cursor: pointer;
+    padding: 3px 7px;
+    border-radius: 10px;
+    transition: background 0.15s, transform 0.1s;
+    font-family: inherit;
+    outline: none;
+}
+
+.zoom-ctrl-text-btn:hover {
+    background: var(--bg-secondary);
+    transform: scale(1.05);
+}
+
+.zoom-ctrl-text-btn:active {
+    transform: scale(0.95);
+}
+
+.zoom-divider {
+    color: var(--border-color);
+    font-size: 0.75rem;
+    margin: 0 4px;
+    user-select: none;
+}
+
+
+
+/* Floating Fullscreen Close Button */
+.fullscreen-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: transform 0.1s, opacity 0.15s;
+}
+.fullscreen-close-btn:active {
+    transform: scale(0.9);
+}
+.fullscreen-close-btn svg {
+    pointer-events: none;
+}
+
+
+
