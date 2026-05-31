@@ -479,7 +479,7 @@ body.logged-out .app-container {
 }
 .stat-pill.active {
     border-color: var(--success) !important;
-    box-shadow: inset 0 -2px 0 var(--success) !important;
+    box-shadow: none !important;
 }
 
 /* Duolingo Practice Skills Grid Section & Dynamic Tabs */
