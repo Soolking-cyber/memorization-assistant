@@ -903,10 +903,20 @@ async function loadData() {
                     needsUpdate = true;
                 }
                 
-                // If a card has identical timestamp as another, it was batch-migrated synchronously and needs historical correction
+                // Advanced detection: Is the card a legacy card created in the past?
                 const isBatchMigrated = card.created_at && timestampCounts[card.created_at] > 1;
+                
+                // Also check if its database created_at is today's date, but it has legacy traits
+                const isToday = card.created_at && getLocalDateString(card.created_at) === getLocalDateString(Date.now());
+                const hasLogsBeforeToday = cachedLogs.some(l => 
+                    (l.cardId === card.id || l.card_id === card.id) && 
+                    getLocalDateString(l.timestamp) !== getLocalDateString(Date.now())
+                );
+                const isLegacy = hasLogsBeforeToday || (card.interval > 4) || (card.repetitions > 2);
+                
+                const needsTimestampCorrection = isBatchMigrated || (isToday && isLegacy);
 
-                if (!card.created_at || isBatchMigrated) {
+                if (!card.created_at || needsTimestampCorrection) {
                     // Estimate creation date precisely
                     let estimatedTime = null;
                     const cardLogs = cachedLogs.filter(l => l.cardId === card.id || l.card_id === card.id);
@@ -922,15 +932,20 @@ async function loadData() {
                         }
                     }
                     
-                    if (!estimatedTime) {
+                    // If the estimated date falls on today but it's classified as legacy, force fallback to past estimation
+                    const estIsToday = estimatedTime && getLocalDateString(estimatedTime) === getLocalDateString(Date.now());
+                    if (!estimatedTime || (isLegacy && estIsToday)) {
                         const reps = card.repetitions || 0;
                         const interval = card.interval || 0;
                         if (reps > 0 && interval > 0) {
                             estimatedTime = Date.now() - (interval * 24 * 60 * 60 * 1000);
+                        } else {
+                            estimatedTime = null;
                         }
                     }
                     
-                    if (!estimatedTime) {
+                    const finalEstIsToday = estimatedTime && getLocalDateString(estimatedTime) === getLocalDateString(Date.now());
+                    if (!estimatedTime || (isLegacy && finalEstIsToday)) {
                         const hash = card.id ? card.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) : Math.random();
                         const daysAgo = (hash % 30) + 1;
                         estimatedTime = Date.now() - daysAgo * 24 * 60 * 60 * 1000;
