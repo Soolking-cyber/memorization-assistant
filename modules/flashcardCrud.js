@@ -268,6 +268,7 @@ export function renderManageView() {
             if (selected.length === 0) return;
             if (!await window.confirm(`Permanently delete ${selected.length} ${selected.length === 1 ? 'memory' : 'memories'}?`)) return;
             await batchDeleteCards(selected);
+        };
     }
 }
 
