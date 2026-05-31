@@ -9,6 +9,7 @@ import { updateDashboard, getSelectedTypes } from './dashboard.js';
 import { switchView } from './navigation.js';
 import { loadData } from './flashcardCrud.js';
 import { dbGet, dbSet } from './db.js';
+import { queueTransaction } from './syncQueue.js';
 
 export function startForcedPractice(count) {
     const now = Date.now();
@@ -822,7 +823,21 @@ export async function logReviewAttempt(cardId, gradeInt, score) {
     
     await dbSet('review_activity_logs', logs);
 
-    if (state.userSession && supabase) {
+    if (!state.userSession || !supabase) return;
+
+    const payload = {
+        card_id: cardId,
+        grade: gradeInt,
+        score: score
+    };
+
+    if (!navigator.onLine) {
+        console.log("[Offline] Queued review log transaction.");
+        await queueTransaction('insert_log', payload);
+        return;
+    }
+
+    try {
         const { error } = await supabase
             .from('review_logs')
             .insert([{
@@ -832,8 +847,12 @@ export async function logReviewAttempt(cardId, gradeInt, score) {
                 score: score
             }]);
         if (error) {
-            console.error("Error saving review attempt to database:", error);
+            console.error("Error saving review attempt to database, queueing transaction:", error);
+            await queueTransaction('insert_log', payload);
         }
+    } catch (err) {
+        console.warn("Exception during review attempt log, queueing transaction:", err);
+        await queueTransaction('insert_log', payload);
     }
 }
 

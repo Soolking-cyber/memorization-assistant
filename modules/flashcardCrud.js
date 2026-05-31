@@ -8,6 +8,7 @@ import { validateExampleSentence } from './practice.js';
 import { switchView } from './navigation.js';
 import { renderStatistics } from './stats.js';
 import { dbGet, dbSet, dbDelete } from './db.js';
+import { queueTransaction } from './syncQueue.js';
 
 export function updateFormLabelsAndPlaceholders(isEdit, type) {
     const labelFront = document.querySelector(`label[for="${isEdit ? 'edit-card-front' : 'card-front'}"]`);
@@ -210,18 +211,44 @@ export async function insertCardToDB(card) {
 
 export async function updateCardInDB(card) {
     if (!state.userSession || !supabase) return;
-    const { error } = await supabase
-        .from('flashcards')
-        .update({
-            nextReview: card.nextReview,
-            ease: card.ease,
-            interval: card.interval,
-            repetitions: card.repetitions
-        })
-        .eq('id', card.id)
-        .eq('user_id', state.userSession.user.id);
-        
-    if (error) console.error("Error updating:", error);
+
+    // Immediately save local state to IndexedDB cache so changes reflect instantly
+    await dbSet('cached_cards', state.cards);
+
+    const payload = {
+        id: card.id,
+        nextReview: card.nextReview,
+        ease: card.ease,
+        interval: card.interval,
+        repetitions: card.repetitions
+    };
+
+    if (!navigator.onLine) {
+        console.log("[Offline] Queued card update transaction.");
+        await queueTransaction('update_card', payload);
+        return;
+    }
+
+    try {
+        const { error } = await supabase
+            .from('flashcards')
+            .update({
+                nextReview: card.nextReview,
+                ease: card.ease,
+                interval: card.interval,
+                repetitions: card.repetitions
+            })
+            .eq('id', card.id)
+            .eq('user_id', state.userSession.user.id);
+            
+        if (error) {
+            console.error("Error updating card, queueing transaction:", error);
+            await queueTransaction('update_card', payload);
+        }
+    } catch (err) {
+        console.warn("Exception during card update, queueing transaction:", err);
+        await queueTransaction('update_card', payload);
+    }
 }
 
 export function updateBatchUI() {

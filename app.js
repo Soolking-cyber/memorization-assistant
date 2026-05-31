@@ -2,6 +2,7 @@ import { state } from './modules/state.js';
 import { supabase } from './modules/supabaseClient.js';
 import { playUISound, initSoundSystem } from './modules/sound.js';
 import { dbGet } from './modules/db.js';
+import { initSyncListeners } from './modules/syncQueue.js';
 import {
     initThemeSystem,
     initNavigation,
@@ -142,6 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initSoundSystem();
     initNavigation();
     initProfileMenu();
+    initSyncListeners();
     
     // Auth events
     document.getElementById('btn-google-login').addEventListener('click', handleLogin);
