@@ -41,6 +41,8 @@ const fontSizeMap = {
     xl: { keyword: '1.2rem', exp: '0.95rem' }
 };
 
+const PROJECT_START_DATE = new Date('2026-01-01').getTime();
+
 let cards = [];
 let customTypes = JSON.parse(localStorage.getItem('customTypes')) || ['Vocabulary', 'Memory Map', 'Image Card', 'Unknown'];
 // Filter out lowercase vocabulary and mixed helper selectors
@@ -914,7 +916,10 @@ async function loadData() {
                 );
                 const isLegacy = hasLogsBeforeToday || (card.interval > 4) || (card.repetitions > 2);
                 
-                const needsTimestampCorrection = isBatchMigrated || (isToday && isLegacy);
+                // ALSO check if it has a buggy legacy date in 2025 or before (pre-project start date limit)
+                const isLegacyBuggyDate = card.created_at && new Date(card.created_at).getTime() < PROJECT_START_DATE;
+
+                const needsTimestampCorrection = isBatchMigrated || (isToday && isLegacy) || isLegacyBuggyDate;
 
                 if (!card.created_at || needsTimestampCorrection) {
                     // Estimate creation date precisely
@@ -951,7 +956,8 @@ async function loadData() {
                         estimatedTime = Date.now() - daysAgo * 24 * 60 * 60 * 1000;
                     }
                     
-                    card.created_at = new Date(estimatedTime).toISOString();
+                    // Enforce the project start date boundary (Jan 1, 2026) to prevent 2025 legacy estimations
+                    card.created_at = new Date(Math.max(estimatedTime, PROJECT_START_DATE)).toISOString();
                     needsUpdate = true;
                 }
                 if (needsUpdate) {
@@ -1537,6 +1543,10 @@ function renderStatistics() {
         } else {
             creationTime = new Date(card.created_at).getTime();
         }
+
+        if (creationTime < PROJECT_START_DATE) {
+            creationTime = PROJECT_START_DATE;
+        }
         
         const dateStr = getLocalDateString(creationTime);
         dailyCreations[dateStr] = (dailyCreations[dateStr] || 0) + 1;
@@ -1797,6 +1807,10 @@ function renderStatistics() {
             }
         } else {
             creationTime = new Date(card.created_at).getTime();
+        }
+
+        if (creationTime < PROJECT_START_DATE) {
+            creationTime = PROJECT_START_DATE;
         }
 
         if (creationTime >= sevenDaysAgo) addedThisWeek++;
