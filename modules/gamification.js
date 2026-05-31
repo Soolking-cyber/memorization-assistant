@@ -1,7 +1,10 @@
 import { state } from './state.js';
 import { dbGet } from './db.js';
 import { switchView } from './navigation.js';
-import { renderCurrentCard } from './practice.js';
+import { calculateMatchPercentage } from './practice/spellingEngine.js';
+import { applySM2Grade } from './spacedRepetition.js';
+import { logReviewAttempt } from './practice.js';
+import { playUISound } from './sound.js';
 
 /**
  * Calculates difficulty and gamification rarity statistics for a single card.
@@ -10,8 +13,6 @@ import { renderCurrentCard } from './practice.js';
 export function calculateCardStats(card, logs) {
     const cardLogs = (logs || []).filter(log => log.cardId === card.id);
     const attempts = cardLogs.length;
-    
-    // Unsuccessful attempts have grade < 2 or score < 75
     const failures = cardLogs.filter(log => log.grade < 2 || log.score < 75).length;
     
     const savedSentences = state.exampleSentences[card.id];
@@ -72,42 +73,18 @@ export function calculateCardStats(card, logs) {
 }
 
 /**
- * Starts a focused single-card study session from the collection deck.
- */
-export function startCardTraining(card) {
-    state.reviewQueue = [card];
-    state.currentReviewIndex = 0;
-    state.isForcedMode = true;
-    state.practiceOrigin = 'collection';
-    
-    // Bind total practice size and switch screen
-    const practiceTotal = document.getElementById('practice-total');
-    if (practiceTotal) practiceTotal.textContent = '1';
-    
-    const activeCard = document.getElementById('active-card');
-    if (activeCard) activeCard.style.display = 'block';
-    
-    const ctrl = document.querySelector('.practice-controls');
-    if (ctrl) ctrl.style.display = 'flex';
-    
-    const practiceCompleted = document.getElementById('practice-completed');
-    if (practiceCompleted) practiceCompleted.classList.add('hidden');
-    
-    const closeBtn = document.querySelector('#view-practice .close-view');
-    if (closeBtn) closeBtn.style.display = 'block';
-    
-    switchView('practice');
-    renderCurrentCard();
-}
-
-/**
  * Master render engine for the Poké Deck View.
+ * Renders 4 animated rarity card stacks with live counters.
  */
 export async function renderCollectionDeck() {
-    const grid = document.getElementById('collection-grid');
-    if (!grid) return;
+    const stacksGrid = document.getElementById('stacks-grid');
+    if (!stacksGrid) return;
     
-    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; font-weight: 600; color: var(--text-secondary);">Shuffling Poké Deck...</div>';
+    // Toggle view visibility resets
+    document.getElementById('deck-stacks-view')?.classList.remove('hidden');
+    document.getElementById('deck-study-view')?.classList.add('hidden');
+    
+    stacksGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; font-weight: 600; color: var(--text-secondary);">Shuffling Stacks...</div>';
     
     // Load reviews history from local cache db
     let logs = [];
@@ -117,98 +94,154 @@ export async function renderCollectionDeck() {
         console.warn("Could not retrieve review logs for Pokédex:", e);
     }
     
-    // Calculate card visual states
-    const decoratedCards = state.cards.map(card => {
+    // Group cards into the 4 rarity tiers
+    const legendaryCards = [];
+    const epicCards = [];
+    const rareCards = [];
+    const commonCards = [];
+    
+    state.cards.forEach(card => {
         const stats = calculateCardStats(card, logs);
-        return {
-            card,
-            stats
-        };
+        const cardObj = { card, stats };
+        
+        if (stats.tier.key === 'legendary') legendaryCards.push(cardObj);
+        else if (stats.tier.key === 'epic') epicCards.push(cardObj);
+        else if (stats.tier.key === 'rare') rareCards.push(cardObj);
+        else commonCards.push(cardObj);
     });
     
-    // Retrieve filters
-    const searchVal = (document.getElementById('deck-search-input')?.value || '').toLowerCase().trim();
-    const rarityVal = document.getElementById('deck-rarity-filter')?.value || 'all';
-    const sortVal = document.getElementById('deck-sort-select')?.value || 'struggle-desc';
+    stacksGrid.innerHTML = '';
     
-    // Apply filters
-    let filtered = decoratedCards.filter(({ card, stats }) => {
-        // Search matches front or back text
-        let frontText = card.front || '';
-        let backText = card.back || '';
-        
-        // Unpack memory map front content
-        if (card.type === 'Memory Map' || frontText.startsWith('{"mode":"memory_map"')) {
-            try {
-                const data = JSON.parse(frontText);
-                if (data && data.nodes) {
-                    frontText = data.nodes.map(n => n.text).join(' ');
-                }
-            } catch (e) {}
+    // Stacks configuration list
+    const stacksConfig = [
+        {
+            key: 'legendary',
+            name: 'Untamed Colossus',
+            badge: 'Legendary',
+            class: 'stack-legendary',
+            cards: legendaryCards,
+            desc: 'Extreme difficulty memories needing immediate taming.'
+        },
+        {
+            key: 'epic',
+            name: 'Wild Beast',
+            badge: 'Epic',
+            class: 'stack-epic',
+            cards: epicCards,
+            desc: 'Struggling cards requiring steady active reviews.'
+        },
+        {
+            key: 'rare',
+            name: 'Challenger',
+            badge: 'Rare',
+            class: 'stack-rare',
+            cards: rareCards,
+            desc: 'Moderate difficulty memories showing light errors.'
+        },
+        {
+            key: 'common',
+            name: 'Tamed',
+            badge: 'Common',
+            class: 'stack-common',
+            cards: commonCards,
+            desc: 'Successfully tamed and mastered memory units.'
         }
+    ];
+    
+    stacksConfig.forEach(cfg => {
+        const stackWrapper = document.createElement('div');
+        stackWrapper.className = `deck-stack ${cfg.class}`;
         
-        const matchesSearch = frontText.toLowerCase().includes(searchVal) || backText.toLowerCase().includes(searchVal);
-        const matchesRarity = rarityVal === 'all' || stats.tier.key === rarityVal;
+        const count = cfg.cards.length;
+        const emptyBadge = count === 0 ? '<div class="stack-empty-badge">Stack Cleared!</div>' : '';
         
-        return matchesSearch && matchesRarity;
-    });
-    
-    // Apply sorts
-    filtered.sort((a, b) => {
-        switch (sortVal) {
-            case 'struggle-desc':
-                return b.stats.struggleIndex - a.stats.struggleIndex;
-            case 'struggle-asc':
-                return a.stats.struggleIndex - b.stats.struggleIndex;
-            case 'success-desc':
-                return b.stats.successRate - a.stats.successRate;
-            case 'success-asc':
-                return a.stats.successRate - b.stats.successRate;
-            case 'name-asc':
-                return getCardTitle(a.card).localeCompare(getCardTitle(b.card));
-            case 'name-desc':
-                return getCardTitle(b.card).localeCompare(getCardTitle(a.card));
-            default:
-                return b.stats.struggleIndex - a.stats.struggleIndex;
-        }
-    });
-    
-    // Update live counters summary bubble UI
-    const legendaryCount = decoratedCards.filter(c => c.stats.struggleIndex >= 22).length;
-    const epicCount = decoratedCards.filter(c => c.stats.struggleIndex >= 12 && c.stats.struggleIndex < 22).length;
-    const rareCount = decoratedCards.filter(c => c.stats.struggleIndex >= 5 && c.stats.struggleIndex < 12).length;
-    const commonCount = decoratedCards.filter(c => c.stats.struggleIndex < 5).length;
-    
-    const countAll = document.getElementById('deck-count-all');
-    const countLegendary = document.getElementById('deck-count-legendary');
-    const countWild = document.getElementById('deck-count-wild');
-    const countTamed = document.getElementById('deck-count-tamed');
-    
-    if (countAll) countAll.textContent = state.cards.length;
-    if (countLegendary) countLegendary.textContent = legendaryCount;
-    if (countWild) countWild.textContent = epicCount + rareCount;
-    if (countTamed) countTamed.textContent = commonCount;
-    
-    grid.innerHTML = '';
-    
-    if (filtered.length === 0) {
-        grid.innerHTML = `
-            <div style="grid-column: 1/-1;" class="deck-empty-state">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="48" height="48">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="8" y1="12" x2="16" y2="12"></line>
-                </svg>
-                <h3>No Memories Match Your Filter</h3>
-                <p>Try adjusting your search keywords or choosing a different rarity tier.</p>
+        stackWrapper.innerHTML = `
+            <div class="stack-card stack-card-1"></div>
+            <div class="stack-card stack-card-2"></div>
+            <div class="stack-card stack-card-3">
+                <div class="stack-info">
+                    <span class="stack-badge">${cfg.badge}</span>
+                    <h4 class="stack-title">${cfg.name}</h4>
+                    <span class="stack-count">${count}</span>
+                    <span class="stack-count-label">Concepts</span>
+                    ${emptyBadge}
+                </div>
             </div>
         `;
+        
+        // Trigger stack study session on click if cards are available
+        stackWrapper.addEventListener('click', () => {
+            if (count === 0) {
+                try { playUISound('fail'); } catch(e) {}
+                alert(`No concepts in the ${cfg.name} stack! You have completely tamed this difficulty level.`);
+                return;
+            }
+            try { playUISound('click'); } catch(e) {}
+            startStackStudy(cfg.key, cfg.name, cfg.cards);
+        });
+        
+        stacksGrid.appendChild(stackWrapper);
+    });
+}
+
+/**
+ * Initializes and starts the stack active study session.
+ */
+function startStackStudy(tierKey, tierName, decoratedCards) {
+    // Sort cards by struggle index descending (hardest first)
+    const sorted = decoratedCards.sort((a, b) => b.stats.struggleIndex - a.stats.struggleIndex);
+    
+    state.reviewQueue = sorted.map(c => c.card);
+    state.currentReviewIndex = 0;
+    state.activeStudyTierKey = tierKey;
+    state.activeStudyTierName = tierName;
+    state.isForcedMode = true;
+    state.practiceOrigin = 'collection'; // Backwards compatible fallback
+    
+    // Toggle active view states
+    document.getElementById('deck-stacks-view')?.classList.add('hidden');
+    const studyView = document.getElementById('deck-study-view');
+    if (studyView) studyView.classList.remove('hidden');
+    
+    const studyTitle = document.getElementById('study-stack-title');
+    if (studyTitle) studyTitle.textContent = `Taming ${tierName} Stack`;
+    
+    renderActiveStackCard();
+}
+
+/**
+ * Renders the top card of the active study stack.
+ */
+function renderActiveStackCard() {
+    const container = document.querySelector('.study-card-container');
+    if (!container) return;
+    
+    const card = state.reviewQueue[state.currentReviewIndex];
+    if (!card) {
+        finishStackStudy();
         return;
     }
     
-    filtered.forEach(({ card, stats }) => {
-        const titleText = getCardTitle(card);
-        const cardWrapper = document.createElement('div');
-        cardWrapper.className = 'card-wrapper animate-pop-in';
+    // Update progress label
+    const progressLabel = document.getElementById('study-stack-progress');
+    if (progressLabel) {
+        progressLabel.textContent = `Concept ${state.currentReviewIndex + 1} of ${state.reviewQueue.length}`;
+    }
+    
+    // Recalculate stats for the card
+    const sentences = state.exampleSentences[card.id] || [];
+    let sentencesList = [];
+    if (Array.isArray(sentences)) {
+        sentencesList = sentences.filter(s => typeof s === 'string' && s.trim().length > 0);
+    } else if (typeof sentences === 'string' && sentences.trim().length > 0) {
+        sentencesList = [sentences];
+    }
+    
+    // Rarity and stats mapping
+    let logs = [];
+    dbGet('review_activity_logs').then(l => {
+        logs = l || [];
+        const stats = calculateCardStats(card, logs);
         
         let abilitiesHTML = '';
         if (stats.sentences.length > 0) {
@@ -224,17 +257,16 @@ export async function renderCollectionDeck() {
             abilitiesHTML = '<div class="no-abilities">No ability modifiers (sentences) attached. Train this memory on fail to unlock.</div>';
         }
         
-        // Illustration front face preview
+        const titleText = getCardTitle(card);
         let illustrationContent = `<div class="illustration-text">${titleText}</div>`;
         if (card.type === 'Image Card' && card.image_front_url) {
             illustrationContent = `<img class="illustration-img" src="${card.image_front_url}" alt="Memory Art">`;
         }
         
-        // Calculate HP percentage bar (HP caps at 100 max)
         const hpPercent = Math.min(100, Math.max(5, stats.struggleIndex * 3));
         
-        cardWrapper.innerHTML = `
-            <div class="pokemon-card ${stats.tier.class}">
+        container.innerHTML = `
+            <div class="study-pokemon-card ${stats.tier.class} card-slide-in">
                 <div class="card-holo"></div>
                 <div class="card-header">
                     <div class="card-title-area">
@@ -262,37 +294,71 @@ export async function renderCollectionDeck() {
                     ${abilitiesHTML}
                 </div>
                 
-                <div class="card-stats-footer">
-                    <div class="footer-stat-group">
-                        <span class="footer-stat-label">Tamed Accuracy</span>
-                        <span class="footer-stat-val">${stats.successRate}%</span>
-                    </div>
-                    <button class="btn-card-action" data-card-id="${card.id}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12" style="vertical-align: middle;">
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                <!-- Recall Attack active prompt field -->
+                <div class="recall-attack-area">
+                    <div class="attack-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" style="vertical-align: middle;">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                         </svg>
-                        <span>Train Card</span>
-                    </button>
+                        <span>Attack Move: Active Recall</span>
+                    </div>
+                    
+                    <div class="attack-input-wrapper">
+                        <input type="text" id="deck-practice-input" class="deck-practice-input" autocomplete="off" placeholder="Type answer translation..." autofocus>
+                    </div>
+                    
+                    <div id="deck-attack-feedback" class="attack-feedback hidden"></div>
+                    
+                    <button id="btn-deck-attack" class="deck-attack-btn">Tame Concept (Enter)</button>
                 </div>
             </div>
         `;
         
-        // Bind focused 3D Hover Tilt tracking
-        cardWrapper.addEventListener('mousemove', (e) => {
-            const innerCard = cardWrapper.querySelector('.pokemon-card');
-            const rect = cardWrapper.getBoundingClientRect();
+        const cardEl = container.querySelector('.study-pokemon-card');
+        const inputField = container.querySelector('#deck-practice-input');
+        const attackBtn = container.querySelector('#btn-deck-attack');
+        const feedbackBox = container.querySelector('#deck-attack-feedback');
+        
+        if (inputField) {
+            setTimeout(() => inputField.focus(), 50);
+            
+            // Handle inline submit on Enter keypress
+            inputField.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    if (!attackBtn.dataset.nextMode) {
+                        evaluateStackAnswer(card, inputField.value.trim(), feedbackBox, attackBtn);
+                    } else {
+                        proceedToNextStackCard(cardEl);
+                    }
+                }
+            });
+        }
+        
+        if (attackBtn) {
+            attackBtn.addEventListener('click', () => {
+                if (!attackBtn.dataset.nextMode) {
+                    evaluateStackAnswer(card, inputField.value.trim(), feedbackBox, attackBtn);
+                } else {
+                    proceedToNextStackCard(cardEl);
+                }
+            });
+        }
+        
+        // Setup 3D Hover Tilt perspective triggers
+        cardEl.addEventListener('mousemove', (e) => {
+            const rect = cardEl.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
             
             const midX = rect.width / 2;
             const midY = rect.height / 2;
             
-            const rotateX = -((y - midY) / midY) * 14;
-            const rotateY = ((x - midX) / midX) * 14;
+            const rotateX = -((y - midY) / midY) * 12;
+            const rotateY = ((x - midX) / midX) * 12;
             
-            innerCard.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            cardEl.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
             
-            const holo = innerCard.querySelector('.card-holo');
+            const holo = cardEl.querySelector('.card-holo');
             if (holo) {
                 const percentX = (x / rect.width) * 100;
                 const percentY = (y / rect.height) * 100;
@@ -300,26 +366,138 @@ export async function renderCollectionDeck() {
             }
         });
         
-        cardWrapper.addEventListener('mouseleave', () => {
-            const innerCard = cardWrapper.querySelector('.pokemon-card');
-            innerCard.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
-            const holo = innerCard.querySelector('.card-holo');
+        cardEl.addEventListener('mouseleave', () => {
+            cardEl.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+            const holo = cardEl.querySelector('.card-holo');
             if (holo) {
                 holo.style.backgroundPosition = `50% 50%`;
             }
         });
-        
-        // Bind individual training buttons
-        cardWrapper.querySelector('.btn-card-action').addEventListener('click', (e) => {
-            e.stopPropagation();
-            try {
-                if (window.playUISound) window.playUISound('click');
-            } catch (err) {}
-            startCardTraining(card);
-        });
-        
-        grid.appendChild(cardWrapper);
     });
+}
+
+/**
+ * Dynamic answering evaluation for Poké Deck in-place Active Recall.
+ */
+function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
+    if (!typed) {
+        alert("Please type your active recall translation first!");
+        return;
+    }
+    
+    // Compares translation to target spelling
+    const score = calculateMatchPercentage(typed, card.back);
+    
+    let gradeInt = 0;
+    let success = false;
+    
+    if (score === 100) {
+        gradeInt = 3;
+        success = true;
+    } else if (score >= 75) {
+        gradeInt = 2;
+        success = true;
+    } else if (score >= 50) {
+        gradeInt = 1;
+    } else {
+        gradeInt = 0;
+    }
+    
+    // Play correct / incorrect sound effects
+    if (success) {
+        try { playUISound('success'); } catch(e) {}
+    } else {
+        try { playUISound('fail'); } catch(e) {}
+    }
+    
+    // Disable typed text inputs
+    const input = document.getElementById('deck-practice-input');
+    if (input) input.disabled = true;
+    
+    // Recalculate SM-2 Intervals & Log attempt
+    applySM2Grade(gradeInt);
+    logReviewAttempt(card.id, gradeInt, score);
+    
+    // Inject visual feedback details
+    feedbackBox.classList.remove('hidden');
+    if (success) {
+        feedbackBox.className = 'attack-feedback feedback-success';
+        feedbackBox.innerHTML = `
+            <div class="feedback-result-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                CONCEPT TAMED!
+            </div>
+            <div>Struggle score drops. Evolving card rarity live.</div>
+        `;
+    } else {
+        feedbackBox.className = 'attack-feedback feedback-danger';
+        feedbackBox.innerHTML = `
+            <div class="feedback-result-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                WILD CONCEPT ESCAPED!
+            </div>
+            <div>Correct Spelling:</div>
+            <div class="feedback-correct-val">${card.back}</div>
+        `;
+    }
+    
+    // Modify button text to prompt proceeding
+    attackBtn.textContent = 'Proceed (Enter)';
+    attackBtn.dataset.nextMode = 'true';
+    attackBtn.focus();
+}
+
+/**
+ * Slide animations triggered when loading the next card.
+ */
+function proceedToNextStackCard(cardEl) {
+    cardEl.classList.remove('card-slide-in');
+    cardEl.classList.add('card-slide-out');
+    
+    setTimeout(() => {
+        state.currentReviewIndex++;
+        renderActiveStackCard();
+    }, 380);
+}
+
+/**
+ * Finishes the current card stack study session.
+ */
+function finishStackStudy() {
+    const container = document.querySelector('.study-card-container');
+    if (!container) return;
+    
+    try {
+        playUISound('complete');
+        if (typeof window.confetti === 'function') {
+            window.confetti({
+                particleCount: 180,
+                spread: 90,
+                origin: { y: 0.55 }
+            });
+        }
+    } catch (e) {}
+    
+    container.innerHTML = `
+        <div class="study-victory-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2" width="60" height="60">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polygon points="12 8 15 11 12 14 9 11 12 8" fill="#d4af37"></polygon>
+                <polyline points="12 2 12 8"></polyline>
+                <polyline points="12 16 12 22"></polyline>
+            </div>
+            <h3>Tier Stack Cleared!</h3>
+            <p>You have successfully confronted all concepts in the <strong>${state.activeStudyTierName}</strong> stack. Evolved cards have dropped into their new tiers.</p>
+            <button id="btn-victory-back" class="btn primary" style="width: 100%; max-width: 200px;">Return to Stacks</button>
+        </div>
+    `;
+    
+    const backBtn = container.querySelector('#btn-victory-back');
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            renderCollectionDeck();
+        });
+    }
 }
 
 /**
@@ -328,7 +506,6 @@ export async function renderCollectionDeck() {
 function getCardTitle(card) {
     if (!card.front) return 'Untamed Card';
     
-    // Check for JSON mind map format
     if (card.type === 'Memory Map' || card.front.startsWith('{"mode":"memory_map"')) {
         try {
             const data = JSON.parse(card.front);
@@ -343,13 +520,12 @@ function getCardTitle(card) {
     return card.front;
 }
 
-// Bind live filter events when collection view is present
+// Global back to stacks click navigation binder
 document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('deck-search-input');
-    const filterRarity = document.getElementById('deck-rarity-filter');
-    const selectSort = document.getElementById('deck-sort-select');
-    
-    if (searchInput) searchInput.addEventListener('input', renderCollectionDeck);
-    if (filterRarity) filterRarity.addEventListener('change', renderCollectionDeck);
-    if (selectSort) selectSort.addEventListener('change', renderCollectionDeck);
+    const btnBack = document.getElementById('btn-back-to-stacks');
+    if (btnBack) {
+        btnBack.addEventListener('click', () => {
+            renderCollectionDeck();
+        });
+    }
 });

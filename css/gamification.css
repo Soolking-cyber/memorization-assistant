@@ -1,8 +1,7 @@
 /* === css/gamification.css - Poké Deck Pokemon-style design stylesheet === */
 
-/* Poké Deck View Layout */
 .collection-container {
-    max-width: 1200px;
+    max-width: 1000px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -11,11 +10,11 @@
 
 .deck-header {
     text-align: center;
-    padding: 20px 0 10px 0;
+    padding: 10px 0 10px 0;
 }
 
 .deck-header h2 {
-    font-size: 2.2rem;
+    font-size: 2rem;
     font-weight: 800;
     margin-bottom: 8px;
     color: var(--text-primary);
@@ -26,8 +25,8 @@
 }
 
 .pokeball-icon {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     animation: spinPokeball 4s linear infinite;
     filter: drop-shadow(0 0 8px rgba(229, 185, 85, 0.4));
 }
@@ -38,132 +37,217 @@
 }
 
 .deck-header p {
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: var(--text-secondary);
 }
 
-/* Poké Deck Search & Filters Panel */
-.deck-filters-bar {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    flex-wrap: wrap;
-    background: var(--bg-card);
-    border: 2px solid var(--border-color);
-    box-shadow: inset 0 -2px 0 var(--border-color);
-    border-radius: 16px;
-    padding: 16px 20px;
-    margin-bottom: 12px;
-}
-
-.deck-search-wrapper {
-    flex: 2;
-    min-width: 250px;
-    position: relative;
-}
-
-.deck-search-icon {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-tertiary);
-    pointer-events: none;
-}
-
-.deck-search-input {
-    padding-left: 40px !important;
-}
-
-.deck-filter-select-wrapper {
-    flex: 1;
-    min-width: 150px;
-}
-
-.deck-filter-select {
-    width: 100%;
-}
-
-.deck-stats-summary {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 8px;
-}
-
-.deck-stat-bubble {
-    background: var(--bg-secondary);
-    border: 2px solid var(--border-color);
-    border-radius: 20px;
-    padding: 6px 14px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.deck-stat-bubble span {
-    color: var(--success);
-}
-
-/* Poké Grid */
-.collection-grid {
+/* Stacks Selection Layout */
+.stacks-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 28px;
-    padding: 10px 0 30px 0;
-    perspective: 1000px; /* Essential for 3D card tilt */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    justify-content: center;
+    padding: 30px 10px 50px 10px;
+    perspective: 1000px;
 }
 
-/* 3D Pokemon Trading Card Wrapper */
-.card-wrapper {
+/* Stack Card Deck Container */
+.deck-stack {
     position: relative;
     width: 100%;
-    height: 420px;
-    perspective: 1000px;
+    max-width: 190px;
+    height: 270px;
+    margin: 0 auto;
     cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* The actual Card Element */
-.pokemon-card {
+.deck-stack:hover {
+    transform: translateY(-8px) scale(1.03);
+}
+
+/* Sub-card offsets in the stack */
+.stack-card {
+    position: absolute;
     width: 100%;
     height: 100%;
-    border-radius: 20px;
-    background: var(--bg-card);
+    border-radius: 16px;
     border: 3px solid var(--border-color);
+    background: var(--bg-card);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s, border-color 0.3s;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.stack-card-1 {
+    transform: rotate3d(0, 0, 1, -4deg) translate3d(-8px, -4px, -10px);
+    z-index: 1;
+    opacity: 0.6;
+}
+
+.stack-card-2 {
+    transform: rotate3d(0, 0, 1, 3deg) translate3d(6px, 2px, -5px);
+    z-index: 2;
+    opacity: 0.8;
+}
+
+.stack-card-3 {
+    transform: rotate3d(0, 0, 1, 0deg) translate3d(0, 0, 0);
+    z-index: 3;
+    opacity: 1;
+}
+
+/* Hover Spread Visuals */
+.deck-stack:hover .stack-card-1 {
+    transform: rotate3d(0, 0, 1, -9deg) translate3d(-24px, -8px, -10px);
+    opacity: 0.8;
+}
+
+.deck-stack:hover .stack-card-2 {
+    transform: rotate3d(0, 0, 1, 7deg) translate3d(18px, -4px, -5px);
+    opacity: 0.9;
+}
+
+.deck-stack:hover .stack-card-3 {
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+}
+
+/* Rarity-specific Stacks Glows */
+.stack-legendary .stack-card { border-color: #d4af37; }
+.stack-legendary .stack-card-3 {
+    background: linear-gradient(135deg, var(--bg-card) 60%, rgba(212, 175, 55, 0.08) 100%);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.15);
+}
+.stack-legendary:hover .stack-card-3 {
+    box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
+}
+
+.stack-epic .stack-card { border-color: #7b1fa2; }
+.stack-epic .stack-card-3 {
+    background: linear-gradient(135deg, var(--bg-card) 60%, rgba(123, 31, 162, 0.08) 100%);
+    box-shadow: 0 6px 20px rgba(123, 31, 162, 0.15);
+}
+.stack-epic:hover .stack-card-3 {
+    box-shadow: 0 15px 35px rgba(123, 31, 162, 0.35);
+}
+
+.stack-rare .stack-card { border-color: #0288d1; }
+.stack-rare .stack-card-3 {
+    background: linear-gradient(135deg, var(--bg-card) 60%, rgba(2, 136, 209, 0.06) 100%);
+    box-shadow: 0 6px 16px rgba(2, 136, 209, 0.1);
+}
+.stack-rare:hover .stack-card-3 {
+    box-shadow: 0 12px 30px rgba(2, 136, 209, 0.3);
+}
+
+.stack-common .stack-card { border-color: #2e7d32; }
+.stack-common .stack-card-3 {
+    background: linear-gradient(135deg, var(--bg-card) 60%, rgba(46, 125, 50, 0.05) 100%);
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.08);
+}
+.stack-common:hover .stack-card-3 {
+    box-shadow: 0 10px 25px rgba(46, 125, 50, 0.25);
+}
+
+/* Stack Info Content Overlay */
+.stack-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    text-align: center;
+}
+
+.stack-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    color: #fff;
+    margin-bottom: 12px;
+}
+.stack-legendary .stack-badge { background: linear-gradient(135deg, #d4af37, #b0524b); }
+.stack-epic .stack-badge { background: #7b1fa2; }
+.stack-rare .stack-badge { background: #0288d1; }
+.stack-common .stack-badge { background: #2e7d32; }
+
+.stack-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.stack-count {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--text-primary);
+}
+
+.stack-count-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.stack-empty-badge {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    font-style: italic;
+    margin-top: 10px;
+}
+
+/* Study Arena Layout */
+.study-arena {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0 30px 0;
+    perspective: 1200px;
+}
+
+.study-card-container {
+    width: 100%;
+    max-width: 440px;
+    min-height: 520px;
+}
+
+/* Big Pokémon Active Study Card */
+.study-pokemon-card {
+    width: 100%;
+    border-radius: 24px;
+    background: var(--bg-card);
+    border: 4px solid var(--border-color);
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
     transform-style: preserve-3d;
     transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, border-color 0.3s;
     user-select: none;
+    padding-bottom: 20px;
 }
 
-/* Glass glare overlay on cards */
-.pokemon-card::after {
+.study-pokemon-card::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.05) 100%);
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.06) 100%);
     pointer-events: none;
     z-index: 5;
 }
 
-/* Holographic dynamic sheet overlay */
-.card-holo {
+/* 3D Holo overlays */
+.study-pokemon-card .card-holo {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     opacity: 0;
     pointer-events: none;
     z-index: 4;
@@ -171,374 +255,231 @@
     transition: opacity 0.3s;
 }
 
-.pokemon-card:hover .card-holo {
-    opacity: 0.8;
+.study-pokemon-card:hover .card-holo {
+    opacity: 0.85;
 }
 
-/* 1. Common Tier - Tamed */
-.pokemon-card.tier-common {
-    border-color: #2e7d32;
-    background: linear-gradient(180deg, var(--bg-card) 60%, rgba(46, 125, 50, 0.05) 100%);
-    box-shadow: 0 4px 15px rgba(46, 125, 50, 0.1);
-}
-.pokemon-card.tier-common .card-holo {
-    background: linear-gradient(105deg, 
-        rgba(255, 255, 255, 0) 30%, 
-        rgba(74, 128, 90, 0.15) 45%, 
-        rgba(74, 128, 90, 0.25) 50%, 
-        rgba(74, 128, 90, 0.15) 55%, 
-        rgba(255, 255, 255, 0) 70%
-    );
-    background-size: 200% 200%;
-}
+/* Tiers overrides */
+.study-pokemon-card.tier-common { border-color: #2e7d32; background: linear-gradient(180deg, var(--bg-card) 65%, rgba(46, 125, 50, 0.04) 100%); }
+.study-pokemon-card.tier-common .card-holo { background: linear-gradient(105deg, rgba(255, 255, 255, 0) 30%, rgba(74, 128, 90, 0.2) 50%, rgba(255, 255, 255, 0) 70%); background-size: 200% 200%; }
 
-/* 2. Rare Tier - Challenger */
-.pokemon-card.tier-rare {
-    border-color: #0288d1;
-    background: linear-gradient(180deg, var(--bg-card) 60%, rgba(2, 136, 209, 0.06) 100%);
-    box-shadow: 0 6px 20px rgba(2, 136, 209, 0.15);
-}
-.pokemon-card.tier-rare .card-holo {
-    background: linear-gradient(115deg, 
-        rgba(0, 0, 0, 0) 20%, 
-        rgba(2, 136, 209, 0.2) 40%, 
-        rgba(0, 229, 255, 0.3) 50%, 
-        rgba(2, 136, 209, 0.2) 60%, 
-        rgba(0, 0, 0, 0) 80%
-    );
-    background-size: 200% 200%;
-}
-.pokemon-card.tier-rare:hover {
-    box-shadow: 0 12px 30px rgba(2, 136, 209, 0.3);
-}
+.study-pokemon-card.tier-rare { border-color: #0288d1; background: linear-gradient(180deg, var(--bg-card) 65%, rgba(2, 136, 209, 0.05) 100%); }
+.study-pokemon-card.tier-rare .card-holo { background: linear-gradient(115deg, rgba(0, 0, 0, 0) 20%, rgba(2, 136, 209, 0.2) 40%, rgba(0, 229, 255, 0.25) 50%, rgba(2, 136, 209, 0.2) 60%, rgba(0, 0, 0, 0) 80%); background-size: 200% 200%; }
+.study-pokemon-card.tier-rare:hover { box-shadow: 0 20px 50px rgba(2, 136, 209, 0.3); }
 
-/* 3. Epic Tier - Wild Beast */
-.pokemon-card.tier-epic {
-    border-color: #7b1fa2;
-    background: linear-gradient(180deg, var(--bg-card) 60%, rgba(123, 31, 162, 0.08) 100%);
-    box-shadow: 0 8px 24px rgba(123, 31, 162, 0.2);
-}
-.pokemon-card.tier-epic .card-holo {
-    background: linear-gradient(125deg, 
-        rgba(255, 0, 128, 0.25) 15%, 
-        rgba(123, 31, 162, 0.3) 35%, 
-        rgba(0, 229, 255, 0.2) 50%, 
-        rgba(123, 31, 162, 0.3) 65%, 
-        rgba(255, 0, 128, 0.25) 85%
-    );
-    background-size: 200% 200%;
-}
-.pokemon-card.tier-epic:hover {
-    box-shadow: 0 15px 35px rgba(123, 31, 162, 0.4);
-}
+.study-pokemon-card.tier-epic { border-color: #7b1fa2; background: linear-gradient(180deg, var(--bg-card) 65%, rgba(123, 31, 162, 0.06) 100%); }
+.study-pokemon-card.tier-epic .card-holo { background: linear-gradient(125deg, rgba(255, 0, 128, 0.2) 15%, rgba(123, 31, 162, 0.25) 35%, rgba(0, 229, 255, 0.15) 50%, rgba(123, 31, 162, 0.25) 65%, rgba(255, 0, 128, 0.2) 85%); background-size: 200% 200%; }
+.study-pokemon-card.tier-epic:hover { box-shadow: 0 25px 55px rgba(123, 31, 162, 0.35); }
 
-/* 4. Legendary Tier - Untamed Colossus */
-.pokemon-card.tier-legendary {
-    border-color: #d4af37;
-    background: linear-gradient(180deg, var(--bg-card) 55%, rgba(212, 175, 55, 0.08) 75%, rgba(176, 82, 75, 0.12) 100%);
-    box-shadow: 0 12px 30px rgba(212, 175, 55, 0.25);
-    animation: legendaryFloat 3s ease-in-out infinite alternate;
-}
-.pokemon-card.tier-legendary::before {
-    content: '';
-    position: absolute;
-    top: -2px; left: -2px; right: -2px; bottom: -2px;
-    border-radius: 20px;
-    background: linear-gradient(135deg, #d4af37, #b0524b, #d4af37);
-    z-index: -1;
-    opacity: 0.7;
-}
-.pokemon-card.tier-legendary .card-holo {
-    background: linear-gradient(135deg, 
-        rgba(255, 215, 0, 0.35) 0%, 
-        rgba(255, 0, 128, 0.25) 25%, 
-        rgba(0, 229, 255, 0.2) 50%, 
-        rgba(255, 128, 0, 0.3) 75%, 
-        rgba(255, 215, 0, 0.35) 100%
-    );
-    background-size: 250% 250%;
-    animation: holoFlow 8s linear infinite;
-    opacity: 0.5;
-}
-.pokemon-card.tier-legendary:hover .card-holo {
-    opacity: 0.95;
-}
-.pokemon-card.tier-legendary:hover {
-    box-shadow: 0 20px 45px rgba(212, 175, 55, 0.5);
-}
+.study-pokemon-card.tier-legendary { border-color: #d4af37; background: linear-gradient(180deg, var(--bg-card) 50%, rgba(212, 175, 55, 0.06) 75%, rgba(176, 82, 75, 0.08) 100%); animation: studyLegendFloat 3s ease-in-out infinite alternate; }
+.study-pokemon-card.tier-legendary::before { content: ''; position: absolute; top:-2px; left:-2px; right:-2px; bottom:-2px; border-radius:24px; background: linear-gradient(135deg, #d4af37, #b0524b, #d4af37); z-index:-1; opacity:0.6; }
+.study-pokemon-card.tier-legendary .card-holo { background: linear-gradient(135deg, rgba(255, 215, 0, 0.25) 0%, rgba(255, 0, 128, 0.2) 25%, rgba(0, 229, 255, 0.15) 50%, rgba(255, 128, 0, 0.2) 75%, rgba(255, 215, 0, 0.25) 100%); background-size: 250% 250%; animation: holoFlow 8s linear infinite; opacity: 0.6; }
+.study-pokemon-card.tier-legendary:hover { box-shadow: 0 30px 65px rgba(212, 175, 55, 0.45); }
 
-@keyframes legendaryFloat {
+@keyframes studyLegendFloat {
     0% { transform: translateY(0); }
-    100% { transform: translateY(-6px); }
+    100% { transform: translateY(-5px); }
 }
 
-@keyframes holoFlow {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+/* Card Visual Header */
+.study-pokemon-card .card-header {
+    padding: 18px 22px;
+}
+.study-pokemon-card .card-title-text {
+    font-size: 1.35rem;
+    font-weight: 800;
+    max-width: 250px;
 }
 
-/* Card Visual Structure Components */
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border-color);
+/* Illustration Panel */
+.study-pokemon-card .card-illustration {
+    height: 180px;
+    margin: 6px 22px 14px 22px;
+    border-radius: 16px;
+}
+.study-pokemon-card .illustration-text {
+    font-size: 1.25rem;
 }
 
-.card-title-area {
+/* HP Energy Bar styling */
+.study-pokemon-card .card-hp-section {
+    padding: 4px 22px 10px 22px;
+}
+
+/* Active Recall attack input container */
+.recall-attack-area {
+    margin: 12px 22px;
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.02);
+    border: 2px dashed var(--border-color);
     display: flex;
     flex-direction: column;
+    gap: 12px;
 }
 
-.card-rarity-badge {
-    align-self: flex-start;
-    font-size: 0.65rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    color: #fff;
-    margin-bottom: 2px;
-}
-.tier-common .card-rarity-badge { background: #2e7d32; }
-.tier-rare .card-rarity-badge { background: #0288d1; }
-.tier-epic .card-rarity-badge { background: #7b1fa2; }
-.tier-legendary .card-rarity-badge { background: linear-gradient(135deg, #d4af37, #b0524b); }
-
-.card-title-text {
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 170px;
+body.dark-theme .recall-attack-area {
+    background: rgba(255, 255, 255, 0.02);
 }
 
-.card-type-indicator {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--text-secondary);
-    background: var(--bg-secondary);
-    padding: 4px 8px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-}
-
-/* Illustration / Front Face Preview container */
-.card-illustration {
-    height: 140px;
-    margin: 10px 16px 6px 16px;
-    border-radius: 12px;
-    border: 2px solid var(--border-color);
-    background: var(--bg-secondary);
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-.illustration-text {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    text-align: center;
-    padding: 10px;
-    max-height: 100%;
-    overflow: hidden;
-}
-
-.illustration-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* HP / Power Stat Section */
-.card-hp-section {
-    padding: 6px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.card-hp-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--text-secondary);
-}
-
-.card-hp-label span.hp-val {
-    color: var(--text-primary);
-    font-weight: 800;
-}
-
-.card-hp-bar {
-    height: 8px;
-    border-radius: 4px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    overflow: hidden;
-    position: relative;
-}
-
-.card-hp-fill {
-    height: 100%;
-    border-radius: 3px;
-    width: 0%;
-    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.tier-common .card-hp-fill { background: #2e7d32; }
-.tier-rare .card-hp-fill { background: #0288d1; }
-.tier-epic .card-hp-fill { background: #7b1fa2; }
-.tier-legendary .card-hp-fill { background: linear-gradient(90deg, #b0524b, #d4af37); }
-
-/* Card Body Clues slots - "Abilities" */
-.card-abilities-section {
-    padding: 6px 16px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    overflow-y: auto;
-    scrollbar-width: none;
-}
-
-.card-abilities-section::-webkit-scrollbar {
-    display: none;
-}
-
-.ability-slot {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px dashed var(--border-color);
-    border-radius: 8px;
-    padding: 6px 10px;
-    font-size: 0.75rem;
-}
-
-body.dark-theme .ability-slot {
-    background: rgba(0, 0, 0, 0.05);
-}
-
-.ability-badge {
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    font-weight: 800;
-    font-size: 0.65rem;
-    padding: 2px 4px;
-    border-radius: 4px;
-    color: var(--text-primary);
-    text-transform: uppercase;
-    white-space: nowrap;
-}
-
-.ability-description {
-    color: var(--text-secondary);
-    line-height: 1.3;
-    font-style: italic;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
-}
-
-.no-abilities {
-    text-align: center;
-    color: var(--text-tertiary);
-    font-size: 0.75rem;
-    padding: 12px;
-    font-style: italic;
-}
-
-/* Card Stats Footer */
-.card-stats-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 16px 12px 16px;
-    border-top: 1px solid var(--border-color);
-    background: rgba(0, 0, 0, 0.01);
-}
-
-body.dark-theme .card-stats-footer {
-    background: rgba(255, 255, 255, 0.01);
-}
-
-.footer-stat-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.footer-stat-label {
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.footer-stat-val {
+.attack-title {
     font-size: 0.8rem;
     font-weight: 800;
     color: var(--text-primary);
-}
-
-.btn-card-action {
-    padding: 6px 12px;
-    font-size: 0.75rem;
-    font-weight: 800;
-    border-radius: 8px;
-    border: 2px solid var(--text-primary);
-    background: var(--text-primary);
-    color: var(--btn-primary-text);
-    box-shadow: 0 2px 0 var(--btn-primary-shadow);
-    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
+}
+
+.attack-title svg {
+    color: var(--warning);
+}
+
+/* Glowing Neon active spelling input */
+.attack-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.deck-practice-input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    transition: all 0.25s ease;
+}
+
+.tier-common .deck-practice-input:focus { border-color: #2e7d32; box-shadow: 0 0 10px rgba(46, 125, 50, 0.2); }
+.tier-rare .deck-practice-input:focus { border-color: #0288d1; box-shadow: 0 0 10px rgba(2, 136, 209, 0.2); }
+.tier-epic .deck-practice-input:focus { border-color: #7b1fa2; box-shadow: 0 0 10px rgba(123, 31, 162, 0.2); }
+.tier-legendary .deck-practice-input:focus { border-color: #d4af37; box-shadow: 0 0 12px rgba(212, 175, 55, 0.3); }
+
+/* Buttons inside the big card */
+.deck-attack-btn {
+    width: 100%;
+    padding: 12px 0;
+    font-size: 0.9rem;
+    font-weight: 800;
+    border-radius: 12px;
+    cursor: pointer;
+    border: none;
+    color: var(--btn-primary-text);
+    box-shadow: 0 4px 0 var(--btn-primary-shadow);
     transition: transform 0.1s, box-shadow 0.1s;
+    text-align: center;
 }
 
-.btn-card-action:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 0 var(--btn-primary-shadow);
+.tier-common .deck-attack-btn { background: #2e7d32; --btn-primary-shadow: #1b5e20; }
+.tier-rare .deck-attack-btn { background: #0288d1; --btn-primary-shadow: #01579b; }
+.tier-epic .deck-attack-btn { background: #7b1fa2; --btn-primary-shadow: #4a148c; }
+.tier-legendary .deck-attack-btn { background: linear-gradient(90deg, #b0524b, #d4af37); --btn-primary-shadow: #5d2522; }
+
+.deck-attack-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--btn-primary-shadow);
 }
 
-.btn-card-action:active {
-    transform: translateY(1px);
+.deck-attack-btn:active {
+    transform: translateY(2px);
     box-shadow: none;
 }
 
-/* empty card state */
-.deck-empty-state {
+/* Feedback Box inside Attack Area */
+.attack-feedback {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    animation: slideDownIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideDownIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.feedback-success {
+    background: rgba(74, 128, 90, 0.08);
+    border: 1px solid var(--success);
+    color: var(--success);
+}
+
+.feedback-danger {
+    background: rgba(176, 82, 75, 0.08);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+}
+
+.feedback-result-title {
+    font-weight: 800;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.feedback-correct-val {
+    font-weight: 700;
+    background: var(--bg-card);
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    margin-top: 4px;
+    display: inline-block;
+    word-break: break-all;
+}
+
+/* Slide animations for card transitions */
+@keyframes slideCardOut {
+    0% { opacity: 1; transform: scale(1) translateX(0); }
+    100% { opacity: 0; transform: scale(0.9) translateX(-150px) rotate(-10deg); }
+}
+
+@keyframes slideCardIn {
+    0% { opacity: 0; transform: scale(0.9) translateX(150px) rotate(10deg); }
+    100% { opacity: 1; transform: scale(1) translateX(0) rotate(0); }
+}
+
+.card-slide-out {
+    animation: slideCardOut 0.4s cubic-bezier(0.175, 0.885, 0.32, 1) forwards !important;
+}
+
+.card-slide-in {
+    animation: slideCardIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+}
+
+/* Clean victory status state */
+.study-victory-state {
     text-align: center;
-    padding: 60px 20px;
-    border: 2px dashed var(--border-color);
+    padding: 40px 20px;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    box-shadow: inset 0 -2px 0 var(--border-color);
     border-radius: 20px;
-    color: var(--text-secondary);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
+    animation: customPopIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-.deck-empty-state svg {
-    color: var(--text-tertiary);
-}
-
-.deck-empty-state h3 {
-    font-size: 1.3rem;
+.study-victory-state h3 {
+    font-size: 1.5rem;
     font-weight: 800;
     color: var(--text-primary);
+}
+
+.study-victory-state p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    max-width: 320px;
 }
