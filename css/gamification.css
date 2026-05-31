@@ -486,14 +486,36 @@ body.dark-theme .recall-attack-area {
 
 /* Theme Blending Glassmorphism & Translucency overrides */
 body.dark-theme .study-pokemon-card,
-body.dark-theme .pokemon-card,
-body.dark-theme .stack-card {
+body.dark-theme .pokemon-card {
     background: rgba(34, 34, 32, 0.65) !important;
     backdrop-filter: blur(18px) saturate(180%);
     -webkit-backdrop-filter: blur(18px) saturate(180%);
     border-color: rgba(230, 228, 220, 0.12) !important;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3) !important;
 }
+
+body.dark-theme .stack-card {
+    background: rgba(34, 34, 32, 0.65) !important;
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+}
+
+/* Subtle glowing colored borders for rarity stacks in Dark Mode */
+body.dark-theme .stack-legendary .stack-card { border-color: rgba(212, 175, 55, 0.3) !important; }
+body.dark-theme .stack-legendary .stack-card-3 { border-color: rgba(212, 175, 55, 0.6) !important; box-shadow: 0 6px 20px rgba(212, 175, 55, 0.12) !important; }
+body.dark-theme .stack-legendary:hover .stack-card-3 { border-color: rgba(212, 175, 55, 0.95) !important; box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4) !important; }
+
+body.dark-theme .stack-epic .stack-card { border-color: rgba(123, 31, 162, 0.25) !important; }
+body.dark-theme .stack-epic .stack-card-3 { border-color: rgba(123, 31, 162, 0.5) !important; box-shadow: 0 6px 20px rgba(123, 31, 162, 0.12) !important; }
+body.dark-theme .stack-epic:hover .stack-card-3 { border-color: rgba(123, 31, 162, 0.9) !important; box-shadow: 0 15px 35px rgba(123, 31, 162, 0.35) !important; }
+
+body.dark-theme .stack-rare .stack-card { border-color: rgba(2, 136, 209, 0.25) !important; }
+body.dark-theme .stack-rare .stack-card-3 { border-color: rgba(2, 136, 209, 0.45) !important; box-shadow: 0 6px 16px rgba(2, 136, 209, 0.1) !important; }
+body.dark-theme .stack-rare:hover .stack-card-3 { border-color: rgba(2, 136, 209, 0.9) !important; box-shadow: 0 12px 30px rgba(2, 136, 209, 0.3) !important; }
+
+body.dark-theme .stack-common .stack-card { border-color: rgba(46, 125, 50, 0.25) !important; }
+body.dark-theme .stack-common .stack-card-3 { border-color: rgba(46, 125, 50, 0.45) !important; box-shadow: 0 4px 12px rgba(46, 125, 50, 0.08) !important; }
+body.dark-theme .stack-common:hover .stack-card-3 { border-color: rgba(46, 125, 50, 0.9) !important; box-shadow: 0 10px 25px rgba(46, 125, 50, 0.25) !important; }
 
 body.dark-theme .card-illustration {
     background: rgba(22, 22, 21, 0.5) !important;
