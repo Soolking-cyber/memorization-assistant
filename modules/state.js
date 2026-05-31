@@ -13,7 +13,7 @@ export const state = {
     currentReviewIndex: 0,
     userSession: null,
     isForcedMode: false,
-    exampleSentences: JSON.parse(localStorage.getItem('exampleSentences')) || {},
+    exampleSentences: {},
     statsYear: new Date().getFullYear(),
     activeCategoryTab: 'mixed',
     draftCreateSentences: [],

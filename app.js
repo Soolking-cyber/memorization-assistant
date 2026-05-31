@@ -1,6 +1,7 @@
 import { state } from './modules/state.js';
 import { supabase } from './modules/supabaseClient.js';
 import { playUISound, initSoundSystem } from './modules/sound.js';
+import { dbGet } from './modules/db.js';
 import {
     initThemeSystem,
     initNavigation,
@@ -49,13 +50,22 @@ async function checkAuth() {
         updateUserAvatarBadge();
         
         try {
-            const cached = localStorage.getItem('cached_cards');
+            const cached = await dbGet('cached_cards');
             if (cached) {
-                state.cards = JSON.parse(cached) || [];
+                state.cards = cached || [];
                 updateDashboard();
             }
         } catch (e) {
             console.warn("Failed to load cached cards on startup:", e);
+        }
+
+        try {
+            const cachedSentences = await dbGet('exampleSentences');
+            if (cachedSentences) {
+                state.exampleSentences = cachedSentences || {};
+            }
+        } catch (e) {
+            console.warn("Failed to load cached sentences on startup:", e);
         }
         
         await loadData();
@@ -72,13 +82,22 @@ async function checkAuth() {
             updateUserAvatarBadge();
             
             try {
-                const cached = localStorage.getItem('cached_cards');
+                const cached = await dbGet('cached_cards');
                 if (cached) {
-                    state.cards = JSON.parse(cached) || [];
+                    state.cards = cached || [];
                     updateDashboard();
                 }
             } catch (e) {
                 console.warn("Failed to load cached cards on auth change:", e);
+            }
+
+            try {
+                const cachedSentences = await dbGet('exampleSentences');
+                if (cachedSentences) {
+                    state.exampleSentences = cachedSentences || {};
+                }
+            } catch (e) {
+                console.warn("Failed to load cached sentences on auth change:", e);
             }
             
             await loadData();

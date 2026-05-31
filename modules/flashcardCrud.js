@@ -7,6 +7,7 @@ import { updateDashboard, getSelectedTypes } from './dashboard.js';
 import { validateExampleSentence } from './practice.js';
 import { switchView } from './navigation.js';
 import { renderStatistics } from './stats.js';
+import { dbGet, dbSet, dbDelete } from './db.js';
 
 export function updateFormLabelsAndPlaceholders(isEdit, type) {
     const labelFront = document.querySelector(`label[for="${isEdit ? 'edit-card-front' : 'card-front'}"]`);
@@ -49,7 +50,7 @@ export async function fetchAndCacheReviewLogs() {
         score: log.score
     }));
     
-    localStorage.setItem('review_activity_logs', JSON.stringify(formattedLogs));
+    await dbSet('review_activity_logs', formattedLogs);
 }
 
 export async function loadData() {
@@ -59,58 +60,129 @@ export async function loadData() {
     if (syncInd) syncInd.classList.remove('hidden');
     
     try {
-        const { data, error } = await supabase
+        // 1. Fetch only lightweight metadata fields from Supabase
+        const { data: metadataList, error: metadataError } = await supabase
             .from('flashcards')
-            .select('*')
+            .select('id, user_id, type, nextReview, ease, interval, repetitions, created_at')
             .eq('user_id', state.userSession.user.id);
 
-        if (error) {
-            console.error("Error loading cards:", error);
-        } else {
-            state.cards = data || [];
-            localStorage.setItem('cached_cards', JSON.stringify(state.cards));
-            
-            let migratedCards = [];
-            state.cards.forEach(card => {
-                let needsUpdate = false;
-                if (!card.type || card.type === 'General' || card.type === 'mixed') {
-                    card.type = 'Unknown';
-                    needsUpdate = true;
+        if (metadataError) {
+            console.error("Error loading card metadata:", metadataError);
+            return;
+        }
+
+        const metadataMap = new Map(metadataList.map(m => [m.id, m]));
+        let cacheChanged = false;
+
+        // 2. Remove cards deleted from the remote DB from local state
+        const originalLength = state.cards.length;
+        state.cards = state.cards.filter(c => {
+            const stillExists = metadataMap.has(c.id);
+            if (!stillExists) cacheChanged = true;
+            return stillExists;
+        });
+
+        const cardsMap = new Map(state.cards.map(c => [c.id, c]));
+        const idsToFetch = [];
+
+        // 3. Find cards that are new, modified, or missing full details in cache
+        for (const meta of metadataList) {
+            const cached = cardsMap.get(meta.id);
+            if (!cached) {
+                // New card
+                idsToFetch.push(meta.id);
+            } else {
+                // Modified card or missing full body fields
+                const metaChanged = 
+                    cached.type !== meta.type ||
+                    cached.nextReview !== meta.nextReview ||
+                    cached.ease !== meta.ease ||
+                    cached.interval !== meta.interval ||
+                    cached.repetitions !== meta.repetitions;
+
+                const hasFullBody = 
+                    cached.front !== undefined && 
+                    cached.back !== undefined;
+
+                if (metaChanged || !hasFullBody) {
+                    idsToFetch.push(meta.id);
                 }
-                if (needsUpdate) {
-                    migratedCards.push(card);
-                }
-                if (card.example_sentences) {
-                    state.exampleSentences[card.id] = card.example_sentences;
-                } else {
-                    if (!state.exampleSentences[card.id]) {
-                        state.exampleSentences[card.id] = [];
+            }
+        }
+
+        // 4. Perform selective query to pull full details ONLY for targeted card IDs
+        if (idsToFetch.length > 0) {
+            console.log(`Selective sync: fetching full details for ${idsToFetch.length} new/changed cards.`);
+            const { data: fullCards, error: fullError } = await supabase
+                .from('flashcards')
+                .select('*')
+                .in('id', idsToFetch);
+
+            if (fullError) {
+                console.error("Error fetching full details for selective sync:", fullError);
+            } else if (fullCards) {
+                cacheChanged = true;
+                
+                // Merge fetched full records
+                for (const fullCard of fullCards) {
+                    const idx = state.cards.findIndex(c => c.id === fullCard.id);
+                    if (idx !== -1) {
+                        state.cards[idx] = fullCard;
+                    } else {
+                        state.cards.push(fullCard);
                     }
                 }
+            }
+        }
+
+        // 5. Complete type migrations and example sentence mapping
+        let migratedCards = [];
+        state.cards.forEach(card => {
+            let needsUpdate = false;
+            if (!card.type || card.type === 'General' || card.type === 'mixed') {
+                card.type = 'Unknown';
+                needsUpdate = true;
+                cacheChanged = true;
+            }
+            if (needsUpdate) {
+                migratedCards.push(card);
+            }
+            
+            if (card.example_sentences) {
+                state.exampleSentences[card.id] = card.example_sentences;
+            } else {
+                if (!state.exampleSentences[card.id]) {
+                    state.exampleSentences[card.id] = [];
+                }
+            }
+        });
+
+        // 6. Write to DB/cache if any updates were made
+        if (cacheChanged) {
+            await dbSet('cached_cards', state.cards);
+            await dbSet('exampleSentences', state.exampleSentences);
+        }
+
+        if (migratedCards.length > 0) {
+            console.log(`Migrating ${migratedCards.length} cards with missing types...`);
+            Promise.all(migratedCards.map(card => 
+                supabase.from('flashcards')
+                    .update({ type: card.type })
+                    .eq('id', card.id)
+                    .eq('user_id', state.userSession.user.id)
+            )).then(() => {
+                console.log("Database migration and synchronization complete!");
+            }).catch(err => {
+                console.error("Failed to sync migrated cards to database:", err);
             });
-            localStorage.setItem('exampleSentences', JSON.stringify(state.exampleSentences));
-            
-            if (migratedCards.length > 0) {
-                console.log(`Migrating ${migratedCards.length} cards with missing types...`);
-                Promise.all(migratedCards.map(card => 
-                    supabase.from('flashcards')
-                        .update({ type: card.type })
-                        .eq('id', card.id)
-                        .eq('user_id', state.userSession.user.id)
-                )).then(() => {
-                    console.log("Database migration and synchronization complete!");
-                }).catch(err => {
-                    console.error("Failed to sync migrated cards to database:", err);
-                });
-            }
-            
-            await fetchAndCacheReviewLogs();
-            
-            updateDashboard();
-            const statsView = document.getElementById('view-stats');
-            if (statsView && !statsView.classList.contains('hidden')) {
-                renderStatistics();
-            }
+        }
+        
+        await fetchAndCacheReviewLogs();
+        
+        updateDashboard();
+        const statsView = document.getElementById('view-stats');
+        if (statsView && !statsView.classList.contains('hidden')) {
+            renderStatistics();
         }
     } catch (err) {
         console.error("Critical error inside loadData background fetch:", err);
@@ -205,7 +277,7 @@ export async function batchDeleteCards(ids) {
         ids.forEach(id => {
             delete state.exampleSentences[id];
         });
-        localStorage.setItem('exampleSentences', JSON.stringify(state.exampleSentences));
+        await dbSet('exampleSentences', state.exampleSentences);
 
         await loadData();
         renderManageView();
@@ -380,7 +452,7 @@ export function renderManageView() {
             } else {
                 delete state.exampleSentences[cardId];
             }
-            localStorage.setItem('exampleSentences', JSON.stringify(state.exampleSentences));
+            await dbSet('exampleSentences', state.exampleSentences);
 
             const cardIndex = state.cards.findIndex(c => c.id === cardId);
             if (cardIndex !== -1) {
@@ -519,7 +591,7 @@ export async function handleCreateCard(e) {
         const createdCard = data[0];
         if (state.draftCreateSentences.length > 0 && activeType !== 'Memory Map') {
             state.exampleSentences[createdCard.id] = [...state.draftCreateSentences];
-            localStorage.setItem('exampleSentences', JSON.stringify(state.exampleSentences));
+            await dbSet('exampleSentences', state.exampleSentences);
         }
         await loadData();
     } else {
@@ -760,7 +832,7 @@ export async function handleEditCardSubmit(e) {
         } else {
             delete state.exampleSentences[cardId];
         }
-        localStorage.setItem('exampleSentences', JSON.stringify(state.exampleSentences));
+        await dbSet('exampleSentences', state.exampleSentences);
         
         await loadData();
         renderManageView();
