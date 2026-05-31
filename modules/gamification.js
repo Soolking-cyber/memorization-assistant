@@ -101,6 +101,11 @@ export async function renderCollectionDeck() {
     const commonCards = [];
     
     state.cards.forEach(card => {
+        // Poké card game strictly challenges vocabulary-type items only
+        if (!card.type || card.type.toLowerCase() !== 'vocabulary') {
+            return;
+        }
+        
         const stats = calculateCardStats(card, logs);
         const cardObj = { card, stats };
         
