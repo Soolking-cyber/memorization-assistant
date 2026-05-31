@@ -326,7 +326,10 @@ function renderActiveStackCard() {
                     
                     <div id="deck-attack-feedback" class="attack-feedback hidden"></div>
                     
-                    <button id="btn-deck-attack" class="deck-attack-btn">Tame Concept (Enter)</button>
+                    <div style="display: flex; gap: 10px; width: 100%; margin-top: 12px;" id="deck-attack-buttons-wrapper">
+                        <button id="btn-deck-cant-guess" class="btn" style="flex: 1; padding: 12px 0; font-size: 0.85rem; font-weight: 800; border-radius: 12px; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-secondary); transition: all 0.2s; outline: none; border-color: rgba(229, 185, 85, 0.25);">Can't Guess</button>
+                        <button id="btn-deck-attack" class="deck-attack-btn" style="flex: 2; margin: 0;">Tame Concept (Enter)</button>
+                    </div>
                 </div>
             </div>
         `;
@@ -434,7 +437,31 @@ function renderActiveStackCard() {
                     } else {
                         proceedToNextStackCard(cardEl);
                     }
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!attackBtn.dataset.nextMode) {
+                        evaluateStackAnswer(card, "", feedbackBox, attackBtn);
+                    }
                 }
+            });
+        }
+        
+        const cantGuessBtn = container.querySelector('#btn-deck-cant-guess');
+        if (cantGuessBtn) {
+            cantGuessBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                evaluateStackAnswer(card, "", feedbackBox, attackBtn);
+            });
+            cantGuessBtn.addEventListener('mouseenter', () => {
+                cantGuessBtn.style.background = 'rgba(229, 185, 85, 0.1)';
+                cantGuessBtn.style.borderColor = 'var(--warning)';
+                cantGuessBtn.style.color = 'var(--warning)';
+            });
+            cantGuessBtn.addEventListener('mouseleave', () => {
+                cantGuessBtn.style.background = 'var(--bg-card)';
+                cantGuessBtn.style.borderColor = 'var(--border-color)';
+                cantGuessBtn.style.color = 'var(--text-secondary)';
             });
         }
         
@@ -486,13 +513,14 @@ function renderActiveStackCard() {
  * Dynamic answering evaluation for Poké Deck in-place Active Recall.
  */
 function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
-    if (!typed) {
-        alert("Please type your active recall translation first!");
-        return;
-    }
+    // If empty or Can't Guess, evaluate match percentage as 0 (escaped)
+    const score = typed ? calculateMatchPercentage(typed, card.back) : 0;
     
-    // Compares translation to target spelling
-    const score = calculateMatchPercentage(typed, card.back);
+    // Hide the "Can't Guess" button if it exists
+    const cantGuessBtn = document.getElementById('btn-deck-cant-guess');
+    if (cantGuessBtn) {
+        cantGuessBtn.style.display = 'none';
+    }
     
     let gradeInt = 0;
     let success = false;
