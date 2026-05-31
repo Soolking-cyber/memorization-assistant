@@ -284,6 +284,8 @@ export function renderCurrentCard() {
             sentences = [savedSentences];
         }
     }
+    const targetWord = card.back.trim();
+    const isSingleWord = !targetWord.includes(' ') && targetWord.length > 0;
     
     if (sentences.length > 0) {
         exerciseTitleEl.textContent = "Complete the sentences with the correct word";
@@ -317,22 +319,25 @@ export function renderCurrentCard() {
             </div>
         `;
         spellingArea.classList.add('hidden');
-        document.getElementById('typing-area').classList.add('hidden');
-        setTimeout(() => {
-            initSpellingInputListeners();
-            const firstInput = document.querySelector('.letter-input');
-            if (firstInput) firstInput.focus();
-        }, 50);
     } else {
-        exerciseTitleEl.textContent = "Spelling Practice";
-        frontEl.innerHTML = card.front;
-        spellingArea.classList.remove('hidden');
-        renderSpellingBoxes(card.back.trim());
-        document.getElementById('typing-area').classList.add('hidden');
-        initSpellingInputListeners();
+        exerciseTitleEl.textContent = "Question";
+        
+        const explanationHtml = card.front.replace(/\n/g, '<br>');
+        frontEl.innerHTML = `
+            <div class="practice-explanation-only" style="font-size: 1.45rem; font-weight: 700; color: var(--text-primary); max-width: 100%; line-height: 1.5; word-break: normal; overflow-wrap: break-word; text-align: center; margin: auto 0;">
+                ${explanationHtml}
+            </div>
+        `;
+        
+        if (isSingleWord && targetWord.length > 1) {
+            spellingArea.classList.remove('hidden');
+            renderSpellingBoxes(targetWord);
+        } else {
+            spellingArea.classList.add('hidden');
+        }
     }
     
-    backEl.innerHTML = card.back;
+    backEl.innerHTML = card.back.replace(/\n/g, '<br>');
     
     const frontImg = document.getElementById('practice-front-img');
     if (frontImg) {
@@ -340,6 +345,7 @@ export function renderCurrentCard() {
             frontImg.src = card.image_front_url;
             frontImg.classList.remove('hidden');
         } else {
+            frontImg.src = '';
             frontImg.classList.add('hidden');
         }
     }
@@ -349,12 +355,28 @@ export function renderCurrentCard() {
             backImg.src = card.image_back_url;
             backImg.classList.remove('hidden');
         } else {
+            backImg.src = '';
             backImg.classList.add('hidden');
         }
     }
     
     document.querySelector('.card-front').classList.remove('hidden');
     document.querySelector('.card-back').classList.add('hidden');
+    
+    document.getElementById('typing-area').classList.remove('hidden');
+    document.getElementById('practice-input').value = '';
+    document.getElementById('evaluation-area').classList.add('hidden');
+    
+    const firstSpellingInput = document.querySelector('.letter-input');
+    if (firstSpellingInput) {
+        document.getElementById('practice-input').classList.add('hidden');
+        setTimeout(() => {
+            firstSpellingInput.focus();
+        }, 50);
+    } else {
+        document.getElementById('practice-input').classList.remove('hidden');
+        document.getElementById('practice-input').focus();
+    }
 }
 
 export async function logReviewAttempt(cardId, gradeInt, score) {
