@@ -94,25 +94,42 @@ export async function renderCollectionDeck() {
         console.warn("Could not retrieve review logs for Pokédex:", e);
     }
     
-    // Group cards into the 4 rarity tiers
+    // Group cards into the rarity tiers
     const legendaryCards = [];
+    const ultraRareCards = [];
     const epicCards = [];
     const rareCards = [];
     const commonCards = [];
     
-    state.cards.forEach(card => {
-        // Poké card game strictly challenges vocabulary-type items only
-        if (!card.type || card.type.toLowerCase() !== 'vocabulary') {
-            return;
+    // First, filter and map all vocabulary cards with their calculated stats
+    const vocabCards = state.cards
+        .filter(card => card.type && card.type.toLowerCase() === 'vocabulary')
+        .map(card => {
+            const stats = calculateCardStats(card, logs);
+            return { card, stats };
+        });
+        
+    // Sort vocabulary cards descending by struggleIndex to isolate the absolute hardest
+    vocabCards.sort((a, b) => b.stats.struggleIndex - a.stats.struggleIndex);
+    
+    // The top 10 most difficult cards are classified as "Ultra Rare" (Apex Shadow)
+    vocabCards.forEach((cardObj, idx) => {
+        if (idx < 10) {
+            cardObj.stats.tier = {
+                name: 'Apex Shadow',
+                key: 'ultrarare',
+                class: 'tier-ultrarare',
+                title: 'Ultra Rare Card'
+            };
+            ultraRareCards.push(cardObj);
+        } else {
+            // Re-allocate remaining cards to their native HP-based tiers
+            const stats = cardObj.stats;
+            if (stats.tier.key === 'legendary') legendaryCards.push(cardObj);
+            else if (stats.tier.key === 'epic') epicCards.push(cardObj);
+            else if (stats.tier.key === 'rare') rareCards.push(cardObj);
+            else commonCards.push(cardObj);
         }
-        
-        const stats = calculateCardStats(card, logs);
-        const cardObj = { card, stats };
-        
-        if (stats.tier.key === 'legendary') legendaryCards.push(cardObj);
-        else if (stats.tier.key === 'epic') epicCards.push(cardObj);
-        else if (stats.tier.key === 'rare') rareCards.push(cardObj);
-        else commonCards.push(cardObj);
     });
     
     stacksGrid.innerHTML = '';
@@ -126,6 +143,14 @@ export async function renderCollectionDeck() {
             class: 'stack-legendary',
             cards: legendaryCards,
             desc: 'Extreme difficulty memories needing immediate taming.'
+        },
+        {
+            key: 'ultrarare',
+            name: 'Apex Shadow',
+            badge: 'Ultra Rare',
+            class: 'stack-ultrarare',
+            cards: ultraRareCards,
+            desc: 'The top 10 absolute hardest concepts in your entire deck.'
         },
         {
             key: 'epic',
@@ -254,7 +279,7 @@ function renderActiveStackCard() {
             illustrationContent = `<img class="illustration-img" src="${card.image_front_url}" alt="Memory Art">`;
         }
         
-        const hpPercent = Math.min(100, Math.max(5, stats.struggleIndex * 3));
+        const hpPercent = Math.min(100, Math.max(25, stats.struggleIndex * 3));
         
         container.innerHTML = `
             <div class="study-pokemon-card ${stats.tier.class} card-slide-in">

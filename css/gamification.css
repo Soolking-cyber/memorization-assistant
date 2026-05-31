@@ -125,6 +125,15 @@
     box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
 }
 
+.stack-ultrarare .stack-card { border-color: #ff5722; }
+.stack-ultrarare .stack-card-3 {
+    background: linear-gradient(135deg, var(--bg-card) 60%, rgba(255, 87, 34, 0.08) 100%);
+    box-shadow: 0 6px 20px rgba(255, 87, 34, 0.15);
+}
+.stack-ultrarare:hover .stack-card-3 {
+    box-shadow: 0 15px 40px rgba(255, 87, 34, 0.4);
+}
+
 .stack-epic .stack-card { border-color: #7b1fa2; }
 .stack-epic .stack-card-3 {
     background: linear-gradient(135deg, var(--bg-card) 60%, rgba(123, 31, 162, 0.08) 100%);
@@ -174,6 +183,7 @@
     margin-bottom: 12px;
 }
 .stack-legendary .stack-badge { background: linear-gradient(135deg, #d4af37, #b0524b); }
+.stack-ultrarare .stack-badge { background: linear-gradient(135deg, #ff5722, #ff9100); }
 .stack-epic .stack-badge { background: #7b1fa2; }
 .stack-rare .stack-badge { background: #0288d1; }
 .stack-common .stack-badge { background: #2e7d32; }
@@ -271,6 +281,16 @@
 .study-pokemon-card.tier-epic .card-holo { background: linear-gradient(125deg, rgba(255, 0, 128, 0.2) 15%, rgba(123, 31, 162, 0.25) 35%, rgba(0, 229, 255, 0.15) 50%, rgba(123, 31, 162, 0.25) 65%, rgba(255, 0, 128, 0.2) 85%); background-size: 200% 200%; }
 .study-pokemon-card.tier-epic:hover { box-shadow: 0 25px 55px rgba(123, 31, 162, 0.35); }
 
+.study-pokemon-card.tier-ultrarare { border-color: #ff5722; background: linear-gradient(180deg, var(--bg-card) 60%, rgba(255, 87, 34, 0.05) 100%); animation: studyUltraFloat 3.5s ease-in-out infinite alternate; }
+.study-pokemon-card.tier-ultrarare::before { content: ''; position: absolute; top:-2px; left:-2px; right:-2px; bottom:-2px; border-radius:24px; background: linear-gradient(135deg, #ff5722, #ff9100, #ff5722); z-index:-1; opacity:0.5; }
+.study-pokemon-card.tier-ultrarare .card-holo { background: linear-gradient(125deg, rgba(255, 87, 34, 0.25) 0%, rgba(255, 145, 0, 0.2) 30%, rgba(255, 0, 128, 0.15) 60%, rgba(255, 87, 34, 0.25) 100%); background-size: 200% 200%; animation: holoFlow 7s linear infinite; opacity: 0.65; }
+.study-pokemon-card.tier-ultrarare:hover { box-shadow: 0 30px 65px rgba(255, 87, 34, 0.4); }
+
+@keyframes studyUltraFloat {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-4px); }
+}
+
 .study-pokemon-card.tier-legendary { border-color: #d4af37; background: linear-gradient(180deg, var(--bg-card) 50%, rgba(212, 175, 55, 0.06) 75%, rgba(176, 82, 75, 0.08) 100%); animation: studyLegendFloat 3s ease-in-out infinite alternate; }
 .study-pokemon-card.tier-legendary::before { content: ''; position: absolute; top:-2px; left:-2px; right:-2px; bottom:-2px; border-radius:24px; background: linear-gradient(135deg, #d4af37, #b0524b, #d4af37); z-index:-1; opacity:0.6; }
 .study-pokemon-card.tier-legendary .card-holo { background: linear-gradient(135deg, rgba(255, 215, 0, 0.25) 0%, rgba(255, 0, 128, 0.2) 25%, rgba(0, 229, 255, 0.15) 50%, rgba(255, 128, 0, 0.2) 75%, rgba(255, 215, 0, 0.25) 100%); background-size: 250% 250%; animation: holoFlow 8s linear infinite; opacity: 0.6; }
@@ -359,6 +379,7 @@ body.dark-theme .recall-attack-area {
 .tier-common .deck-practice-input:focus { border-color: #2e7d32; box-shadow: 0 0 10px rgba(46, 125, 50, 0.2); }
 .tier-rare .deck-practice-input:focus { border-color: #0288d1; box-shadow: 0 0 10px rgba(2, 136, 209, 0.2); }
 .tier-epic .deck-practice-input:focus { border-color: #7b1fa2; box-shadow: 0 0 10px rgba(123, 31, 162, 0.2); }
+.tier-ultrarare .deck-practice-input:focus { border-color: #ff5722; box-shadow: 0 0 12px rgba(255, 87, 34, 0.3); }
 .tier-legendary .deck-practice-input:focus { border-color: #d4af37; box-shadow: 0 0 12px rgba(212, 175, 55, 0.3); }
 
 /* Buttons inside the big card */
@@ -379,6 +400,7 @@ body.dark-theme .recall-attack-area {
 .tier-common .deck-attack-btn { background: #2e7d32; --btn-primary-shadow: #1b5e20; }
 .tier-rare .deck-attack-btn { background: #0288d1; --btn-primary-shadow: #01579b; }
 .tier-epic .deck-attack-btn { background: #7b1fa2; --btn-primary-shadow: #4a148c; }
+.tier-ultrarare .deck-attack-btn { background: linear-gradient(90deg, #ff5722, #ff9100); --btn-primary-shadow: #c33c0e; }
 .tier-legendary .deck-attack-btn { background: linear-gradient(90deg, #b0524b, #d4af37); --btn-primary-shadow: #5d2522; }
 
 .deck-attack-btn:hover {
@@ -504,6 +526,10 @@ body.dark-theme .stack-card {
 body.dark-theme .stack-legendary .stack-card { border-color: rgba(212, 175, 55, 0.3) !important; }
 body.dark-theme .stack-legendary .stack-card-3 { border-color: rgba(212, 175, 55, 0.6) !important; box-shadow: 0 6px 20px rgba(212, 175, 55, 0.12) !important; }
 body.dark-theme .stack-legendary:hover .stack-card-3 { border-color: rgba(212, 175, 55, 0.95) !important; box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4) !important; }
+
+body.dark-theme .stack-ultrarare .stack-card { border-color: rgba(255, 87, 34, 0.25) !important; }
+body.dark-theme .stack-ultrarare .stack-card-3 { border-color: rgba(255, 87, 34, 0.5) !important; box-shadow: 0 6px 20px rgba(255, 87, 34, 0.12) !important; }
+body.dark-theme .stack-ultrarare:hover .stack-card-3 { border-color: rgba(255, 87, 34, 0.95) !important; box-shadow: 0 15px 40px rgba(255, 87, 34, 0.4) !important; }
 
 body.dark-theme .stack-epic .stack-card { border-color: rgba(123, 31, 162, 0.25) !important; }
 body.dark-theme .stack-epic .stack-card-3 { border-color: rgba(123, 31, 162, 0.5) !important; box-shadow: 0 6px 20px rgba(123, 31, 162, 0.12) !important; }
@@ -682,6 +708,11 @@ body.dark-theme .ability-slot:hover {
 .tier-epic .deck-letter-input:focus:not(:disabled) {
     border-color: #7b1fa2 !important;
     box-shadow: 0 0 12px rgba(123, 31, 162, 0.5), inset 0 -2px 0 #7b1fa2 !important;
+}
+
+.tier-ultrarare .deck-letter-input:focus:not(:disabled) {
+    border-color: #ff5722 !important;
+    box-shadow: 0 0 16px rgba(255, 87, 34, 0.65), inset 0 -2px 0 #ff5722 !important;
 }
 
 .tier-legendary .deck-letter-input:focus:not(:disabled) {
