@@ -5,6 +5,8 @@ import { hideExplanationTooltip } from './canvas.js';
 import { loadData, renderManageView, renderCreateSentencesList, updateCardInDB } from './flashcardCrud.js';
 import { updateDashboard, handleTypeSelectChange } from './dashboard.js';
 import { renderStatistics } from './stats.js';
+import { renderCollectionDeck } from './gamification.js';
+
 
 export function initThemeSystem() {
     const btnThemeToggle = document.getElementById('btn-theme-toggle');
@@ -129,6 +131,8 @@ export async function switchView(viewId) {
         }
     } else if (viewId === 'stats') {
         await renderStatistics();
+    } else if (viewId === 'collection') {
+        await renderCollectionDeck();
     }
     if (viewId === 'create') {
         state.draftCreateSentences = [];

@@ -4,6 +4,7 @@ import { playUISound } from './sound.js';
 import { toggleFullscreen } from './uiHelpers.js';
 import { applySM2Grade } from './spacedRepetition.js';
 import { queueTransaction } from './syncQueue.js';
+import { dbGet, dbSet } from './db.js';
 
 import {
     blankOutWordInSentence,
@@ -385,6 +386,20 @@ export async function logReviewAttempt(cardId, gradeInt, score) {
         grade: gradeInt,
         score: score
     };
+    
+    // Append locally to IndexedDB cache for real-time live Poké Deck update!
+    try {
+        const localLogs = await dbGet('review_activity_logs') || [];
+        localLogs.push({
+            timestamp: Date.now(),
+            cardId: cardId,
+            grade: gradeInt,
+            score: score
+        });
+        await dbSet('review_activity_logs', localLogs);
+    } catch (e) {
+        console.warn("Could not save review attempt locally:", e);
+    }
     
     try {
         if (!state.userSession || !supabase) return;

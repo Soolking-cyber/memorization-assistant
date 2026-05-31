@@ -98,7 +98,12 @@ export async function finishSession() {
     
     if (state.isForcedMode) {
         document.getElementById('nav-buttons').classList.remove('hidden');
-        switchView('dashboard');
+        if (state.practiceOrigin === 'collection') {
+            state.practiceOrigin = null;
+            switchView('collection');
+        } else {
+            switchView('dashboard');
+        }
     } else {
         const completedMsg = document.getElementById('practice-completed');
         completedMsg.innerHTML = `<h2>Session Complete</h2><p style="color: var(--text-secondary); margin-bottom: 24px;">Your brain is getting stronger.</p><button class="btn primary" id="btn-finish-practice">Back to Dashboard</button>`;
