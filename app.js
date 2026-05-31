@@ -990,6 +990,10 @@ async function loadData() {
             await fetchAndCacheReviewLogs();
             
             updateDashboard();
+            const statsView = document.getElementById('view-stats');
+            if (statsView && !statsView.classList.contains('hidden')) {
+                renderStatistics();
+            }
         }
     } catch (err) {
         console.error("Critical error inside loadData background fetch:", err);
@@ -1473,6 +1477,14 @@ function renderStatistics() {
         }
     });
 
+    // Count occurrences of each created_at timestamp to identify batch-migrated legacy cards
+    const timestampCounts = {};
+    cards.forEach(c => {
+        if (c.created_at) {
+            timestampCounts[c.created_at] = (timestampCounts[c.created_at] || 0) + 1;
+        }
+    });
+
     const dailyCreations = {};
     cards.forEach(card => {
         let creationTime = null;
@@ -1484,7 +1496,8 @@ function renderStatistics() {
             (l.cardId === card.id || l.card_id === card.id) && 
             getLocalDateString(l.timestamp) !== getLocalDateString(Date.now())
         );
-        const isLegacy = hasLogsBeforeToday || (card.interval > 4) || (card.repetitions > 2);
+        const isBatchMigrated = card.created_at && timestampCounts[card.created_at] > 1;
+        const isLegacy = hasLogsBeforeToday || (card.interval > 4) || (card.repetitions > 2) || isBatchMigrated;
         
         if (!card.created_at || (isToday && isLegacy)) {
             // Estimate creation date precisely
@@ -1746,7 +1759,8 @@ function renderStatistics() {
             (l.cardId === card.id || l.card_id === card.id) && 
             getLocalDateString(l.timestamp) !== getLocalDateString(Date.now())
         );
-        const isLegacy = hasLogsBeforeToday || (card.interval > 4) || (card.repetitions > 2);
+        const isBatchMigrated = card.created_at && timestampCounts[card.created_at] > 1;
+        const isLegacy = hasLogsBeforeToday || (card.interval > 4) || (card.repetitions > 2) || isBatchMigrated;
         
         if (!card.created_at || (isToday && isLegacy)) {
             const cardLogs = logs.filter(l => l.cardId === card.id || l.card_id === card.id);
