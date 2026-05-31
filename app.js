@@ -1460,12 +1460,18 @@ function renderStatistics() {
 
     const dailyCreations = {};
     cards.forEach(card => {
-        let creationTime;
+        let creationTime = null;
         
         const isToday = card.created_at && getLocalDateString(card.created_at) === getLocalDateString(Date.now());
-        const hasActivity = (card.repetitions || 0) > 0 || logs.some(l => l.cardId === card.id || l.card_id === card.id);
         
-        if (!card.created_at || (isToday && hasActivity)) {
+        // Robust Legacy Detection: a card is created in the past if it has prior logs, high reps, or high interval
+        const hasLogsBeforeToday = logs.some(l => 
+            (l.cardId === card.id || l.card_id === card.id) && 
+            getLocalDateString(l.timestamp) !== getLocalDateString(Date.now())
+        );
+        const isLegacy = hasLogsBeforeToday || (card.interval > 4) || (card.repetitions > 2);
+        
+        if (!card.created_at || (isToday && isLegacy)) {
             // Estimate creation date precisely
             // 1. Check earliest review log
             const cardLogs = logs.filter(l => l.cardId === card.id || l.card_id === card.id);
@@ -1481,15 +1487,20 @@ function renderStatistics() {
                 }
             }
             
-            if (!creationTime) {
+            // If the estimated date falls on today but it's classified as legacy, force fallback to past estimation
+            const estIsToday = creationTime && getLocalDateString(creationTime) === getLocalDateString(Date.now());
+            if (!creationTime || (isLegacy && estIsToday)) {
                 const reps = card.repetitions || 0;
                 const interval = card.interval || 0;
                 if (reps > 0 && interval > 0) {
                     creationTime = Date.now() - (interval * 24 * 60 * 60 * 1000);
+                } else {
+                    creationTime = null;
                 }
             }
             
-            if (!creationTime) {
+            const finalEstIsToday = creationTime && getLocalDateString(creationTime) === getLocalDateString(Date.now());
+            if (!creationTime || (isLegacy && finalEstIsToday)) {
                 // Distribute legacy cards naturally over the past 30 days based on their ID hash
                 const hash = card.id ? card.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) : Math.random();
                 const daysAgo = (hash % 30) + 1;
@@ -1712,11 +1723,17 @@ function renderStatistics() {
     let addedThisWeek = 0;
 
     cards.forEach(card => {
-        let creationTime;
+        let creationTime = null;
         const isToday = card.created_at && getLocalDateString(card.created_at) === getLocalDateString(Date.now());
-        const hasActivity = (card.repetitions || 0) > 0 || logs.some(l => l.cardId === card.id || l.card_id === card.id);
         
-        if (!card.created_at || (isToday && hasActivity)) {
+        // Robust Legacy Detection: a card is created in the past if it has prior logs, high reps, or high interval
+        const hasLogsBeforeToday = logs.some(l => 
+            (l.cardId === card.id || l.card_id === card.id) && 
+            getLocalDateString(l.timestamp) !== getLocalDateString(Date.now())
+        );
+        const isLegacy = hasLogsBeforeToday || (card.interval > 4) || (card.repetitions > 2);
+        
+        if (!card.created_at || (isToday && isLegacy)) {
             const cardLogs = logs.filter(l => l.cardId === card.id || l.card_id === card.id);
             if (cardLogs.length > 0) {
                 const timestamps = cardLogs.map(l => {
@@ -1730,15 +1747,21 @@ function renderStatistics() {
                 }
             }
             
-            if (!creationTime) {
+            // If the estimated date falls on today but it's classified as legacy, force fallback to past estimation
+            const estIsToday = creationTime && getLocalDateString(creationTime) === getLocalDateString(Date.now());
+            if (!creationTime || (isLegacy && estIsToday)) {
                 const reps = card.repetitions || 0;
                 const interval = card.interval || 0;
                 if (reps > 0 && interval > 0) {
                     creationTime = Date.now() - (interval * 24 * 60 * 60 * 1000);
+                } else {
+                    creationTime = null;
                 }
             }
             
-            if (!creationTime) {
+            const finalEstIsToday = creationTime && getLocalDateString(creationTime) === getLocalDateString(Date.now());
+            if (!creationTime || (isLegacy && finalEstIsToday)) {
+                // Distribute legacy cards naturally over the past 30 days based on their ID hash
                 const hash = card.id ? card.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) : Math.random();
                 const daysAgo = (hash % 30) + 1;
                 creationTime = Date.now() - daysAgo * 24 * 60 * 60 * 1000;
