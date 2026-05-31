@@ -242,23 +242,10 @@ function renderActiveStackCard() {
     dbGet('review_activity_logs').then(l => {
         logs = l || [];
         const stats = calculateCardStats(card, logs);
-        
-        let abilitiesHTML = '';
-        if (stats.sentences.length > 0) {
-            stats.sentences.slice(0, 2).forEach((sentence, index) => {
-                abilitiesHTML += `
-                    <div class="ability-slot">
-                        <span class="ability-badge">Slot ${index + 1}</span>
-                        <span class="ability-description" title="${sentence}">${sentence}</span>
-                    </div>
-                `;
-            });
-        } else {
-            abilitiesHTML = '<div class="no-abilities">No ability modifiers (sentences) attached. Train this memory on fail to unlock.</div>';
-        }
-        
         const titleText = getCardTitle(card);
-        let illustrationContent = `<div class="illustration-text">${titleText}</div>`;
+        const displayTitle = titleText.length > 25 ? titleText.substring(0, 22) + '...' : titleText;
+        
+        let illustrationContent = `<div class="illustration-text" style="font-size: 0.95rem; font-weight: 500; line-height: 1.45; overflow-y: auto; max-height: 100%; text-align: left; padding: 12px; font-family: 'Inter', sans-serif; color: var(--text-primary);">${titleText}</div>`;
         if (card.type === 'Image Card' && card.image_front_url) {
             illustrationContent = `<img class="illustration-img" src="${card.image_front_url}" alt="Memory Art">`;
         }
@@ -271,7 +258,7 @@ function renderActiveStackCard() {
                 <div class="card-header">
                     <div class="card-title-area">
                         <span class="card-rarity-badge">${stats.tier.name}</span>
-                        <h4 class="card-title-text" title="${titleText}">${titleText}</h4>
+                        <h4 class="card-title-text" title="${titleText}">${displayTitle}</h4>
                     </div>
                     <span class="card-type-indicator">${card.type || 'Unknown'}</span>
                 </div>
@@ -290,8 +277,9 @@ function renderActiveStackCard() {
                     </div>
                 </div>
                 
+                <!-- Dynamic active clues section -->
                 <div class="card-abilities-section">
-                    ${abilitiesHTML}
+                    <!-- Clue slider populated dynamically -->
                 </div>
                 
                 <!-- Recall Attack active prompt field -->
@@ -318,6 +306,61 @@ function renderActiveStackCard() {
         const inputField = container.querySelector('#deck-practice-input');
         const attackBtn = container.querySelector('#btn-deck-attack');
         const feedbackBox = container.querySelector('#deck-attack-feedback');
+        
+        // Active Sentence Clues Navigation Slide System
+        let activeSentenceIndex = 0;
+        
+        function updateSentenceClueUI() {
+            const abilitiesContainer = cardEl.querySelector('.card-abilities-section');
+            if (!abilitiesContainer) return;
+            
+            if (stats.sentences.length > 0) {
+                const rawSentence = stats.sentences[activeSentenceIndex];
+                const blurredSentence = blurWordInSentence(rawSentence, card.back);
+                
+                let navigationHTML = '';
+                if (stats.sentences.length > 1) {
+                    navigationHTML = `
+                        <div class="clue-nav-buttons" style="display: flex; gap: 6px;">
+                            <button class="clue-nav-btn btn-up" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 6px; padding: 2px 8px; cursor: pointer; font-size: 0.65rem; font-weight: 800;" title="Previous Clue">▲</button>
+                            <button class="clue-nav-btn btn-down" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 6px; padding: 2px 8px; cursor: pointer; font-size: 0.65rem; font-weight: 800;" title="Next Clue">▼</button>
+                        </div>
+                    `;
+                }
+                
+                abilitiesContainer.innerHTML = `
+                    <div class="ability-slot" style="display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 8px 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <span class="ability-badge">Clue ${activeSentenceIndex + 1} of ${stats.sentences.length}</span>
+                            ${navigationHTML}
+                        </div>
+                        <span class="ability-description" title="${rawSentence}" style="font-size: 0.85rem; font-style: normal; white-space: normal; line-height: 1.45; color: var(--text-secondary);">
+                            "${blurredSentence}"
+                        </span>
+                    </div>
+                `;
+                
+                // Bind arrow study triggers
+                if (stats.sentences.length > 1) {
+                    abilitiesContainer.querySelector('.btn-up').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        activeSentenceIndex = (activeSentenceIndex - 1 + stats.sentences.length) % stats.sentences.length;
+                        try { playUISound('click'); } catch(err) {}
+                        updateSentenceClueUI();
+                    });
+                    abilitiesContainer.querySelector('.btn-down').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        activeSentenceIndex = (activeSentenceIndex + 1) % stats.sentences.length;
+                        try { playUISound('click'); } catch(err) {}
+                        updateSentenceClueUI();
+                    });
+                }
+            } else {
+                abilitiesContainer.innerHTML = '<div class="no-abilities">No ability modifiers (sentences) attached. Train this memory on fail to unlock.</div>';
+            }
+        }
+        
+        updateSentenceClueUI();
         
         if (inputField) {
             setTimeout(() => inputField.focus(), 50);
@@ -518,6 +561,29 @@ function getCardTitle(card) {
     }
     
     return card.front;
+}
+
+/**
+ * Escapes regex special characters and blurs occurrences of targetWord inside a sentence with ***.
+ */
+function blurWordInSentence(sentence, targetWord) {
+    if (!sentence || !targetWord) return sentence;
+    const word = targetWord.trim();
+    if (!word) return sentence;
+    
+    const escaped = word.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    
+    // 1. Try matching whole words only case-insensitively
+    const wordRegex = new RegExp(`\\b${escaped}\\b`, 'gi');
+    let blurred = sentence.replace(wordRegex, '***');
+    
+    // 2. Fallback to general substring match if exact boundary wasn't found (e.g. inflected suffix)
+    if (blurred === sentence) {
+        const subRegex = new RegExp(escaped, 'gi');
+        blurred = sentence.replace(subRegex, '***');
+    }
+    
+    return blurred;
 }
 
 // Global back to stacks click navigation binder
