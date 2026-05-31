@@ -137,20 +137,20 @@ export async function renderCollectionDeck() {
     // Stacks configuration list
     const stacksConfig = [
         {
-            key: 'legendary',
-            name: 'Untamed Colossus',
-            badge: 'Legendary',
-            class: 'stack-legendary',
-            cards: legendaryCards,
-            desc: 'Extreme difficulty memories needing immediate taming.'
-        },
-        {
             key: 'ultrarare',
             name: 'Apex Shadow',
             badge: 'Ultra Rare',
             class: 'stack-ultrarare',
             cards: ultraRareCards,
             desc: 'The top 10 absolute hardest concepts in your entire deck.'
+        },
+        {
+            key: 'legendary',
+            name: 'Untamed Colossus',
+            badge: 'Legendary',
+            class: 'stack-legendary',
+            cards: legendaryCards,
+            desc: 'Extreme difficulty memories needing immediate taming.'
         },
         {
             key: 'epic',
