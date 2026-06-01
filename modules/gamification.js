@@ -327,9 +327,8 @@ function renderActiveStackCard() {
                     
                     <div id="deck-attack-feedback" class="attack-feedback hidden"></div>
                     
-                    <div style="display: flex; gap: 10px; width: 100%; margin-top: 12px;" id="deck-attack-buttons-wrapper">
-                        <button id="btn-deck-cant-guess" class="btn" style="flex: 1; padding: 12px 0; font-size: 0.85rem; font-weight: 800; border-radius: 12px; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-secondary); transition: all 0.2s; outline: none; border-color: rgba(229, 185, 85, 0.25);">Can't Guess</button>
-                        <button id="btn-deck-attack" class="deck-attack-btn" style="flex: 2; margin: 0;">Tame Concept (Enter)</button>
+                    <div style="display: flex; justify-content: center; width: 100%; margin-top: 12px;" id="deck-attack-buttons-wrapper">
+                        <button id="btn-deck-attack" class="deck-attack-btn" style="margin: 0; width: 100%;">Tame Concept (Enter)</button>
                     </div>
                 </div>
             </div>
@@ -448,24 +447,6 @@ function renderActiveStackCard() {
             });
         }
         
-        const cantGuessBtn = container.querySelector('#btn-deck-cant-guess');
-        if (cantGuessBtn) {
-            cantGuessBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                evaluateStackAnswer(card, "", feedbackBox, attackBtn);
-            });
-            cantGuessBtn.addEventListener('mouseenter', () => {
-                cantGuessBtn.style.background = 'rgba(229, 185, 85, 0.1)';
-                cantGuessBtn.style.borderColor = 'var(--warning)';
-                cantGuessBtn.style.color = 'var(--warning)';
-            });
-            cantGuessBtn.addEventListener('mouseleave', () => {
-                cantGuessBtn.style.background = 'var(--bg-card)';
-                cantGuessBtn.style.borderColor = 'var(--border-color)';
-                cantGuessBtn.style.color = 'var(--text-secondary)';
-            });
-        }
-        
         if (attackBtn) {
             attackBtn.addEventListener('click', () => {
                 if (!attackBtn.dataset.nextMode) {
@@ -579,7 +560,7 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
         const abilitiesContainer = document.querySelector('.study-card-container .card-abilities-section');
         if (abilitiesContainer) {
             abilitiesContainer.innerHTML = `
-                <div class="ability-slot attach-clue-container" style="display: flex; flex-direction: column; gap: 8px; width: 100%; padding: 12px; background: rgba(229, 185, 85, 0.04); border: 2px dashed rgba(229, 185, 85, 0.25); border-radius: 12px; margin-top: 8px;">
+                <div class="ability-slot attach-clue-container">
                     <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--warning); display: flex; align-items: center; gap: 6px;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" style="vertical-align: middle;">
                             <polygon points="12 2 2 22 22 22 12 2"></polygon>
@@ -592,10 +573,10 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
                         Teach this card a clue sentence containing the target word <strong>"${card.back}"</strong> to tame it easily next time!
                     </span>
                     <div style="display: flex; gap: 8px; width: 100%; margin-top: 4px;">
-                        <input type="text" id="deck-attach-sentence-input" class="input-field" placeholder="e.g. He showed high affinity for the task." style="flex: 1; padding: 6px 10px; font-size: 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); outline: none;">
-                        <button id="btn-deck-save-sentence" class="btn" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 800; background: var(--warning); color: #000; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s;">Save Clue</button>
+                        <input type="text" id="deck-attach-sentence-input" class="input-field" placeholder="e.g. He showed high affinity for the task." style="flex: 1; padding: 8px 12px; font-size: 0.85rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.25); color: var(--text-primary); outline: none;">
+                        <button id="btn-deck-save-sentence" class="btn" style="padding: 8px 16px; font-size: 0.8rem; font-weight: 800; background: var(--warning); color: #000; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s;">Save Clue</button>
                     </div>
-                    <div id="deck-sentence-error" style="font-size: 0.75rem; font-weight: 700; color: var(--danger); margin-top: 2px;" class="hidden"></div>
+                    <div id="deck-sentence-error" style="font-size: 0.75rem; font-weight: 700; color: var(--danger); margin-top: 4px;" class="hidden"></div>
                 </div>
             `;
             
