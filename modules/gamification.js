@@ -9,12 +9,13 @@ import { playUISound } from './sound.js';
 
 /**
  * Calculates difficulty and gamification rarity statistics for a single card.
- * Rarity tier depends on Struggle Index = (attempts * 2) + (failures * 5) + (clues * 4)
+ * Rarity tier depends on Struggle Index = max(0, (failures * 6) - (successes * 3) + (clues * 4))
  */
 export function calculateCardStats(card, logs) {
     const cardLogs = (logs || []).filter(log => log.cardId === card.id);
     const attempts = cardLogs.length;
     const failures = cardLogs.filter(log => log.grade < 2 || log.score < 75).length;
+    const successes = attempts - failures;
     
     const savedSentences = state.exampleSentences[card.id];
     let cluesCount = 0;
@@ -29,7 +30,7 @@ export function calculateCardStats(card, logs) {
     }
     cluesCount = sentences.length;
     
-    const struggleIndex = (attempts * 2) + (failures * 5) + (cluesCount * 4);
+    const struggleIndex = Math.max(0, (failures * 6) - (successes * 3) + (cluesCount * 4));
     const successRate = attempts > 0 ? Math.round(((attempts - failures) / attempts) * 100) : 100;
     
     let tier = {
