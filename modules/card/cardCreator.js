@@ -76,10 +76,12 @@ export async function handleCreateCard(e) {
 
     const uploadImage = async (file, side) => {
         const fileExt = file.name.split('.').pop();
-        const fileName = `${cardId}_${side}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from('card_images').upload(fileName, file);
+        const userId = state.userSession.user.id;
+        const fileName = `${userId}/${cardId}_${side}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from('card_images').upload(fileName, file, { upsert: true });
         if (uploadError) {
             console.error(`Error uploading ${side} image:`, uploadError);
+            await window.alert(`Failed to upload ${side} image: ${uploadError.message}`);
             return null;
         }
         const { data: publicUrlData } = supabase.storage.from('card_images').getPublicUrl(fileName);
@@ -291,10 +293,12 @@ export async function handleEditCardSubmit(e) {
 
     const uploadImage = async (file, side) => {
         const fileExt = file.name.split('.').pop();
-        const fileName = `${cardId}_${side}_${Date.now()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from('card_images').upload(fileName, file);
+        const userId = state.userSession.user.id;
+        const fileName = `${userId}/${cardId}_${side}_${Date.now()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from('card_images').upload(fileName, file, { upsert: true });
         if (uploadError) {
             console.error(`Error uploading ${side} image:`, uploadError);
+            await window.alert(`Failed to upload ${side} image: ${uploadError.message}`);
             return null;
         }
         const { data: publicUrlData } = supabase.storage.from('card_images').getPublicUrl(fileName);
@@ -303,23 +307,32 @@ export async function handleEditCardSubmit(e) {
 
     const deleteOldImage = async (url) => {
         if (!url) return;
-        const parts = url.split('/');
-        const fileName = parts[parts.length - 1];
-        await supabase.storage.from('card_images').remove([fileName]);
+        try {
+            const urlObj = new URL(url);
+            const pathParts = urlObj.pathname.split('/storage/v1/object/public/card_images/');
+            if (pathParts.length > 1) {
+                const filePath = decodeURIComponent(pathParts[1]);
+                await supabase.storage.from('card_images').remove([filePath]);
+            }
+        } catch (e) {
+            console.warn('Could not delete old image:', e);
+        }
     };
 
     if (frontImageFile) {
         if (existingCard.image_front_url) {
             await deleteOldImage(existingCard.image_front_url);
         }
-        new_image_front_url = await uploadImage(frontImageFile, 'front');
+        const uploaded = await uploadImage(frontImageFile, 'front');
+        if (uploaded) new_image_front_url = uploaded;
     }
 
     if (backImageFile) {
         if (existingCard.image_back_url) {
             await deleteOldImage(existingCard.image_back_url);
         }
-        new_image_back_url = await uploadImage(backImageFile, 'back');
+        const uploaded = await uploadImage(backImageFile, 'back');
+        if (uploaded) new_image_back_url = uploaded;
     }
 
     const editSentenceInput = document.getElementById('edit-new-sentence');

@@ -237,13 +237,21 @@ export async function batchDeleteCards(ids) {
     const imagePaths = [];
     
     cardsToDelete.forEach(card => {
+        const extractPath = (url) => {
+            try {
+                const urlObj = new URL(url);
+                const pathParts = urlObj.pathname.split('/storage/v1/object/public/card_images/');
+                if (pathParts.length > 1) return decodeURIComponent(pathParts[1]);
+            } catch (e) {}
+            // Fallback: just use the last segment
+            const parts = url.split('/');
+            return parts[parts.length - 1];
+        };
         if (card.image_front_url) {
-            const parts = card.image_front_url.split('/');
-            imagePaths.push(parts[parts.length - 1]);
+            imagePaths.push(extractPath(card.image_front_url));
         }
         if (card.image_back_url) {
-            const parts = card.image_back_url.split('/');
-            imagePaths.push(parts[parts.length - 1]);
+            imagePaths.push(extractPath(card.image_back_url));
         }
     });
 
@@ -260,7 +268,7 @@ export async function batchDeleteCards(ids) {
         deleteBtn.disabled = false;
     } else {
         if (imagePaths.length > 0) {
-            await supabase.storage.from('card_images').remove(imagePaths);
+            await supabase.storage.from('card_images').remove(imagePaths).catch(e => console.warn('Image cleanup error:', e));
         }
 
         ids.forEach(id => {
