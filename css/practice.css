@@ -172,6 +172,46 @@ input.letter-box:focus {
     }
 }
 
+/* Image Card Practice - Container, Frame & Image Fit */
+.practice-image-card-container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 20px;
+    overflow: hidden;
+}
+
+.image-card-frame {
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    overflow: hidden;
+    background: var(--bg-secondary);
+    transition: border-color 0.2s ease;
+}
+
+.image-card-frame img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    border-radius: 10px;
+}
+
 /* Image Card Clue Overlays & Mobile Stack Responsiveness */
 .image-card-clue-row {
     display: flex;
@@ -228,8 +268,8 @@ input.letter-box:focus {
         width: fit-content;
     }
     .practice-image-card-container {
-        padding: 16px !important;
-        justify-content: flex-start !important;
+        padding: 14px !important;
+        gap: 8px !important;
     }
 }
 

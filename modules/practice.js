@@ -201,7 +201,10 @@ export function renderCurrentCard() {
             activeCard.style.height = '';
         }
         const cardFront = activeCard.querySelector('.card-front');
-        if (cardFront) cardFront.style.padding = '';
+        if (cardFront) {
+            cardFront.style.padding = '';
+            cardFront.style.overflow = '';
+        }
         const cardBack = activeCard.querySelector('.card-back');
         if (cardBack) cardBack.style.padding = '';
     }
@@ -212,11 +215,14 @@ export function renderCurrentCard() {
             const isMobile = window.innerWidth <= 768;
             activeCard.style.height = isMobile ? '450px' : '655px';
             const cardFront = activeCard.querySelector('.card-front');
-            if (cardFront) cardFront.style.padding = '0';
+            if (cardFront) {
+                cardFront.style.padding = '0';
+                cardFront.style.overflow = 'hidden';
+            }
         }
         
         frontEl.innerHTML = `
-            <div class="practice-image-card-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; width: 100%; height: 100%; position: relative; box-sizing: border-box; padding: 24px;">
+            <div class="practice-image-card-container">
                 <div class="image-card-clue-row">
                     <div class="image-card-clue-header">
                         Recall the Steps in Sequence Order
