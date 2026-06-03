@@ -6,6 +6,7 @@ import { loadData, renderManageView, renderCreateSentencesList, updateCardInDB }
 import { updateDashboard, handleTypeSelectChange } from './dashboard.js';
 import { renderStatistics } from './stats.js';
 import { renderCollectionDeck } from './gamification.js';
+import { buildCustomDropdownUI } from './uiHelpers.js';
 
 
 export function initThemeSystem() {
@@ -124,6 +125,13 @@ export async function switchView(viewId) {
     });
 
     if (viewId === 'dashboard') {
+        const select = document.getElementById('practice-type-select');
+        if (select) {
+            select.selectedValues = [...select.options].map(o => o.value).filter(v => v !== 'add_new');
+            select.value = 'mixed';
+            buildCustomDropdownUI('practice-type-select');
+        }
+        
         if (state.userSession && supabase) {
             loadData();
         } else {
