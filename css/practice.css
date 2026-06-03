@@ -158,8 +158,8 @@ input.letter-box:focus {
         align-items: stretch;
     }
     .practice-layout-map .practice-workspace {
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-rows: 1fr auto;
         gap: 16px;
         width: 100%;
         flex: 1;
