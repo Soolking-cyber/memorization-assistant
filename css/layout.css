@@ -206,10 +206,18 @@ body.logged-out .app-container {
     max-width: 650px; /* Mobile/portrait viewport constraint */
     margin: 0 auto;
     transition: max-width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    min-height: calc(100dvh - 140px);
 }
 
 #view-practice.practice-layout-split {
     max-width: 1150px;
+}
+
+#view-practice > .form-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
 }
 
 .practice-workspace {
@@ -217,6 +225,8 @@ body.logged-out .app-container {
     flex-direction: column;
     gap: 16px;
     width: 100%;
+    flex: 1;
+    min-height: 0;
 }
 
 #view-auth {
@@ -829,8 +839,8 @@ body.logged-out .app-container {
     }
     .hero-right { display: none; }
     .stats-row { flex-direction: column; gap: 10px; }
-    .flashcard { height: auto; min-height: 320px; }
-    .card-face { min-height: 320px; padding: 16px !important; }
+    .flashcard { min-height: 300px; }
+    .card-face { min-height: 300px; padding: 16px !important; }
     .card-content { font-size: 1.15rem; }
 
     /* Canvas specific mobile styles */
