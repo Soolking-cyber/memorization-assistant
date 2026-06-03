@@ -32,25 +32,40 @@ import {
 // Dynamic image stretch and aspect ratio shrink-wrap adjust helper
 window.adjustPracticeImage = (img) => {
     if (!img) return;
-    const parent = img.parentElement;
+    const parent = img.parentElement; // .image-card-frame
     if (!parent) return;
+    const container = parent.parentElement; // .practice-image-card-container
+    if (!container) return;
     
-    const parentWidth = parent.clientWidth;
-    const parentHeight = parent.clientHeight;
+    const clueRow = container.querySelector('.image-card-clue-row');
+    const clueHeight = clueRow ? clueRow.offsetHeight : 0;
     
-    if (parentWidth > 0 && parentHeight > 0) {
+    const style = window.getComputedStyle(container);
+    const paddingTop = parseFloat(style.paddingTop) || 0;
+    const paddingBottom = parseFloat(style.paddingBottom) || 0;
+    const paddingLeft = parseFloat(style.paddingLeft) || 0;
+    const paddingRight = parseFloat(style.paddingRight) || 0;
+    const gap = 12; // gap: 12px
+    
+    const maxAvailableWidth = container.clientWidth - paddingLeft - paddingRight;
+    const maxAvailableHeight = container.clientHeight - paddingTop - paddingBottom - clueHeight - gap;
+    
+    if (maxAvailableWidth > 0 && maxAvailableHeight > 0 && img.naturalWidth > 0 && img.naturalHeight > 0) {
         const aspect = img.naturalWidth / img.naturalHeight;
-        const parentAspect = parentWidth / parentHeight;
-        if (aspect > parentAspect) {
-            img.style.width = '100%';
-            img.style.height = 'auto';
+        const availableAspect = maxAvailableWidth / maxAvailableHeight;
+        
+        if (aspect > availableAspect) {
+            // Landscape dominated: stretch to full width, scale height
+            parent.style.width = `${maxAvailableWidth}px`;
+            parent.style.height = `${maxAvailableWidth / aspect}px`;
         } else {
-            img.style.height = '100%';
-            img.style.width = 'auto';
+            // Portrait dominated: stretch to full height, scale width
+            parent.style.height = `${maxAvailableHeight}px`;
+            parent.style.width = `${maxAvailableHeight * aspect}px`;
         }
     } else {
-        img.style.width = '100%';
-        img.style.height = 'auto';
+        parent.style.width = '100%';
+        parent.style.height = '100%';
     }
 };
 
