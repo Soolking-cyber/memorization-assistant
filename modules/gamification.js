@@ -34,32 +34,32 @@ export function calculateCardStats(card, logs) {
     const successRate = attempts > 0 ? Math.round(((attempts - failures) / attempts) * 100) : 100;
     
     let tier = {
-        name: 'Tamed',
+        name: 'Mastered',
         key: 'common',
         class: 'tier-common',
-        title: 'Common Card'
+        title: 'Mastered Card'
     };
     
     if (struggleIndex >= 22) {
         tier = {
-            name: 'Untamed Colossus',
+            name: 'High Struggle',
             key: 'legendary',
             class: 'tier-legendary',
-            title: 'Legendary Card'
+            title: 'High Struggle Card'
         };
     } else if (struggleIndex >= 12) {
         tier = {
-            name: 'Wild Beast',
+            name: 'Medium Struggle',
             key: 'epic',
             class: 'tier-epic',
-            title: 'Epic Card'
+            title: 'Medium Struggle Card'
         };
     } else if (struggleIndex >= 5) {
         tier = {
-            name: 'Challenger',
+            name: 'Low Struggle',
             key: 'rare',
             class: 'tier-rare',
-            title: 'Rare Card'
+            title: 'Low Struggle Card'
         };
     }
     
@@ -114,18 +114,18 @@ export async function renderCollectionDeck() {
     // Sort vocabulary cards descending by struggleIndex to isolate the absolute hardest
     vocabCards.sort((a, b) => b.stats.struggleIndex - a.stats.struggleIndex);
     
-    // The top 10 most difficult cards are classified as "Ultra Rare" (Apex Shadow)
+    // The top 10 most difficult cards are classified as "Critical Focus"
     vocabCards.forEach((cardObj, idx) => {
         if (idx < 10) {
             cardObj.stats.tier = {
-                name: 'Apex Shadow',
+                name: 'Critical Focus',
                 key: 'ultrarare',
                 class: 'tier-ultrarare',
-                title: 'Ultra Rare Card'
+                title: 'Critical Focus Card'
             };
             ultraRareCards.push(cardObj);
         } else {
-            // Re-allocate remaining cards to their native HP-based tiers
+            // Re-allocate remaining cards to their native struggle-based tiers
             const stats = cardObj.stats;
             if (stats.tier.key === 'legendary') legendaryCards.push(cardObj);
             else if (stats.tier.key === 'epic') epicCards.push(cardObj);
@@ -140,43 +140,43 @@ export async function renderCollectionDeck() {
     const stacksConfig = [
         {
             key: 'ultrarare',
-            name: 'Apex Shadow',
-            badge: 'Ultra Rare',
+            name: 'Critical Focus',
+            badge: 'Critical',
             class: 'stack-ultrarare',
             cards: ultraRareCards,
-            desc: 'The top 10 absolute hardest concepts in your entire deck.'
+            desc: 'The top 10 absolute hardest cards in your entire deck.'
         },
         {
             key: 'legendary',
-            name: 'Untamed Colossus',
-            badge: 'Legendary',
+            name: 'High Struggle',
+            badge: 'High Struggle',
             class: 'stack-legendary',
             cards: legendaryCards,
-            desc: 'Extreme difficulty memories needing immediate taming.'
+            desc: 'High difficulty memories needing active recall focus.'
         },
         {
             key: 'epic',
-            name: 'Wild Beast',
-            badge: 'Epic',
+            name: 'Medium Struggle',
+            badge: 'Medium Struggle',
             class: 'stack-epic',
             cards: epicCards,
             desc: 'Struggling cards requiring steady active reviews.'
         },
         {
             key: 'rare',
-            name: 'Challenger',
-            badge: 'Rare',
+            name: 'Low Struggle',
+            badge: 'Low Struggle',
             class: 'stack-rare',
             cards: rareCards,
             desc: 'Moderate difficulty memories showing light errors.'
         },
         {
             key: 'common',
-            name: 'Tamed',
-            badge: 'Common',
+            name: 'Mastered',
+            badge: 'Mastered',
             class: 'stack-common',
             cards: commonCards,
-            desc: 'Successfully tamed and mastered memory units.'
+            desc: 'Successfully mastered memory units with strong retention.'
         }
     ];
     
@@ -185,7 +185,7 @@ export async function renderCollectionDeck() {
         stackWrapper.className = `deck-stack ${cfg.class}`;
         
         const count = cfg.cards.length;
-        const emptyBadge = count === 0 ? '<div class="stack-empty-badge">Stack Cleared!</div>' : '';
+        const emptyBadge = count === 0 ? '<div class="stack-empty-badge">Deck Empty</div>' : '';
         
         stackWrapper.innerHTML = `
             <div class="stack-card stack-card-1"></div>
@@ -195,7 +195,7 @@ export async function renderCollectionDeck() {
                     <span class="stack-badge">${cfg.badge}</span>
                     <h4 class="stack-title">${cfg.name}</h4>
                     <span class="stack-count">${count}</span>
-                    <span class="stack-count-label">Concepts</span>
+                    <span class="stack-count-label">Cards</span>
                     ${emptyBadge}
                 </div>
             </div>
@@ -205,7 +205,7 @@ export async function renderCollectionDeck() {
         stackWrapper.addEventListener('click', () => {
             if (count === 0) {
                 try { playUISound('fail'); } catch(e) {}
-                alert(`No concepts in the ${cfg.name} stack! You have completely tamed this difficulty level.`);
+                alert(`No cards in the ${cfg.name} deck! You have fully mastered this difficulty level.`);
                 return;
             }
             try { playUISound('click'); } catch(e) {}
@@ -236,7 +236,7 @@ function startStackStudy(tierKey, tierName, decoratedCards) {
     if (studyView) studyView.classList.remove('hidden');
     
     const studyTitle = document.getElementById('study-stack-title');
-    if (studyTitle) studyTitle.textContent = `Taming ${tierName} Stack`;
+    if (studyTitle) studyTitle.textContent = `Recall Deck - ${tierName}`;
     
     renderActiveStackCard();
 }
@@ -285,7 +285,6 @@ function renderActiveStackCard() {
         
         container.innerHTML = `
             <div class="study-pokemon-card ${stats.tier.class} card-slide-in">
-                <div class="card-holo"></div>
                 <div class="card-header">
                     <div class="card-title-area">
                         <span class="card-rarity-badge">${stats.tier.name}</span>
@@ -299,8 +298,8 @@ function renderActiveStackCard() {
                 
                 <div class="card-hp-section">
                     <div class="card-hp-label">
-                        <span>Wild Energy / HP</span>
-                        <span class="hp-val">${stats.struggleIndex} HP</span>
+                        <span>Struggle Index</span>
+                        <span class="hp-val">${stats.struggleIndex}</span>
                     </div>
                     <div class="card-hp-bar">
                         <div class="card-hp-fill" style="width: ${hpPercent}%"></div>
@@ -312,13 +311,13 @@ function renderActiveStackCard() {
                     <!-- Clue slider populated dynamically -->
                 </div>
                 
-                <!-- Recall Attack active prompt field -->
+                <!-- Recall Input Area -->
                 <div class="recall-attack-area">
                     <div class="attack-title">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" style="vertical-align: middle;">
-                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="vertical-align: middle;">
+                            <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                         </svg>
-                        <span>Attack Move: Active Recall</span>
+                        <span>Active Recall</span>
                     </div>
                     
                     <div class="attack-input-wrapper" style="display: flex; justify-content: center; width: 100%; overflow: visible;">
@@ -328,7 +327,7 @@ function renderActiveStackCard() {
                     <div id="deck-attack-feedback" class="attack-feedback hidden"></div>
                     
                     <div style="display: flex; justify-content: center; width: 100%; margin-top: 12px;" id="deck-attack-buttons-wrapper">
-                        <button id="btn-deck-attack" class="deck-attack-btn" style="margin: 0; width: 100%;">Tame Concept (Enter)</button>
+                        <button id="btn-deck-attack" class="deck-attack-btn" style="margin: 0; width: 100%;">Check Recall (Enter)</button>
                     </div>
                 </div>
             </div>
@@ -362,7 +361,7 @@ function renderActiveStackCard() {
                 abilitiesContainer.innerHTML = `
                     <div class="ability-slot">
                         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            <span class="ability-badge">Clue ${activeSentenceIndex + 1} of ${stats.sentences.length}</span>
+                            <span class="ability-badge">Context Clue ${activeSentenceIndex + 1} of ${stats.sentences.length}</span>
                             ${navigationHTML}
                         </div>
                         <span class="ability-description" title="${rawSentence}">
@@ -387,7 +386,7 @@ function renderActiveStackCard() {
                     });
                 }
             } else {
-                abilitiesContainer.innerHTML = '<div class="no-abilities">No ability modifiers (sentences) attached. Train this memory on fail to unlock.</div>';
+                abilitiesContainer.innerHTML = '<div class="no-abilities">No context sentences attached. Add a context sentence on failure to reinforce learning.</div>';
             }
         }
         
@@ -540,41 +539,41 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
         feedbackBox.className = 'attack-feedback feedback-success';
         feedbackBox.innerHTML = `
             <div class="feedback-result-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                CONCEPT TAMED!
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                RECALL CORRECT!
             </div>
-            <div>Struggle score drops. Evolving card rarity live.</div>
+            <div>Struggle score decreased. Card strength updated.</div>
         `;
     } else {
         feedbackBox.className = 'attack-feedback feedback-danger';
         feedbackBox.innerHTML = `
             <div class="feedback-result-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                WILD CONCEPT ESCAPED!
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                RECALL FAILED
             </div>
             <div>Correct Spelling:</div>
             <div class="feedback-correct-val">${card.back}</div>
         `;
         
-        // Show custom interactive Pokémon style clue-attachment form if guess failed
+        // Show custom interactive context clue-attachment form if guess failed
         const abilitiesContainer = document.querySelector('.study-card-container .card-abilities-section');
         if (abilitiesContainer) {
             abilitiesContainer.innerHTML = `
                 <div class="ability-slot attach-clue-container">
                     <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--warning); display: flex; align-items: center; gap: 6px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" style="vertical-align: middle;">
-                            <polygon points="12 2 2 22 22 22 12 2"></polygon>
-                            <line x1="12" y1="9" x2="12" y2="13"></line>
-                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="vertical-align: middle;">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
                         </svg>
-                        <span>Unlock Clue Modifier (Attach Clue)</span>
+                        <span>Attach Context Clue</span>
                     </div>
                     <span style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
-                        Teach this card a clue sentence containing the target word <strong>"${card.back}"</strong> to tame it easily next time!
+                        Add an example sentence containing the target word <strong>"${card.back}"</strong> to see it in context.
                     </span>
                     <div style="display: flex; gap: 8px; width: 100%; margin-top: 4px;">
-                        <input type="text" id="deck-attach-sentence-input" class="input-field" placeholder="e.g. He showed high affinity for the task." style="flex: 1; padding: 8px 12px; font-size: 0.85rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.25); color: var(--text-primary); outline: none;">
-                        <button id="btn-deck-save-sentence" class="btn" style="padding: 8px 16px; font-size: 0.8rem; font-weight: 800; background: var(--warning); color: #000; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s;">Save Clue</button>
+                        <input type="text" id="deck-attach-sentence-input" class="input-field" placeholder="e.g. He showed high affinity for the task." style="flex: 1; padding: 8px 12px; font-size: 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.1); color: var(--text-primary); outline: none;">
+                        <button id="btn-deck-save-sentence" class="btn" style="padding: 8px 16px; font-size: 0.8rem; font-weight: 800; background: var(--warning); color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s;">Save Context</button>
                     </div>
                     <div id="deck-sentence-error" style="font-size: 0.75rem; font-weight: 700; color: var(--danger); margin-top: 4px;" class="hidden"></div>
                 </div>
@@ -682,15 +681,13 @@ function finishStackStudy() {
     
     container.innerHTML = `
         <div class="study-victory-state">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2" width="60" height="60">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polygon points="12 8 15 11 12 14 9 11 12 8" fill="#d4af37"></polygon>
-                <polyline points="12 2 12 8"></polyline>
-                <polyline points="12 16 12 22"></polyline>
-            </div>
-            <h3>Tier Stack Cleared!</h3>
-            <p>You have successfully confronted all concepts in the <strong>${state.activeStudyTierName}</strong> stack. Evolved cards have dropped into their new tiers.</p>
-            <button id="btn-victory-back" class="btn primary" style="width: 100%; max-width: 200px;">Return to Stacks</button>
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" width="60" height="60">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <h3>Recall Session Complete</h3>
+            <p>You have successfully reviewed all cards in the <strong>${state.activeStudyTierName}</strong> deck. Cards have been re-sorted into their updated strength levels.</p>
+            <button id="btn-victory-back" class="btn primary" style="width: 100%; max-width: 200px;">Return to Decks</button>
         </div>
     `;
     
@@ -706,7 +703,7 @@ function finishStackStudy() {
  * Decodes the card front safely to yield a neat title.
  */
 function getCardTitle(card) {
-    if (!card.front) return 'Untamed Card';
+    if (!card.front) return 'Memory Card';
     
     if (card.type === 'Memory Map' || card.front.startsWith('{"mode":"memory_map"')) {
         try {

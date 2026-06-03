@@ -1,4 +1,4 @@
-/* === css/gamification.css - Poké Deck Pokemon-style design stylesheet === */
+/* === css/gamification.css - Recall Decks stylesheet === */
 
 .collection-container {
     max-width: 1000px;
@@ -10,30 +10,23 @@
 
 .deck-header {
     text-align: center;
-    padding: 10px 0 10px 0;
+    padding: 10px 0;
 }
 
 .deck-header h2 {
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 800;
     margin-bottom: 8px;
     color: var(--text-primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 10px;
 }
 
-.pokeball-icon {
-    width: 32px;
-    height: 32px;
-    animation: spinPokeball 4s linear infinite;
-    filter: drop-shadow(0 0 8px rgba(229, 185, 85, 0.4));
-}
-
-@keyframes spinPokeball {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+.deck-icon {
+    color: var(--text-primary);
+    opacity: 0.85;
 }
 
 .deck-header p {
@@ -47,8 +40,7 @@
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 30px;
     justify-content: center;
-    padding: 30px 10px 50px 10px;
-    perspective: 1000px;
+    padding: 30px 10px 40px 10px;
 }
 
 /* Stack Card Deck Container */
@@ -59,12 +51,11 @@
     height: 270px;
     margin: 0 auto;
     cursor: pointer;
-    transform-style: preserve-3d;
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .deck-stack:hover {
-    transform: translateY(-8px) scale(1.03);
+    transform: translateY(-8px);
 }
 
 /* Sub-card offsets in the stack */
@@ -73,92 +64,87 @@
     width: 100%;
     height: 100%;
     border-radius: 16px;
-    border: 3px solid var(--border-color);
+    border: 2px solid var(--border-color);
     background: var(--bg-card);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s, border-color 0.3s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s, border-color 0.3s;
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
 .stack-card-1 {
-    transform: rotate3d(0, 0, 1, -4deg) translate3d(-8px, -4px, -10px);
+    transform: translateY(-10px) scale(0.92);
     z-index: 1;
-    opacity: 0.6;
+    opacity: 0.4;
 }
 
 .stack-card-2 {
-    transform: rotate3d(0, 0, 1, 3deg) translate3d(6px, 2px, -5px);
+    transform: translateY(-5px) scale(0.96);
     z-index: 2;
-    opacity: 0.8;
+    opacity: 0.75;
 }
 
 .stack-card-3 {
-    transform: rotate3d(0, 0, 1, 0deg) translate3d(0, 0, 0);
+    transform: translateY(0) scale(1);
     z-index: 3;
     opacity: 1;
 }
 
 /* Hover Spread Visuals */
 .deck-stack:hover .stack-card-1 {
-    transform: rotate3d(0, 0, 1, -9deg) translate3d(-24px, -8px, -10px);
-    opacity: 0.8;
+    transform: translateY(-18px) scale(0.92);
+    opacity: 0.6;
 }
 
 .deck-stack:hover .stack-card-2 {
-    transform: rotate3d(0, 0, 1, 7deg) translate3d(18px, -4px, -5px);
-    opacity: 0.9;
+    transform: translateY(-9px) scale(0.96);
+    opacity: 0.85;
 }
 
 .deck-stack:hover .stack-card-3 {
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
 }
 
-/* Rarity-specific Stacks Glows */
-.stack-legendary .stack-card { border-color: #d4af37; }
-.stack-legendary .stack-card-3 {
-    background: linear-gradient(135deg, var(--bg-card) 60%, rgba(212, 175, 55, 0.08) 100%);
-    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.15);
-}
-.stack-legendary:hover .stack-card-3 {
-    box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
-}
-
-.stack-ultrarare .stack-card { border-color: #ff5722; }
+/* Stack-specific Subtle Accent Highlights */
+.stack-ultrarare .stack-card { border-color: var(--danger); }
 .stack-ultrarare .stack-card-3 {
-    background: linear-gradient(135deg, var(--bg-card) 60%, rgba(255, 87, 34, 0.08) 100%);
-    box-shadow: 0 6px 20px rgba(255, 87, 34, 0.15);
+    background: linear-gradient(135deg, var(--bg-card) 75%, rgba(176, 82, 75, 0.03) 100%);
 }
 .stack-ultrarare:hover .stack-card-3 {
-    box-shadow: 0 15px 40px rgba(255, 87, 34, 0.4);
+    box-shadow: 0 8px 24px rgba(176, 82, 75, 0.15);
+}
+
+.stack-legendary .stack-card { border-color: var(--warning); }
+.stack-legendary .stack-card-3 {
+    background: linear-gradient(135deg, var(--bg-card) 75%, rgba(179, 136, 21, 0.03) 100%);
+}
+.stack-legendary:hover .stack-card-3 {
+    box-shadow: 0 8px 24px rgba(179, 136, 21, 0.15);
 }
 
 .stack-epic .stack-card { border-color: #7b1fa2; }
 .stack-epic .stack-card-3 {
-    background: linear-gradient(135deg, var(--bg-card) 60%, rgba(123, 31, 162, 0.08) 100%);
-    box-shadow: 0 6px 20px rgba(123, 31, 162, 0.15);
+    background: linear-gradient(135deg, var(--bg-card) 75%, rgba(123, 31, 162, 0.03) 100%);
 }
 .stack-epic:hover .stack-card-3 {
-    box-shadow: 0 15px 35px rgba(123, 31, 162, 0.35);
+    box-shadow: 0 8px 24px rgba(123, 31, 162, 0.15);
 }
 
 .stack-rare .stack-card { border-color: #0288d1; }
 .stack-rare .stack-card-3 {
-    background: linear-gradient(135deg, var(--bg-card) 60%, rgba(2, 136, 209, 0.06) 100%);
-    box-shadow: 0 6px 16px rgba(2, 136, 209, 0.1);
+    background: linear-gradient(135deg, var(--bg-card) 75%, rgba(2, 136, 209, 0.03) 100%);
 }
 .stack-rare:hover .stack-card-3 {
-    box-shadow: 0 12px 30px rgba(2, 136, 209, 0.3);
+    box-shadow: 0 8px 24px rgba(2, 136, 209, 0.15);
 }
 
-.stack-common .stack-card { border-color: #2e7d32; }
+.stack-common .stack-card { border-color: var(--success); }
 .stack-common .stack-card-3 {
-    background: linear-gradient(135deg, var(--bg-card) 60%, rgba(46, 125, 50, 0.05) 100%);
-    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.08);
+    background: linear-gradient(135deg, var(--bg-card) 75%, rgba(74, 128, 90, 0.03) 100%);
 }
 .stack-common:hover .stack-card-3 {
-    box-shadow: 0 10px 25px rgba(46, 125, 50, 0.25);
+    box-shadow: 0 8px 24px rgba(74, 128, 90, 0.15);
 }
 
 /* Stack Info Content Overlay */
@@ -182,11 +168,11 @@
     color: #fff;
     margin-bottom: 12px;
 }
-.stack-legendary .stack-badge { background: linear-gradient(135deg, #d4af37, #b0524b); }
-.stack-ultrarare .stack-badge { background: linear-gradient(135deg, #ff5722, #ff9100); }
+.stack-ultrarare .stack-badge { background: var(--danger); }
+.stack-legendary .stack-badge { background: var(--warning); }
 .stack-epic .stack-badge { background: #7b1fa2; }
 .stack-rare .stack-badge { background: #0288d1; }
-.stack-common .stack-badge { background: #2e7d32; }
+.stack-common .stack-badge { background: var(--success); }
 
 .stack-title {
     font-size: 1rem;
@@ -219,7 +205,6 @@
     justify-content: center;
     align-items: center;
     padding: 10px 0 30px 0;
-    perspective: 1200px;
 }
 
 .study-card-container {
@@ -228,175 +213,99 @@
     min-height: 520px;
 }
 
-/* Big Pokémon Active Study Card - Premium Glassmorphism & Minimalist Lux Borders */
+/* Big Study Card - Sleek Translucent Dashboard Panel */
 .study-pokemon-card {
     width: 100%;
     border-radius: 24px;
-    background: rgba(20, 20, 20, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    transform-style: preserve-3d;
-    transition: transform 0.25s cubic-bezier(0.19, 1, 0.22, 1), box-shadow 0.25s cubic-bezier(0.19, 1, 0.22, 1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), inset 0 -2px 0 var(--border-color);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
     user-select: none;
     padding-bottom: 24px;
 }
 
-.study-pokemon-card::after {
+.study-pokemon-card::before {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.2) 100%);
-    pointer-events: none;
-    z-index: 5;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    z-index: 10;
 }
 
-/* 3D Holo overlays */
-.study-pokemon-card .card-holo {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 4;
-    mix-blend-mode: color-dodge;
-    transition: opacity 0.3s;
-}
+/* Tier Accent Line Indicators */
+.study-pokemon-card.tier-common::before { background: var(--success); }
+.study-pokemon-card.tier-rare::before { background: #0288d1; }
+.study-pokemon-card.tier-epic::before { background: #7b1fa2; }
+.study-pokemon-card.tier-legendary::before { background: var(--warning); }
+.study-pokemon-card.tier-ultrarare::before { background: var(--danger); }
 
-.study-pokemon-card:hover .card-holo {
-    opacity: 0.75;
-}
-
-/* Tiers overrides - Sleek Glassmorphism & High-end Accents */
-.study-pokemon-card.tier-common {
-    border: 1px solid rgba(46, 125, 50, 0.3) !important;
-    background: linear-gradient(185deg, rgba(20, 24, 21, 0.85) 0%, rgba(14, 16, 15, 0.95) 100%) !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(46, 125, 50, 0.05) !important;
-}
-.study-pokemon-card.tier-common .card-holo {
-    background: linear-gradient(105deg, rgba(255, 255, 255, 0) 30%, rgba(74, 128, 90, 0.1) 50%, rgba(255, 255, 255, 0) 70%);
-    background-size: 200% 200%;
-}
-
-.study-pokemon-card.tier-rare {
-    border: 1px solid rgba(2, 136, 209, 0.3) !important;
-    background: linear-gradient(185deg, rgba(18, 22, 26, 0.85) 0%, rgba(13, 15, 18, 0.95) 100%) !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(2, 136, 209, 0.05) !important;
-}
-.study-pokemon-card.tier-rare .card-holo {
-    background: linear-gradient(115deg, rgba(0, 0, 0, 0) 20%, rgba(2, 136, 209, 0.15) 40%, rgba(0, 229, 255, 0.2) 50%, rgba(2, 136, 209, 0.15) 60%, rgba(0, 0, 0, 0) 80%);
-    background-size: 200% 200%;
-}
-.study-pokemon-card.tier-rare:hover { box-shadow: 0 25px 55px rgba(2, 136, 209, 0.2) !important; }
-
-.study-pokemon-card.tier-epic {
-    border: 1px solid rgba(123, 31, 162, 0.3) !important;
-    background: linear-gradient(185deg, rgba(22, 18, 25, 0.85) 0%, rgba(15, 13, 17, 0.95) 100%) !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(123, 31, 162, 0.05) !important;
-}
-.study-pokemon-card.tier-epic .card-holo {
-    background: linear-gradient(125deg, rgba(255, 0, 128, 0.15) 15%, rgba(123, 31, 162, 0.2) 35%, rgba(0, 229, 255, 0.1) 50%, rgba(123, 31, 162, 0.2) 65%, rgba(255, 0, 128, 0.15) 85%);
-    background-size: 200% 200%;
-}
-.study-pokemon-card.tier-epic:hover { box-shadow: 0 25px 55px rgba(123, 31, 162, 0.25) !important; }
-
-.study-pokemon-card.tier-ultrarare {
-    border: 1px solid rgba(255, 87, 34, 0.35) !important;
-    background: linear-gradient(185deg, rgba(26, 20, 18, 0.85) 0%, rgba(18, 14, 13, 0.95) 100%) !important;
-    box-shadow: 0 25px 55px rgba(0, 0, 0, 0.45), inset 0 0 25px rgba(255, 87, 34, 0.05) !important;
-    animation: studyUltraFloat 3.5s ease-in-out infinite alternate;
-}
-.study-pokemon-card.tier-ultrarare .card-holo {
-    background: linear-gradient(125deg, rgba(255, 87, 34, 0.2) 0%, rgba(255, 145, 0, 0.15) 30%, rgba(255, 0, 128, 0.1) 60%, rgba(255, 87, 34, 0.2) 100%);
-    background-size: 200% 200%;
-    animation: holoFlow 7s linear infinite;
-    opacity: 0.55;
-}
-.study-pokemon-card.tier-ultrarare:hover { box-shadow: 0 30px 65px rgba(255, 87, 34, 0.3) !important; }
-
-@keyframes studyUltraFloat {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(-4px); }
-}
-
-.study-pokemon-card.tier-legendary {
-    border: 1.5px solid rgba(212, 175, 55, 0.4) !important;
-    background: linear-gradient(185deg, rgba(24, 22, 18, 0.9) 0%, rgba(16, 14, 12, 0.95) 100%) !important;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(212, 175, 55, 0.08) !important;
-    animation: studyLegendFloat 3s ease-in-out infinite alternate;
-}
-.study-pokemon-card.tier-legendary .card-holo {
-    background: linear-gradient(135deg, rgba(255, 215, gold, 0.15) 0%, rgba(255, 0, 128, 0.1) 25%, rgba(0, 229, 255, 0.08) 50%, rgba(255, 128, 0, 0.1) 75%, rgba(255, 215, 0, 0.15) 100%);
-    background-size: 250% 250%;
-    animation: holoFlow 8s linear infinite;
-    opacity: 0.55;
-}
-.study-pokemon-card.tier-legendary:hover { box-shadow: 0 30px 65px rgba(212, 175, 55, 0.35) !important; }
-
-@keyframes studyLegendFloat {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(-5px); }
-}
-
-/* Card Visual Header */
+/* Card Header */
 .study-pokemon-card .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 22px;
+    padding: 18px 22px 14px 22px;
 }
+
 .study-pokemon-card .card-rarity-badge {
-    font-size: 0.65rem;
-    font-weight: 800;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--warning);
-    padding: 4px 10px;
-    background: rgba(229, 185, 85, 0.04);
-    border: 1px solid rgba(229, 185, 85, 0.15);
-    border-radius: 20px;
-}
-.card-type-indicator {
     font-size: 0.68rem;
     font-weight: 700;
-    letter-spacing: 0.8px;
-    color: var(--text-secondary);
+    letter-spacing: 0.5px;
     text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
 }
+
+.study-pokemon-card.tier-common .card-rarity-badge { color: var(--success); border-color: rgba(74, 128, 90, 0.2); background: rgba(74, 128, 90, 0.05); }
+.study-pokemon-card.tier-rare .card-rarity-badge { color: #0288d1; border-color: rgba(2, 136, 209, 0.2); background: rgba(2, 136, 209, 0.05); }
+.study-pokemon-card.tier-epic .card-rarity-badge { color: #7b1fa2; border-color: rgba(123, 31, 162, 0.2); background: rgba(123, 31, 162, 0.05); }
+.study-pokemon-card.tier-legendary .card-rarity-badge { color: var(--warning); border-color: rgba(179, 136, 21, 0.2); background: rgba(179, 136, 21, 0.05); }
+.study-pokemon-card.tier-ultrarare .card-rarity-badge { color: var(--danger); border-color: rgba(176, 82, 75, 0.2); background: rgba(176, 82, 75, 0.05); }
 
 /* Illustration Panel - Sleek and Spacious Text Display */
 .study-pokemon-card .card-illustration {
     height: 180px;
     margin: 6px 22px 14px 22px;
     border-radius: 16px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.015) 0%, rgba(255, 255, 255, 0.005) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: inset 0 10px 25px rgba(0, 0, 0, 0.3);
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
 }
+
 .study-pokemon-card .illustration-text {
-    font-size: 1.05rem !important;
+    font-size: 1.1rem !important;
     font-weight: 500 !important;
-    line-height: 1.65 !important;
-    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.6 !important;
+    color: var(--text-primary);
     padding: 20px 24px !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: 'Outfit', sans-serif !important;
 }
 
-/* HP Progress Bar Section - High-End Monospace Details */
+.study-pokemon-card .illustration-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* HP Progress Bar Section */
 .study-pokemon-card .card-hp-section {
     display: flex;
     flex-direction: column;
     gap: 8px;
     padding: 6px 22px 12px 22px;
 }
+
 .card-hp-label {
     display: flex;
     justify-content: space-between;
@@ -407,46 +316,134 @@
     text-transform: uppercase;
     color: var(--text-secondary);
 }
+
 .card-hp-label .hp-val {
     font-family: 'Outfit', sans-serif;
     font-weight: 800;
     color: var(--text-primary);
 }
+
 .card-hp-bar {
     width: 100%;
     height: 6px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-secondary);
     border-radius: 10px;
     overflow: hidden;
     position: relative;
-    border: 1px solid rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
 }
+
 .card-hp-fill {
     height: 100%;
     border-radius: 10px;
     transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.tier-common .card-hp-fill { background: linear-gradient(90deg, #2e7d32, #4caf50); }
-.tier-rare .card-hp-fill { background: linear-gradient(90deg, #0288d1, #00b0ff); }
-.tier-epic .card-hp-fill { background: linear-gradient(90deg, #7b1fa2, #e040fb); }
-.tier-ultrarare .card-hp-fill { background: linear-gradient(90deg, #ff5722, #ff9100); }
-.tier-legendary .card-hp-fill { background: linear-gradient(90deg, #b0524b, #d4af37); }
 
-/* Active Recall attack input container */
+.tier-common .card-hp-fill { background: var(--success); }
+.tier-rare .card-hp-fill { background: #0288d1; }
+.tier-epic .card-hp-fill { background: #7b1fa2; }
+.tier-legendary .card-hp-fill { background: var(--warning); }
+.tier-ultrarare .card-hp-fill { background: var(--danger); }
+
+/* Clues / Sentence Context section */
+.card-abilities-section {
+    margin: 4px 22px 10px 22px;
+    display: flex;
+    flex-direction: column;
+}
+
+.ability-slot {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    background: var(--bg-secondary);
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.ability-slot:hover {
+    border-color: var(--text-secondary);
+}
+
+.ability-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    background: var(--bg-card);
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.ability-description {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    font-family: 'Inter', sans-serif;
+}
+
+.no-abilities {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 12px;
+    border-radius: 12px;
+    border: 2px dashed var(--border-color);
+    background: var(--bg-secondary);
+    opacity: 0.7;
+}
+
+/* Fail-State Context sentence attachment */
+.attach-clue-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    padding: 16px;
+    background: var(--bg-secondary) !important;
+    border: 2px dashed var(--warning) !important;
+    border-radius: 12px;
+    margin-top: 8px;
+}
+
+/* Clue Nav Arrows */
+.clue-nav-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.clue-nav-btn {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-secondary) !important;
+    border-radius: 6px;
+    padding: 3px 8px;
+    cursor: pointer;
+    font-size: 0.65rem;
+    font-weight: 800;
+    transition: all 0.2s;
+}
+
+.clue-nav-btn:hover {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Active Recall input area */
 .recall-attack-area {
     margin: 14px 22px;
     padding: 20px;
     border-radius: 16px;
-    background: rgba(0, 0, 0, 0.15) !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02) !important;
+    background: var(--bg-secondary) !important;
+    border: 2px solid var(--border-color) !important;
     display: flex;
     flex-direction: column;
     gap: 14px;
-}
-
-body.dark-theme .recall-attack-area {
-    background: rgba(0, 0, 0, 0.2) !important;
 }
 
 .attack-title {
@@ -461,75 +458,89 @@ body.dark-theme .recall-attack-area {
 }
 
 .attack-title svg {
-    color: var(--warning);
+    color: var(--text-secondary);
 }
 
-/* Glowing Neon active spelling input */
 .attack-input-wrapper {
     position: relative;
     width: 100%;
 }
 
-.deck-practice-input {
-    width: 100%;
-    padding: 12px 14px;
-    font-size: 1rem;
-    font-weight: 700;
+/* Character Input Box Squares styling */
+.deck-letter-input {
+    width: 32px !important;
+    height: 42px !important;
     text-align: center;
-    border-radius: 12px;
-    border: 2px solid var(--border-color);
-    background: var(--bg-card);
-    color: var(--text-primary);
-    transition: all 0.25s ease;
+    outline: none !important;
+    padding: 0;
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    border: 2px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    cursor: pointer;
 }
 
-.tier-common .deck-practice-input:focus { border-color: #2e7d32; box-shadow: 0 0 10px rgba(46, 125, 50, 0.2); }
-.tier-rare .deck-practice-input:focus { border-color: #0288d1; box-shadow: 0 0 10px rgba(2, 136, 209, 0.2); }
-.tier-epic .deck-practice-input:focus { border-color: #7b1fa2; box-shadow: 0 0 10px rgba(123, 31, 162, 0.2); }
-.tier-ultrarare .deck-practice-input:focus { border-color: #ff5722; box-shadow: 0 0 12px rgba(255, 87, 34, 0.3); }
-.tier-legendary .deck-practice-input:focus { border-color: #d4af37; box-shadow: 0 0 12px rgba(212, 175, 55, 0.3); }
+.deck-letter-input:hover:not(:disabled) {
+    border-color: var(--text-primary) !important;
+}
 
-/* Buttons inside the big card - Luxury Metallic & Scale-up Hover */
+.deck-letter-input:focus:not(:disabled) {
+    border-color: var(--text-primary) !important;
+    background: var(--bg-secondary) !important;
+    transform: translateY(-1px);
+}
+
+.deck-letter-input.just-typed {
+    transform: scale(1.1);
+}
+
+.deck-letter-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--bg-secondary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Check Recall Button styling */
 .deck-attack-btn {
     width: 100%;
-    padding: 14px 0 !important;
-    font-size: 0.88rem !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.8px;
+    padding: 12px 18px !important;
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     border-radius: 12px !important;
     cursor: pointer !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    color: #fff !important;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
-    transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1) !important;
+    border: 2px solid var(--border-dark) !important;
+    background: var(--accent) !important;
+    color: var(--btn-primary-text) !important;
+    box-shadow: inset 0 -2px 0 var(--btn-primary-shadow) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
     text-align: center;
 }
 
-.tier-common .deck-attack-btn { background: linear-gradient(135deg, #4caf50, #2e7d32) !important; border-color: rgba(76, 175, 80, 0.3) !important; }
-.tier-rare .deck-attack-btn { background: linear-gradient(135deg, #00b0ff, #0288d1) !important; border-color: rgba(0, 176, 255, 0.3) !important; }
-.tier-epic .deck-attack-btn { background: linear-gradient(135deg, #e040fb, #7b1fa2) !important; border-color: rgba(224, 64, 251, 0.3) !important; }
-.tier-ultrarare .deck-attack-btn { background: linear-gradient(135deg, #ff9100, #ff5722) !important; border-color: rgba(255, 145, 0, 0.3) !important; }
-.tier-legendary .deck-attack-btn { background: linear-gradient(135deg, #d4af37, #b0524b) !important; border-color: rgba(212, 175, 55, 0.3) !important; }
-
 .deck-attack-btn:hover {
-    transform: translateY(-2px) scale(1.01) !important;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45) !important;
+    background: var(--accent-hover) !important;
+    transform: translateY(-1px) !important;
 }
 
 .deck-attack-btn:active {
     transform: translateY(1px) !important;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: none !important;
 }
 
-/* Feedback Box inside Attack Area */
+/* Feedback Box */
 .attack-feedback {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 10px;
+    padding: 12px;
     border-radius: 12px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     animation: slideDownIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -539,53 +550,54 @@ body.dark-theme .recall-attack-area {
 }
 
 .feedback-success {
-    background: rgba(74, 128, 90, 0.08);
+    background: rgba(74, 128, 90, 0.06);
     border: 1px solid var(--success);
     color: var(--success);
 }
 
 .feedback-danger {
-    background: rgba(176, 82, 75, 0.08);
+    background: rgba(176, 82, 75, 0.06);
     border: 1px solid var(--danger);
     color: var(--danger);
 }
 
 .feedback-result-title {
-    font-weight: 800;
+    font-weight: 850;
     font-size: 0.95rem;
     display: flex;
     align-items: center;
     gap: 6px;
+    text-transform: uppercase;
 }
 
 .feedback-correct-val {
     font-weight: 700;
     background: var(--bg-card);
-    padding: 4px 8px;
+    padding: 6px 10px;
     border-radius: 6px;
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     margin-top: 4px;
     display: inline-block;
-    word-break: break-all;
+    color: var(--text-primary);
 }
 
 /* Slide animations for card transitions */
 @keyframes slideCardOut {
     0% { opacity: 1; transform: scale(1) translateX(0); }
-    100% { opacity: 0; transform: scale(0.9) translateX(-150px) rotate(-10deg); }
+    100% { opacity: 0; transform: scale(0.95) translateX(-100px); }
 }
 
 @keyframes slideCardIn {
-    0% { opacity: 0; transform: scale(0.9) translateX(150px) rotate(10deg); }
-    100% { opacity: 1; transform: scale(1) translateX(0) rotate(0); }
+    0% { opacity: 0; transform: scale(0.95) translateX(100px); }
+    100% { opacity: 1; transform: scale(1) translateX(0); }
 }
 
 .card-slide-out {
-    animation: slideCardOut 0.4s cubic-bezier(0.175, 0.885, 0.32, 1) forwards !important;
+    animation: slideCardOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
 }
 
 .card-slide-in {
-    animation: slideCardIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+    animation: slideCardIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
 }
 
 /* Clean victory status state */
@@ -600,11 +612,11 @@ body.dark-theme .recall-attack-area {
     flex-direction: column;
     align-items: center;
     gap: 20px;
-    animation: customPopIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    animation: slideDownIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .study-victory-state h3 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 800;
     color: var(--text-primary);
 }
@@ -613,262 +625,5 @@ body.dark-theme .recall-attack-area {
     font-size: 0.95rem;
     color: var(--text-secondary);
     max-width: 320px;
-}
-
-/* Theme Blending Glassmorphism & Translucency overrides */
-body.dark-theme .study-pokemon-card,
-body.dark-theme .pokemon-card {
-    background: rgba(34, 34, 32, 0.65) !important;
-    backdrop-filter: blur(18px) saturate(180%);
-    -webkit-backdrop-filter: blur(18px) saturate(180%);
-    border-color: rgba(230, 228, 220, 0.12) !important;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3) !important;
-}
-
-body.dark-theme .stack-card {
-    background: rgba(34, 34, 32, 0.65) !important;
-    backdrop-filter: blur(18px) saturate(180%);
-    -webkit-backdrop-filter: blur(18px) saturate(180%);
-}
-
-/* Subtle glowing colored borders for rarity stacks in Dark Mode */
-body.dark-theme .stack-legendary .stack-card { border-color: rgba(212, 175, 55, 0.3) !important; }
-body.dark-theme .stack-legendary .stack-card-3 { border-color: rgba(212, 175, 55, 0.6) !important; box-shadow: 0 6px 20px rgba(212, 175, 55, 0.12) !important; }
-body.dark-theme .stack-legendary:hover .stack-card-3 { border-color: rgba(212, 175, 55, 0.95) !important; box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4) !important; }
-
-body.dark-theme .stack-ultrarare .stack-card { border-color: rgba(255, 87, 34, 0.25) !important; }
-body.dark-theme .stack-ultrarare .stack-card-3 { border-color: rgba(255, 87, 34, 0.5) !important; box-shadow: 0 6px 20px rgba(255, 87, 34, 0.12) !important; }
-body.dark-theme .stack-ultrarare:hover .stack-card-3 { border-color: rgba(255, 87, 34, 0.95) !important; box-shadow: 0 15px 40px rgba(255, 87, 34, 0.4) !important; }
-
-body.dark-theme .stack-epic .stack-card { border-color: rgba(123, 31, 162, 0.25) !important; }
-body.dark-theme .stack-epic .stack-card-3 { border-color: rgba(123, 31, 162, 0.5) !important; box-shadow: 0 6px 20px rgba(123, 31, 162, 0.12) !important; }
-body.dark-theme .stack-epic:hover .stack-card-3 { border-color: rgba(123, 31, 162, 0.9) !important; box-shadow: 0 15px 35px rgba(123, 31, 162, 0.35) !important; }
-
-body.dark-theme .stack-rare .stack-card { border-color: rgba(2, 136, 209, 0.25) !important; }
-body.dark-theme .stack-rare .stack-card-3 { border-color: rgba(2, 136, 209, 0.45) !important; box-shadow: 0 6px 16px rgba(2, 136, 209, 0.1) !important; }
-body.dark-theme .stack-rare:hover .stack-card-3 { border-color: rgba(2, 136, 209, 0.9) !important; box-shadow: 0 12px 30px rgba(2, 136, 209, 0.3) !important; }
-
-body.dark-theme .stack-common .stack-card { border-color: rgba(46, 125, 50, 0.25) !important; }
-body.dark-theme .stack-common .stack-card-3 { border-color: rgba(46, 125, 50, 0.45) !important; box-shadow: 0 4px 12px rgba(46, 125, 50, 0.08) !important; }
-body.dark-theme .stack-common:hover .stack-card-3 { border-color: rgba(46, 125, 50, 0.9) !important; box-shadow: 0 10px 25px rgba(46, 125, 50, 0.25) !important; }
-
-body.dark-theme .card-illustration {
-    background: rgba(22, 22, 21, 0.5) !important;
-    border-color: rgba(230, 228, 220, 0.08) !important;
-}
-
-body.dark-theme .recall-attack-area {
-    background: rgba(22, 22, 21, 0.4) !important;
-    border-color: rgba(230, 228, 220, 0.08) !important;
-}
-
-body.dark-theme .ability-slot {
-    background: rgba(22, 22, 21, 0.3) !important;
-    border-color: rgba(230, 228, 220, 0.08) !important;
-}
-
-body.dark-theme .deck-practice-input {
-    background: rgba(22, 22, 21, 0.6) !important;
-    border-color: rgba(230, 228, 220, 0.1) !important;
-}
-
-body.dark-theme .clue-nav-btn {
-    background: rgba(22, 22, 21, 0.6) !important;
-    border-color: rgba(230, 228, 220, 0.15) !important;
-}
-
-/* Light theme adjustments */
-body:not(.dark-theme) .study-pokemon-card,
-body:not(.dark-theme) .pokemon-card,
-body:not(.dark-theme) .stack-card {
-    background: rgba(250, 250, 247, 0.8) !important;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-color: rgba(227, 225, 217, 0.8) !important;
-}
-
-body:not(.dark-theme) .card-illustration {
-    background: rgba(235, 234, 228, 0.4) !important;
-}
-
-body:not(.dark-theme) .recall-attack-area {
-    background: rgba(235, 234, 228, 0.3) !important;
-}
-
-/* === SPACIOUS CLUES & PREMIUM INTERACTIONS === */
-
-.card-abilities-section {
-    margin: 4px 22px 10px 22px;
-    display: flex;
-    flex-direction: column;
-}
-
-.ability-slot {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    width: 100%;
-    padding: 12px 16px !important;
-    border-radius: 12px !important;
-    border: 1px solid rgba(255, 255, 255, 0.04) !important;
-    background: rgba(255, 255, 255, 0.015) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.01) !important;
-    transition: all 0.25s cubic-bezier(0.19, 1, 0.22, 1) !important;
-}
-
-.ability-slot:hover {
-    transform: translateY(-1px) !important;
-    border-color: rgba(255, 255, 255, 0.08) !important;
-    background: rgba(255, 255, 255, 0.02) !important;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
-}
-
-.ability-badge {
-    font-size: 0.65rem !important;
-    font-weight: 800 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 1px !important;
-    color: var(--text-secondary) !important;
-    background: rgba(255, 255, 255, 0.03) !important;
-    padding: 3px 8px !important;
-    border-radius: 6px !important;
-    border: 1px solid rgba(255, 255, 255, 0.03) !important;
-}
-
-.ability-description {
-    font-size: 0.85rem !important;
-    line-height: 1.5 !important;
-    color: var(--text-secondary) !important;
-    font-family: 'Inter', sans-serif !important;
-}
-
-.no-abilities {
-    font-size: 0.8rem !important;
-    color: var(--text-secondary) !important;
-    text-align: center !important;
-    padding: 12px !important;
-    border-radius: 12px !important;
-    border: 1px dashed rgba(255, 255, 255, 0.05) !important;
-    background: rgba(255, 255, 255, 0.005) !important;
-}
-
-.attach-clue-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-    padding: 16px !important;
-    background: rgba(229, 185, 85, 0.02) !important;
-    border: 1px dashed rgba(229, 185, 85, 0.25) !important;
-    border-radius: 12px !important;
-    margin-top: 8px !important;
-    box-shadow: inset 0 0 15px rgba(229, 185, 85, 0.02) !important;
-}
-
-/* Clue Navigation Arrows */
-.clue-nav-buttons {
-    display: flex;
-    gap: 6px;
-}
-
-.clue-nav-btn {
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    color: var(--text-secondary) !important;
-    border-radius: 6px !important;
-    padding: 3px 8px !important;
-    cursor: pointer !important;
-    font-size: 0.65rem !important;
-    font-weight: 800 !important;
-    transition: all 0.2s cubic-bezier(0.19, 1, 0.22, 1) !important;
-}
-
-.clue-nav-btn:hover {
-    transform: scale(1.1) translateY(-1px);
-    background: rgba(255, 255, 255, 0.06) !important;
-    color: var(--text-primary) !important;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
-
-.clue-nav-btn:active {
-    transform: scale(0.95);
-}
-
-/* Premium Character Input Squares Styling - High-End Minimalist */
-.deck-letter-input {
-    width: 32px !important;
-    height: 42px !important;
-    text-align: center;
-    outline: none !important;
-    padding: 0;
-    font-family: 'Outfit', sans-serif !important;
-    font-size: 1.2rem !important;
-    font-weight: 700 !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
-    border-radius: 8px !important;
-    background: rgba(255, 255, 255, 0.02) !important;
-    color: var(--text-primary) !important;
-    transition: all 0.25s cubic-bezier(0.19, 1, 0.22, 1) !important;
-    cursor: pointer;
-}
-
-.deck-letter-input:hover:not(:disabled) {
-    transform: scale(1.05) translateY(-1px);
-    border-color: rgba(255, 255, 255, 0.15) !important;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2) !important;
-}
-
-.deck-letter-input:focus:not(:disabled) {
-    transform: scale(1.1) translateY(-2px) !important;
-    background: rgba(255, 255, 255, 0.04) !important;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important;
-    color: var(--text-primary) !important;
-}
-
-/* Neon Glowing Border Rings matching Tier stack colors */
-.tier-common .deck-letter-input:focus:not(:disabled) {
-    border-color: rgba(46, 125, 50, 0.8) !important;
-    box-shadow: 0 0 15px rgba(46, 125, 50, 0.4) !important;
-}
-
-.tier-rare .deck-letter-input:focus:not(:disabled) {
-    border-color: rgba(2, 136, 209, 0.8) !important;
-    box-shadow: 0 0 15px rgba(2, 136, 209, 0.4) !important;
-}
-
-.tier-epic .deck-letter-input:focus:not(:disabled) {
-    border-color: rgba(123, 31, 162, 0.8) !important;
-    box-shadow: 0 0 15px rgba(123, 31, 162, 0.4) !important;
-}
-
-.tier-ultrarare .deck-letter-input:focus:not(:disabled) {
-    border-color: rgba(255, 87, 34, 0.8) !important;
-    box-shadow: 0 0 18px rgba(255, 87, 34, 0.5) !important;
-}
-
-.tier-legendary .deck-letter-input:focus:not(:disabled) {
-    border-color: rgba(212, 175, 55, 0.8) !important;
-    box-shadow: 0 0 18px rgba(212, 175, 55, 0.5) !important;
-}
-
-/* Character Typing Tactile Pulse Animation */
-@keyframes letterPop {
-    0% { transform: scale(1.1) translateY(-2px); }
-    50% { transform: scale(1.22) translateY(-4px); filter: brightness(1.2) saturate(1.15); }
-    100% { transform: scale(1.1) translateY(-2px); }
-}
-
-.deck-letter-input.just-typed {
-    animation: letterPop 0.15s cubic-bezier(0.19, 1, 0.22, 1) forwards !important;
-}
-
-/* Disabled styling on active recall evaluation complete */
-.deck-letter-input:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none !important;
-    box-shadow: none !important;
-    border-color: rgba(255, 255, 255, 0.05) !important;
-    background: rgba(0, 0, 0, 0.2) !important;
+    line-height: 1.5;
 }
