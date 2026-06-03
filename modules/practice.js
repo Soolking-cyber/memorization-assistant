@@ -164,7 +164,7 @@ export function renderCurrentCard() {
         const activeCard = document.getElementById('active-card');
         if (activeCard) {
             const isMobile = window.innerWidth <= 768;
-            activeCard.style.height = isMobile ? '460px' : 'calc(100vh - 280px)';
+            activeCard.style.height = isMobile ? '460px' : '100%';
             activeCard.style.minHeight = isMobile ? '360px' : '480px';
             activeCard.style.maxHeight = isMobile ? 'none' : '850px';
             const cardFront = activeCard.querySelector('.card-front');

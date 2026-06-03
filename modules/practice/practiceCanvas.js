@@ -167,8 +167,7 @@ export function initPracticeCanvasControls(mapData) {
             const containerWidth = scrollContainer.clientWidth || 400;
             const containerHeight = scrollContainer.clientHeight || 400;
             
-            let initialZoom = Math.min(1.0, Math.min(containerWidth / viewportWidth, containerHeight / viewportHeight));
-            initialZoom = Math.max(0.6, initialZoom);
+            const initialZoom = 1.0;
             
             setPracticeMapZoom(initialZoom);
             adjustPracticeViewportCentering(viewportWidth, viewportHeight);
