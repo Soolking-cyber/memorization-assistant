@@ -162,6 +162,29 @@ export function openEditView(cardId) {
     const card = state.cards.find(c => c.id === cardId);
     if (!card) return;
 
+    state.editFrontImageDeleted = false;
+    state.editBackImageDeleted = false;
+
+    const btnDeleteFrontImg = document.getElementById('btn-delete-edit-front-img');
+    if (btnDeleteFrontImg) {
+        btnDeleteFrontImg.onclick = () => {
+            state.editFrontImageDeleted = true;
+            document.getElementById('edit-front-img-preview').classList.add('hidden');
+            const fileInput = document.getElementById('edit-card-front-image');
+            if (fileInput) fileInput.value = '';
+        };
+    }
+
+    const btnDeleteBackImg = document.getElementById('btn-delete-edit-back-img');
+    if (btnDeleteBackImg) {
+        btnDeleteBackImg.onclick = () => {
+            state.editBackImageDeleted = true;
+            document.getElementById('edit-back-img-preview').classList.add('hidden');
+            const fileInput = document.getElementById('edit-card-back-image');
+            if (fileInput) fileInput.value = '';
+        };
+    }
+
     document.getElementById('edit-card-id').value = card.id;
     document.getElementById('edit-card-type').value = card.type || 'mixed';
     
@@ -321,16 +344,30 @@ export async function handleEditCardSubmit(e) {
         }
     };
 
-    if (frontImageFile) {
+    if (state.editFrontImageDeleted) {
         if (existingCard.image_front_url) {
+            await deleteOldImage(existingCard.image_front_url);
+        }
+        new_image_front_url = null;
+    }
+
+    if (frontImageFile) {
+        if (existingCard.image_front_url && !state.editFrontImageDeleted) {
             await deleteOldImage(existingCard.image_front_url);
         }
         const uploaded = await uploadImage(frontImageFile, 'front');
         if (uploaded) new_image_front_url = uploaded;
     }
 
-    if (backImageFile) {
+    if (state.editBackImageDeleted) {
         if (existingCard.image_back_url) {
+            await deleteOldImage(existingCard.image_back_url);
+        }
+        new_image_back_url = null;
+    }
+
+    if (backImageFile) {
+        if (existingCard.image_back_url && !state.editBackImageDeleted) {
             await deleteOldImage(existingCard.image_back_url);
         }
         const uploaded = await uploadImage(backImageFile, 'back');
