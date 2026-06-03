@@ -143,13 +143,13 @@ export async function handleCreateCard(e) {
     if (sentenceList) sentenceList.innerHTML = '';
     state.draftCreateSentences = [];
     
-    btn.textContent = "Memory Uploaded! " + ICONS.check;
+    btn.innerHTML = "Memory Uploaded! " + ICONS.check;
     btn.style.background = "var(--accent)";
     btn.style.borderColor = "var(--accent)";
     btn.style.color = "var(--btn-primary-text)";
     
     setTimeout(() => {
-        btn.textContent = oldText;
+        btn.innerHTML = oldText;
         btn.style.background = "";
         btn.style.borderColor = "";
         btn.style.color = "";
