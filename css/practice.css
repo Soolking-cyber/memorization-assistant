@@ -386,5 +386,25 @@ input.letter-box:focus {
     border: 1px solid rgba(74, 128, 90, 0.3);
 }
 
+/* Cohesive and elegant pill-shaped submit/next buttons aligned to the bottom-right */
+#typing-area,
+#evaluation-area {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+#btn-submit-answer,
+#btn-next-card {
+    width: auto !important;
+    min-width: 160px;
+    border-radius: 9999px !important;
+    align-self: flex-end;
+    margin-left: auto;
+    margin-top: 16px;
+    padding: 12px 28px;
+    justify-content: center;
+}
+
 
 
