@@ -6,7 +6,7 @@ import { validateExampleSentence } from '../practice.js';
 import { switchView } from '../navigation.js';
 import { dbSet } from '../db.js';
 import { buildCustomDropdownUI } from '../uiHelpers.js';
-import { renderEditSentencesList } from './sentenceBuilder.js';
+import { renderEditSentencesList, renderCreateSentencesList } from './sentenceBuilder.js';
 import { loadData } from './syncEngine.js';
 import { renderManageView } from '../flashcardCrud.js';
 
@@ -133,15 +133,40 @@ export async function handleCreateCard(e) {
         console.error("Failed to insert core memory:", error);
     }
     
-    document.getElementById('card-type').value = 'mixed';
-    document.getElementById('card-front').value = '';
-    document.getElementById('card-back').value = '';
-    document.getElementById('card-front-image').value = '';
-    document.getElementById('card-back-image').value = '';
+    // Reset forms and selections
+    const selectEl = document.getElementById('card-type');
+    if (selectEl) {
+        selectEl.value = 'mixed';
+        buildCustomDropdownUI('card-type');
+    }
+    updateFormLabelsAndPlaceholders(false, 'mixed');
+
+    // Clear standard text areas and file inputs
+    const frontEl = document.getElementById('card-front');
+    if (frontEl) frontEl.value = '';
     
-    const sentenceList = document.getElementById('draft-sentences-list');
-    if (sentenceList) sentenceList.innerHTML = '';
+    const backEl = document.getElementById('card-back');
+    if (backEl) backEl.value = '';
+    
+    const frontImgEl = document.getElementById('card-front-image');
+    if (frontImgEl) frontImgEl.value = '';
+    
+    const backImgEl = document.getElementById('card-back-image');
+    if (backImgEl) backImgEl.value = '';
+
+    const newSentenceEl = document.getElementById('create-new-sentence');
+    if (newSentenceEl) newSentenceEl.value = '';
+
+    // Clear draft sentences
     state.draftCreateSentences = [];
+    renderCreateSentencesList();
+
+    // Clear memory map states
+    const createMapTitle = document.getElementById('create-map-title');
+    if (createMapTitle) createMapTitle.value = '';
+    state.createMapNodes = [];
+    state.createMapLinks = [];
+    renderEditorNodes('create-map-nodes-container', state.createMapNodes, state.createMapLinks, 'create-map-svg', 'create-arrowhead');
     
     btn.innerHTML = "Memory Uploaded! " + ICONS.check;
     btn.style.background = "var(--accent)";
@@ -154,7 +179,6 @@ export async function handleCreateCard(e) {
         btn.style.borderColor = "";
         btn.style.color = "";
         btn.disabled = false;
-        switchView('manage');
     }, 1000);
 }
 
