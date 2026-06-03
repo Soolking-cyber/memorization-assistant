@@ -213,6 +213,7 @@ export function renderCurrentCard() {
             frontEl.style.justifyContent = 'stretch';
             frontEl.style.width = '100%';
             frontEl.style.height = '100%';
+            frontEl.style.position = 'relative';
         }
         
         frontEl.innerHTML = `
@@ -237,13 +238,14 @@ export function renderCurrentCard() {
                     </svg>
                     <div id="practice-map-nodes-container" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2;"></div>
                 </div>
-                <div class="canvas-zoom-controls">
-                    <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-out">−</button>
-                    <span class="zoom-percent" id="practice-zoom-label">100%</span>
-                    <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-in">+</button>
-                    <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-reset" style="font-size: 0.65rem; margin-left: 2px;">R</button>
-                    <button type="button" class="zoom-ctrl-btn" id="btn-practice-fullscreen" style="font-size: 0.65rem; margin-left: 2px;" title="Toggle Fullscreen">⛶</button>
-                </div>
+            </div>
+            
+            <div class="canvas-zoom-controls">
+                <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-out">−</button>
+                <span class="zoom-percent" id="practice-zoom-label">100%</span>
+                <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-in">+</button>
+                <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-reset" style="font-size: 0.65rem; margin-left: 2px;">R</button>
+                <button type="button" class="zoom-ctrl-btn" id="btn-practice-fullscreen" style="font-size: 0.65rem; margin-left: 2px;" title="Toggle Fullscreen">⛶</button>
             </div>
         `;
         
@@ -306,6 +308,7 @@ export function renderCurrentCard() {
         frontEl.style.justifyContent = '';
         frontEl.style.width = '';
         frontEl.style.height = '';
+        frontEl.style.position = '';
     }
 
     if (card.type === 'Image Card') {
