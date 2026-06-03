@@ -123,7 +123,7 @@ export function renderSpellingBoxes(word) {
 }
 
 export function getTypedSpellingAnswer(targetWord) {
-    const inputs = Array.from(document.querySelectorAll('.letter-input'));
+    const inputs = Array.from(document.querySelectorAll('#practice-letter-boxes .letter-input'));
     let typed = '';
     let inputIndex = 0;
     for (let i = 0; i < targetWord.length; i++) {
@@ -164,7 +164,7 @@ export function getTargetWordsForSentences(backWord, sentences) {
 }
 
 export function getTypedAnswersForSentences(targetWords, sentencesCount) {
-    const inputs = Array.from(document.querySelectorAll('.letter-input'));
+    const inputs = Array.from(document.querySelectorAll('.practice-sentence-list .letter-input'));
     const typedWords = [];
     
     let inputIndex = 0;
@@ -194,7 +194,9 @@ export function getTypedAnswersForSentences(targetWords, sentencesCount) {
 export function initSpellingInputListeners() {
     document.addEventListener('input', (e) => {
         if (e.target.classList.contains('letter-input')) {
-            const inputs = Array.from(document.querySelectorAll('.letter-input'));
+            const container = e.target.closest('#practice-letter-boxes') || e.target.closest('.practice-sentence-list') || e.target.closest('#deck-letter-boxes');
+            if (!container) return;
+            const inputs = Array.from(container.querySelectorAll('.letter-input'));
             const currentIndex = inputs.indexOf(e.target);
             
             if (e.target.value.length > 0) {
@@ -211,7 +213,9 @@ export function initSpellingInputListeners() {
 
     document.addEventListener('keydown', (e) => {
         if (e.target.classList.contains('letter-input')) {
-            const inputs = Array.from(document.querySelectorAll('.letter-input'));
+            const container = e.target.closest('#practice-letter-boxes') || e.target.closest('.practice-sentence-list') || e.target.closest('#deck-letter-boxes');
+            if (!container) return;
+            const inputs = Array.from(container.querySelectorAll('.letter-input'));
             const currentIndex = inputs.indexOf(e.target);
             
             if (e.key === 'Backspace') {

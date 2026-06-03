@@ -168,9 +168,15 @@ export function renderCurrentCard() {
             activeCard.style.minHeight = isMobile ? '360px' : '480px';
             activeCard.style.maxHeight = isMobile ? 'none' : '850px';
             const cardFront = activeCard.querySelector('.card-front');
-            if (cardFront) cardFront.style.padding = '0';
+            if (cardFront) {
+                cardFront.style.padding = '0';
+                cardFront.style.height = '100%';
+            }
             const cardBack = activeCard.querySelector('.card-back');
-            if (cardBack) cardBack.style.padding = '0';
+            if (cardBack) {
+                cardBack.style.padding = '0';
+                cardBack.style.height = '100%';
+            }
         }
         
         state.practiceMapZoom = 1.0;
@@ -436,7 +442,7 @@ export function renderCurrentCard() {
     document.getElementById('practice-input').value = '';
     document.getElementById('evaluation-area').classList.add('hidden');
     
-    const firstSpellingInput = document.querySelector('.letter-input');
+    const firstSpellingInput = document.querySelector('#practice-letter-boxes .letter-input, .practice-sentence-list .letter-input');
     if (firstSpellingInput) {
         document.getElementById('practice-input').classList.add('hidden');
         setTimeout(() => {
@@ -505,7 +511,7 @@ export async function evaluateAnswer() {
 
     let typed = '';
     let score = 0;
-    const spellingInputs = document.querySelectorAll('.letter-input');
+    const spellingInputs = document.querySelectorAll('#practice-letter-boxes .letter-input, .practice-sentence-list .letter-input');
     
     const savedSentences = state.exampleSentences[card.id];
     let sentences = [];
