@@ -126,6 +126,8 @@ export async function handleCreateCard(e) {
             state.exampleSentences[createdCard.id] = [...state.draftCreateSentences];
             await dbSet('exampleSentences', state.exampleSentences);
         }
+        state.cards.push(createdCard);
+        await dbSet('cached_cards', state.cards);
         await loadData();
     } else {
         console.error("Failed to insert core memory:", error);
@@ -360,6 +362,13 @@ export async function handleEditCardSubmit(e) {
         .select();
 
     if (!error && data) {
+        const updatedCard = data[0];
+        const idx = state.cards.findIndex(c => c.id === cardId);
+        if (idx !== -1) {
+            state.cards[idx] = updatedCard;
+        }
+        await dbSet('cached_cards', state.cards);
+
         if (state.editSentences.length > 0) {
             state.exampleSentences[cardId] = [...state.editSentences];
         } else {

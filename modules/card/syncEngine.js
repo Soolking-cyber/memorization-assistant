@@ -35,72 +35,43 @@ export async function loadData() {
     if (syncInd) syncInd.classList.remove('hidden');
     
     try {
-        const { data: metadataList, error: metadataError } = await supabase
+        const { data: fullCards, error: fullError } = await supabase
             .from('flashcards')
-            .select('id, user_id, type, nextReview, ease, interval, repetitions, created_at')
+            .select('*')
             .eq('user_id', state.userSession.user.id);
 
-        if (metadataError) {
-            console.error("Error loading card metadata:", metadataError);
+        if (fullError) {
+            console.error("Error loading card data:", fullError);
             return;
         }
 
-        const metadataMap = new Map(metadataList.map(m => [m.id, m]));
+        // Compare if cache changed
         let cacheChanged = false;
-
-        state.cards = state.cards.filter(c => {
-            const stillExists = metadataMap.has(c.id);
-            if (!stillExists) cacheChanged = true;
-            return stillExists;
-        });
-
-        const cardsMap = new Map(state.cards.map(c => [c.id, c]));
-        const idsToFetch = [];
-
-        for (const meta of metadataList) {
-            const cached = cardsMap.get(meta.id);
-            if (!cached) {
-                idsToFetch.push(meta.id);
-            } else {
-                const metaChanged = 
-                    cached.type !== meta.type ||
-                    cached.nextReview !== meta.nextReview ||
-                    cached.ease !== meta.ease ||
-                    cached.interval !== meta.interval ||
-                    cached.repetitions !== meta.repetitions;
-
-                const hasFullBody = 
-                    cached.front !== undefined && 
-                    cached.back !== undefined;
-
-                if (metaChanged || !hasFullBody) {
-                    idsToFetch.push(meta.id);
+        if (state.cards.length !== fullCards.length) {
+            cacheChanged = true;
+        } else {
+            const cardsMap = new Map(state.cards.map(c => [c.id, c]));
+            for (const card of fullCards) {
+                const cached = cardsMap.get(card.id);
+                if (!cached || 
+                    cached.type !== card.type ||
+                    cached.front !== card.front ||
+                    cached.back !== card.back ||
+                    cached.image_front_url !== card.image_front_url ||
+                    cached.image_back_url !== card.image_back_url ||
+                    cached.nextReview !== card.nextReview ||
+                    cached.ease !== card.ease ||
+                    cached.interval !== card.interval ||
+                    cached.repetitions !== card.repetitions ||
+                    JSON.stringify(cached.example_sentences) !== JSON.stringify(card.example_sentences)
+                ) {
+                    cacheChanged = true;
+                    break;
                 }
             }
         }
 
-        if (idsToFetch.length > 0) {
-            console.log(`Selective sync: fetching full details for ${idsToFetch.length} new/changed cards.`);
-            const { data: fullCards, error: fullError } = await supabase
-                .from('flashcards')
-                .select('*')
-                .in('id', idsToFetch);
-
-            if (fullError) {
-                console.error("Error fetching full details for selective sync:", fullError);
-            } else if (fullCards) {
-                cacheChanged = true;
-                
-                for (const fullCard of fullCards) {
-                    const idx = state.cards.findIndex(c => c.id === fullCard.id);
-                    if (idx !== -1) {
-                        state.cards[idx] = fullCard;
-                    } else {
-                        state.cards.push(fullCard);
-                    }
-                }
-            }
-        }
+        state.cards = fullCards || [];
 
         let migratedCards = [];
         state.cards.forEach(card => {
