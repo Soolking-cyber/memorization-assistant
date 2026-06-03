@@ -2,6 +2,7 @@ import { state } from './modules/state.js';
 import { supabase } from './modules/supabaseClient.js';
 import { playUISound, initSoundSystem } from './modules/sound.js';
 import { dbGet } from './modules/db.js';
+import { parseNextReview } from './modules/card/syncEngine.js';
 import { initSyncListeners } from './modules/syncQueue.js';
 import {
     initThemeSystem,
@@ -53,6 +54,9 @@ async function checkAuth() {
         try {
             const cached = await dbGet('cached_cards');
             if (cached) {
+                cached.forEach(c => {
+                    c.nextReview = parseNextReview(c.nextReview);
+                });
                 state.cards = cached || [];
                 updateDashboard();
             }
@@ -69,7 +73,7 @@ async function checkAuth() {
             console.warn("Failed to load cached sentences on startup:", e);
         }
         
-        await loadData();
+        loadData(); // Run in the background asynchronously!
         handleSessionStart();
     } else {
         state.userSession = null;
@@ -85,6 +89,9 @@ async function checkAuth() {
             try {
                 const cached = await dbGet('cached_cards');
                 if (cached) {
+                    cached.forEach(c => {
+                        c.nextReview = parseNextReview(c.nextReview);
+                    });
                     state.cards = cached || [];
                     updateDashboard();
                 }
@@ -101,7 +108,7 @@ async function checkAuth() {
                 console.warn("Failed to load cached sentences on auth change:", e);
             }
             
-            await loadData();
+            loadData(); // Run in the background asynchronously!
             handleSessionStart();
         } else if (!session && state.userSession) {
             state.userSession = null;

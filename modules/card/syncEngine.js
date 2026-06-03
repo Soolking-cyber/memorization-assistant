@@ -28,6 +28,19 @@ export async function fetchAndCacheReviewLogs() {
     await dbSet('review_activity_logs', formattedLogs);
 }
 
+export function parseNextReview(val) {
+    if (!val) return Date.now();
+    if (typeof val === 'number') return val;
+    if (typeof val === 'string') {
+        if (/^\d+$/.test(val)) {
+            return parseInt(val, 10);
+        }
+        const parsed = Date.parse(val);
+        return isNaN(parsed) ? Date.now() : parsed;
+    }
+    return Date.now();
+}
+
 export async function loadData() {
     if (!state.userSession || !supabase) return;
     
@@ -43,6 +56,13 @@ export async function loadData() {
         if (fullError) {
             console.error("Error loading card data:", fullError);
             return;
+        }
+
+        // Normalize nextReview values immediately
+        if (fullCards) {
+            fullCards.forEach(c => {
+                c.nextReview = parseNextReview(c.nextReview);
+            });
         }
 
         // Compare if cache changed
@@ -99,6 +119,9 @@ export async function loadData() {
             await dbSet('exampleSentences', state.exampleSentences);
         }
 
+        // Update dashboard immediately for a snappy user experience!
+        updateDashboard();
+
         if (migratedCards.length > 0) {
             console.log(`Migrating ${migratedCards.length} cards with missing types...`);
             Promise.all(migratedCards.map(card => 
@@ -113,12 +136,15 @@ export async function loadData() {
             });
         }
         
-        await fetchAndCacheReviewLogs();
-        updateDashboard();
-        const statsView = document.getElementById('view-stats');
-        if (statsView && !statsView.classList.contains('hidden')) {
-            renderStatistics();
-        }
+        // Fetch logs asynchronously in the background so it doesn't block dashboard UI
+        fetchAndCacheReviewLogs().then(() => {
+            const statsView = document.getElementById('view-stats');
+            if (statsView && !statsView.classList.contains('hidden')) {
+                renderStatistics();
+            }
+        }).catch(err => {
+            console.error("Failed to fetch review logs:", err);
+        });
     } catch (err) {
         console.error("Critical error inside loadData background fetch:", err);
     } finally {
