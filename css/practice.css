@@ -386,24 +386,34 @@ input.letter-box:focus {
     border: 1px solid rgba(74, 128, 90, 0.3);
 }
 
-/* Cohesive and elegant pill-shaped submit/next buttons aligned to the bottom-right */
-#typing-area,
-#evaluation-area {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+/* Position and enlarge the canvas zoom controls pill in the bottom-right corner */
+.canvas-zoom-controls {
+    position: absolute !important;
+    bottom: 16px !important;
+    right: 16px !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+    padding: 6px 10px !important;
+    border-radius: 24px !important;
+    gap: 6px !important;
 }
 
-#btn-submit-answer,
-#btn-next-card {
-    width: auto !important;
-    min-width: 160px;
-    border-radius: 9999px !important;
-    align-self: flex-end;
-    margin-left: auto;
-    margin-top: 16px;
-    padding: 12px 28px;
-    justify-content: center;
+.canvas-zoom-controls .zoom-ctrl-btn {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 1.05rem !important;
+}
+
+#btn-practice-zoom-reset,
+#btn-practice-fullscreen {
+    font-size: 0.8rem !important;
+}
+
+.canvas-zoom-controls .zoom-percent {
+    font-size: 0.8rem !important;
+    min-width: 40px !important;
 }
 
 
