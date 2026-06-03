@@ -29,6 +29,38 @@ import {
     saveIncorrectExampleSentence
 } from './practice/clueCollector.js';
 
+// Dynamic image stretch and aspect ratio shrink-wrap adjust helper
+window.adjustPracticeImage = (img) => {
+    if (!img) return;
+    const parent = img.parentElement;
+    if (!parent) return;
+    
+    const parentWidth = parent.clientWidth;
+    const parentHeight = parent.clientHeight;
+    
+    if (parentWidth > 0 && parentHeight > 0) {
+        const aspect = img.naturalWidth / img.naturalHeight;
+        const parentAspect = parentWidth / parentHeight;
+        if (aspect > parentAspect) {
+            img.style.width = '100%';
+            img.style.height = 'auto';
+        } else {
+            img.style.height = '100%';
+            img.style.width = 'auto';
+        }
+    } else {
+        img.style.width = '100%';
+        img.style.height = 'auto';
+    }
+};
+
+window.addEventListener('resize', () => {
+    const practiceImg = document.querySelector('.image-card-frame img');
+    if (practiceImg) {
+        window.adjustPracticeImage(practiceImg);
+    }
+});
+
 import {
     startForcedPractice,
     startPractice,
@@ -232,7 +264,7 @@ export function renderCurrentCard() {
                     </div>
                 </div>
                 <div class="image-card-frame">
-                    <img src="${card.image_front_url || card.image_back_url}" alt="Memory step image" />
+                    <img src="${card.image_front_url || card.image_back_url}" alt="Memory step image" onload="window.adjustPracticeImage(this)" />
                 </div>
             </div>
         `;
