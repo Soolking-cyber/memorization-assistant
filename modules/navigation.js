@@ -58,6 +58,12 @@ export function initNavigation() {
 export async function switchView(viewId) {
     hideExplanationTooltip();
 
+    // Clear active Recall Deck timers
+    if (state.recallTimerInterval) {
+        clearInterval(state.recallTimerInterval);
+        state.recallTimerInterval = null;
+    }
+
     const fullscreens = document.querySelectorAll('.canvas-container-fullscreen');
     fullscreens.forEach(el => {
         el.classList.remove('canvas-container-fullscreen');

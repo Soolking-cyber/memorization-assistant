@@ -230,6 +230,19 @@ function startStackStudy(tierKey, tierName, decoratedCards) {
     state.isForcedMode = true;
     state.practiceOrigin = 'collection'; // Backwards compatible fallback
     
+    // Initialize gamification session variables
+    state.recallScore = 0;
+    state.recallStreak = 0;
+    state.maxRecallStreak = 0;
+    state.recallCorrectCount = 0;
+    state.recallTotalTime = 0;
+    
+    // Reset HUD display
+    const scoreVal = document.getElementById('hud-score-val');
+    if (scoreVal) scoreVal.textContent = '0 XP';
+    const streakVal = document.getElementById('hud-streak-val');
+    if (streakVal) streakVal.textContent = '0x';
+    
     // Toggle active view states
     document.getElementById('deck-stacks-view')?.classList.add('hidden');
     const studyView = document.getElementById('deck-study-view');
@@ -247,6 +260,12 @@ function startStackStudy(tierKey, tierName, decoratedCards) {
 function renderActiveStackCard() {
     const container = document.querySelector('.study-card-container');
     if (!container) return;
+    
+    // Clear any active timer intervals
+    if (state.recallTimerInterval) {
+        clearInterval(state.recallTimerInterval);
+        state.recallTimerInterval = null;
+    }
     
     const card = state.reviewQueue[state.currentReviewIndex];
     if (!card) {
@@ -336,6 +355,40 @@ function renderActiveStackCard() {
         const cardEl = container.querySelector('.study-pokemon-card');
         const attackBtn = container.querySelector('#btn-deck-attack');
         const feedbackBox = container.querySelector('#deck-attack-feedback');
+        
+        // Start study session timer
+        const timerDuration = 20; // 20 seconds countdown
+        let timeRemaining = timerDuration;
+        state.recallCardStartTime = Date.now();
+        
+        const timerBar = document.getElementById('recall-timer-bar');
+        if (timerBar) {
+            timerBar.style.width = '100%';
+            timerBar.style.background = 'var(--success)';
+        }
+        
+        state.recallTimerInterval = setInterval(() => {
+            timeRemaining -= 0.1;
+            if (timeRemaining <= 0) {
+                timeRemaining = 0;
+                clearInterval(state.recallTimerInterval);
+                state.recallTimerInterval = null;
+            }
+            
+            if (timerBar) {
+                const percent = (timeRemaining / timerDuration) * 100;
+                timerBar.style.width = `${percent}%`;
+                
+                // Color transition from green to yellow to red
+                if (percent > 50) {
+                    timerBar.style.background = 'var(--success)';
+                } else if (percent > 20) {
+                    timerBar.style.background = 'var(--warning)';
+                } else {
+                    timerBar.style.background = 'var(--danger)';
+                }
+            }
+        }, 100);
         
         // Active Sentence Clues Navigation Slide System
         let activeSentenceIndex = 0;
@@ -494,6 +547,15 @@ function renderActiveStackCard() {
  * Dynamic answering evaluation for Poké Deck in-place Active Recall.
  */
 function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
+    // Stop the timer
+    if (state.recallTimerInterval) {
+        clearInterval(state.recallTimerInterval);
+        state.recallTimerInterval = null;
+    }
+    
+    const elapsedSeconds = (Date.now() - state.recallCardStartTime) / 1000;
+    state.recallTotalTime += elapsedSeconds;
+
     // If empty or Can't Guess, evaluate match percentage as 0 (escaped)
     const score = typed ? calculateMatchPercentage(typed, card.back) : 0;
     
@@ -518,6 +580,64 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
         gradeInt = 0;
     }
     
+    // Get card stats and log history
+    let cardXP = 0;
+    if (success) {
+        state.recallCorrectCount++;
+        state.recallStreak++;
+        if (state.recallStreak > state.maxRecallStreak) {
+            state.maxRecallStreak = state.recallStreak;
+        }
+        
+        // Base XP based on deck difficulty
+        let baseXP = 10;
+        const tierKey = state.activeStudyTierKey;
+        if (tierKey === 'ultrarare') baseXP = 50;
+        else if (tierKey === 'legendary') baseXP = 40;
+        else if (tierKey === 'epic') baseXP = 30;
+        else if (tierKey === 'rare') baseXP = 20;
+        
+        // Multiplier based on streak
+        const multiplier = Math.min(1.5, 1 + (state.recallStreak * 0.1));
+        
+        // Speed bonus
+        let speedBonus = 0;
+        if (elapsedSeconds <= 5) speedBonus = 25;
+        else if (elapsedSeconds <= 10) speedBonus = 10;
+        
+        cardXP = Math.round(baseXP * multiplier) + speedBonus;
+        state.recallScore += cardXP;
+    } else {
+        state.recallStreak = 0;
+    }
+    
+    // Update HUD display
+    const scoreVal = document.getElementById('hud-score-val');
+    if (scoreVal) {
+        scoreVal.textContent = `${state.recallScore} XP`;
+    }
+    const streakVal = document.getElementById('hud-streak-val');
+    if (streakVal) {
+        streakVal.textContent = state.recallStreak > 0 ? `${state.recallStreak}x` : '0x';
+    }
+    
+    // Spawn floating points animation over card
+    const attackArea = document.querySelector('.recall-attack-area');
+    if (attackArea && success) {
+        const floatTag = document.createElement('div');
+        floatTag.className = 'floating-points';
+        let bonusText = '';
+        if (state.recallStreak > 1) bonusText += ` (Combo x${Math.min(1.5, 1 + state.recallStreak * 0.1).toFixed(1)})`;
+        if (elapsedSeconds <= 5) bonusText += ` (+25 Speed!)`;
+        else if (elapsedSeconds <= 10) bonusText += ` (+10 Speed!)`;
+        
+        floatTag.textContent = `+${cardXP} XP${bonusText}`;
+        attackArea.appendChild(floatTag);
+        setTimeout(() => {
+            floatTag.remove();
+        }, 1200);
+    }
+
     // Play correct / incorrect sound effects
     if (success) {
         try { playUISound('success'); } catch(e) {}
@@ -668,6 +788,24 @@ function finishStackStudy() {
     const container = document.querySelector('.study-card-container');
     if (!container) return;
     
+    // Clear active timers
+    if (state.recallTimerInterval) {
+        clearInterval(state.recallTimerInterval);
+        state.recallTimerInterval = null;
+    }
+    
+    const totalCount = state.reviewQueue.length;
+    const accuracy = totalCount > 0 ? Math.round((state.recallCorrectCount / totalCount) * 100) : 100;
+    
+    // Calculate performance letter grade
+    let grade = 'D';
+    if (accuracy === 100) grade = 'S';
+    else if (accuracy >= 90) grade = 'A';
+    else if (accuracy >= 80) grade = 'B';
+    else if (accuracy >= 70) grade = 'C';
+    
+    const avgSpeed = totalCount > 0 ? (state.recallTotalTime / totalCount).toFixed(1) : 0;
+    
     try {
         playUISound('complete');
         if (typeof window.confetti === 'function') {
@@ -680,14 +818,35 @@ function finishStackStudy() {
     } catch (e) {}
     
     container.innerHTML = `
-        <div class="study-victory-state">
-            <svg viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" width="60" height="60">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-            <h3>Recall Session Complete</h3>
-            <p>You have successfully reviewed all cards in the <strong>${state.activeStudyTierName}</strong> deck. Cards have been re-sorted into their updated strength levels.</p>
-            <button id="btn-victory-back" class="btn primary" style="width: 100%; max-width: 200px;">Return to Decks</button>
+        <div class="study-victory-state scorecard-view">
+            <div class="scorecard-header" style="margin-bottom: 20px;">
+                <div class="grade-badge-wrapper" style="margin-bottom: 12px;">
+                    <span class="grade-badge grade-${grade.toLowerCase()}">${grade}</span>
+                </div>
+                <h3 style="margin-bottom: 6px;">Recall Session Complete</h3>
+                <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);">Reviewed <strong>${totalCount}</strong> cards in the <strong>${state.activeStudyTierName}</strong> deck.</p>
+            </div>
+            
+            <div class="scorecard-grid">
+                <div class="scorecard-item">
+                    <span class="scorecard-label">Total Score</span>
+                    <span class="scorecard-value text-gold">${state.recallScore} XP</span>
+                </div>
+                <div class="scorecard-item">
+                    <span class="scorecard-label">Accuracy</span>
+                    <span class="scorecard-value">${accuracy}%</span>
+                </div>
+                <div class="scorecard-item">
+                    <span class="scorecard-label">Max Combo</span>
+                    <span class="scorecard-value">${state.maxRecallStreak}x</span>
+                </div>
+                <div class="scorecard-item">
+                    <span class="scorecard-label">Avg Speed</span>
+                    <span class="scorecard-value">${avgSpeed}s</span>
+                </div>
+            </div>
+            
+            <button id="btn-victory-back" class="btn primary" style="width: 100%; max-width: 200px; margin-top: 15px;">Return to Decks</button>
         </div>
     `;
     
