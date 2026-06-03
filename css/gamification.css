@@ -671,24 +671,33 @@
     color: #0288d1; /* Blue accent for combos */
 }
 
-/* Glowing Dynamic Timer Line */
-.hud-timer-container {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: rgba(0, 0, 0, 0.05);
+.hud-shields-container .hud-value {
+    color: var(--danger); /* Red/coral accent for shields */
 }
 
-body.dark-theme .hud-timer-container {
-    background: rgba(255, 255, 255, 0.05);
+/* Collapsed Clue Reveal Toggle Button */
+.clue-reveal-btn {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 4px 10px;
+    font-size: 0.72rem;
+    font-weight: 750;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: inset 0 -1.5px 0 var(--border-color);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.recall-timer-bar {
-    height: 100%;
-    width: 100%;
-    transition: width 0.1s linear, background-color 0.3s ease;
+.clue-reveal-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+}
+
+.clue-reveal-btn:active {
+    transform: translateY(1px);
+    box-shadow: none;
 }
 
 /* Floating XP Points Tag */

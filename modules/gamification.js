@@ -236,12 +236,16 @@ function startStackStudy(tierKey, tierName, decoratedCards) {
     state.maxRecallStreak = 0;
     state.recallCorrectCount = 0;
     state.recallTotalTime = 0;
+    state.recallShields = 3;
+    state.recallPrecisionCount = 0;
     
     // Reset HUD display
     const scoreVal = document.getElementById('hud-score-val');
     if (scoreVal) scoreVal.textContent = '0 XP';
     const streakVal = document.getElementById('hud-streak-val');
     if (streakVal) streakVal.textContent = '0x';
+    const shieldsVal = document.getElementById('hud-shields-val');
+    if (shieldsVal) shieldsVal.textContent = '🛡️🛡️🛡️';
     
     // Toggle active view states
     document.getElementById('deck-stacks-view')?.classList.add('hidden');
@@ -261,17 +265,16 @@ function renderActiveStackCard() {
     const container = document.querySelector('.study-card-container');
     if (!container) return;
     
-    // Clear any active timer intervals
-    if (state.recallTimerInterval) {
-        clearInterval(state.recallTimerInterval);
-        state.recallTimerInterval = null;
-    }
-    
     const card = state.reviewQueue[state.currentReviewIndex];
     if (!card) {
         finishStackStudy();
         return;
     }
+    
+    // Initialize card-level gamification state
+    state.clueRevealed = false;
+    state.backspacePressed = false;
+    state.recallCardStartTime = Date.now();
     
     // Update progress label
     const progressLabel = document.getElementById('study-stack-progress');
@@ -355,42 +358,7 @@ function renderActiveStackCard() {
         const cardEl = container.querySelector('.study-pokemon-card');
         const attackBtn = container.querySelector('#btn-deck-attack');
         const feedbackBox = container.querySelector('#deck-attack-feedback');
-        
-        // Start study session timer
-        const timerDuration = 20; // 20 seconds countdown
-        let timeRemaining = timerDuration;
-        state.recallCardStartTime = Date.now();
-        
-        const timerBar = document.getElementById('recall-timer-bar');
-        if (timerBar) {
-            timerBar.style.width = '100%';
-            timerBar.style.background = 'var(--success)';
-        }
-        
-        state.recallTimerInterval = setInterval(() => {
-            timeRemaining -= 0.1;
-            if (timeRemaining <= 0) {
-                timeRemaining = 0;
-                clearInterval(state.recallTimerInterval);
-                state.recallTimerInterval = null;
-            }
-            
-            if (timerBar) {
-                const percent = (timeRemaining / timerDuration) * 100;
-                timerBar.style.width = `${percent}%`;
-                
-                // Color transition from green to yellow to red
-                if (percent > 50) {
-                    timerBar.style.background = 'var(--success)';
-                } else if (percent > 20) {
-                    timerBar.style.background = 'var(--warning)';
-                } else {
-                    timerBar.style.background = 'var(--danger)';
-                }
-            }
-        }, 100);
-        
-        // Active Sentence Clues Navigation Slide System
+               // Active Sentence Clues Navigation Slide System
         let activeSentenceIndex = 0;
         
         function updateSentenceClueUI() {
@@ -411,30 +379,45 @@ function renderActiveStackCard() {
                     `;
                 }
                 
-                abilitiesContainer.innerHTML = `
-                    <div class="ability-slot">
-                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            <span class="ability-badge">Context Clue ${activeSentenceIndex + 1} of ${stats.sentences.length}</span>
-                            ${navigationHTML}
+                if (state.clueRevealed) {
+                    abilitiesContainer.innerHTML = `
+                        <div class="ability-slot">
+                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <span class="ability-badge">Context Clue ${activeSentenceIndex + 1} of ${stats.sentences.length}</span>
+                                ${navigationHTML}
+                            </div>
+                            <span class="ability-description" title="${rawSentence}">
+                                "${blurredSentence}"
+                            </span>
                         </div>
-                        <span class="ability-description" title="${rawSentence}">
-                            "${blurredSentence}"
-                        </span>
-                    </div>
-                `;
-                
-                // Bind arrow study triggers
-                if (stats.sentences.length > 1) {
-                    abilitiesContainer.querySelector('.btn-up').addEventListener('click', (e) => {
+                    `;
+                    
+                    // Bind arrow study triggers
+                    if (stats.sentences.length > 1) {
+                        abilitiesContainer.querySelector('.btn-up').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            activeSentenceIndex = (activeSentenceIndex - 1 + stats.sentences.length) % stats.sentences.length;
+                            try { playUISound('click'); } catch(err) {}
+                            updateSentenceClueUI();
+                        });
+                        abilitiesContainer.querySelector('.btn-down').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            activeSentenceIndex = (activeSentenceIndex + 1) % stats.sentences.length;
+                            try { playUISound('click'); } catch(err) {}
+                            updateSentenceClueUI();
+                        });
+                    }
+                } else {
+                    abilitiesContainer.innerHTML = `
+                        <div class="ability-slot" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 10px 16px !important;">
+                            <span class="ability-description" style="font-style: italic; color: var(--text-tertiary);">Context sentence is locked.</span>
+                            <button id="btn-reveal-clue" class="clue-reveal-btn" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 700; border-radius: 6px; cursor: pointer; transition: all 0.2s;">Reveal Clue</button>
+                        </div>
+                    `;
+                    abilitiesContainer.querySelector('#btn-reveal-clue').addEventListener('click', (e) => {
                         e.stopPropagation();
-                        activeSentenceIndex = (activeSentenceIndex - 1 + stats.sentences.length) % stats.sentences.length;
                         try { playUISound('click'); } catch(err) {}
-                        updateSentenceClueUI();
-                    });
-                    abilitiesContainer.querySelector('.btn-down').addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        activeSentenceIndex = (activeSentenceIndex + 1) % stats.sentences.length;
-                        try { playUISound('click'); } catch(err) {}
+                        state.clueRevealed = true;
                         updateSentenceClueUI();
                     });
                 }
@@ -471,9 +454,10 @@ function renderActiveStackCard() {
                         }, 150);
                     }
                 });
-
+ 
                 input.addEventListener('keydown', (e) => {
                     if (e.key === 'Backspace') {
+                        state.backspacePressed = true;
                         try { playUISound('click'); } catch(err) {}
                     }
                 });
@@ -547,12 +531,6 @@ function renderActiveStackCard() {
  * Dynamic answering evaluation for Poké Deck in-place Active Recall.
  */
 function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
-    // Stop the timer
-    if (state.recallTimerInterval) {
-        clearInterval(state.recallTimerInterval);
-        state.recallTimerInterval = null;
-    }
-    
     const elapsedSeconds = (Date.now() - state.recallCardStartTime) / 1000;
     state.recallTotalTime += elapsedSeconds;
 
@@ -582,6 +560,10 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
     
     // Get card stats and log history
     let cardXP = 0;
+    let bonusText = '';
+    const sentences = state.exampleSentences[card.id] || [];
+    const hasClues = (Array.isArray(sentences) ? sentences : [sentences]).filter(s => typeof s === 'string' && s.trim().length > 0).length > 0;
+    
     if (success) {
         state.recallCorrectCount++;
         state.recallStreak++;
@@ -599,16 +581,28 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
         
         // Multiplier based on streak
         const multiplier = Math.min(1.5, 1 + (state.recallStreak * 0.1));
+        cardXP = Math.round(baseXP * multiplier);
+        if (state.recallStreak > 1) {
+            bonusText += ` (Combo x${multiplier.toFixed(1)})`;
+        }
         
-        // Speed bonus
-        let speedBonus = 0;
-        if (elapsedSeconds <= 5) speedBonus = 25;
-        else if (elapsedSeconds <= 10) speedBonus = 10;
+        // 1. Clue-Free Bonus
+        if (hasClues && !state.clueRevealed) {
+            cardXP += 25;
+            bonusText += ` (+25 Blind Recall!)`;
+        }
         
-        cardXP = Math.round(baseXP * multiplier) + speedBonus;
+        // 2. Precision Typing Bonus
+        if (!state.backspacePressed) {
+            cardXP += 15;
+            state.recallPrecisionCount++;
+            bonusText += ` (+15 Precision!)`;
+        }
+        
         state.recallScore += cardXP;
     } else {
         state.recallStreak = 0;
+        state.recallShields = Math.max(0, state.recallShields - 1);
     }
     
     // Update HUD display
@@ -620,17 +614,16 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
     if (streakVal) {
         streakVal.textContent = state.recallStreak > 0 ? `${state.recallStreak}x` : '0x';
     }
+    const shieldsVal = document.getElementById('hud-shields-val');
+    if (shieldsVal) {
+        shieldsVal.textContent = '🛡️'.repeat(state.recallShields) || 'None';
+    }
     
     // Spawn floating points animation over card
     const attackArea = document.querySelector('.recall-attack-area');
     if (attackArea && success) {
         const floatTag = document.createElement('div');
         floatTag.className = 'floating-points';
-        let bonusText = '';
-        if (state.recallStreak > 1) bonusText += ` (Combo x${Math.min(1.5, 1 + state.recallStreak * 0.1).toFixed(1)})`;
-        if (elapsedSeconds <= 5) bonusText += ` (+25 Speed!)`;
-        else if (elapsedSeconds <= 10) bonusText += ` (+10 Speed!)`;
-        
         floatTag.textContent = `+${cardXP} XP${bonusText}`;
         attackArea.appendChild(floatTag);
         setTimeout(() => {
@@ -788,10 +781,11 @@ function finishStackStudy() {
     const container = document.querySelector('.study-card-container');
     if (!container) return;
     
-    // Clear active timers
-    if (state.recallTimerInterval) {
-        clearInterval(state.recallTimerInterval);
-        state.recallTimerInterval = null;
+    // Calculate shield bonus
+    let shieldBonus = 0;
+    if (state.recallShields === 3) {
+        shieldBonus = 100;
+        state.recallScore += shieldBonus;
     }
     
     const totalCount = state.reviewQueue.length;
@@ -803,8 +797,6 @@ function finishStackStudy() {
     else if (accuracy >= 90) grade = 'A';
     else if (accuracy >= 80) grade = 'B';
     else if (accuracy >= 70) grade = 'C';
-    
-    const avgSpeed = totalCount > 0 ? (state.recallTotalTime / totalCount).toFixed(1) : 0;
     
     try {
         playUISound('complete');
@@ -831,18 +823,19 @@ function finishStackStudy() {
                 <div class="scorecard-item">
                     <span class="scorecard-label">Total Score</span>
                     <span class="scorecard-value text-gold">${state.recallScore} XP</span>
+                    ${shieldBonus > 0 ? `<span style="font-size: 0.72rem; color: var(--success); font-weight: 700; margin-top: 2px;">+100 Shield Bonus!</span>` : ''}
                 </div>
                 <div class="scorecard-item">
                     <span class="scorecard-label">Accuracy</span>
                     <span class="scorecard-value">${accuracy}%</span>
                 </div>
                 <div class="scorecard-item">
-                    <span class="scorecard-label">Max Combo</span>
-                    <span class="scorecard-value">${state.maxRecallStreak}x</span>
+                    <span class="scorecard-label">Precision Recalls</span>
+                    <span class="scorecard-value">${state.recallPrecisionCount} / ${totalCount}</span>
                 </div>
                 <div class="scorecard-item">
-                    <span class="scorecard-label">Avg Speed</span>
-                    <span class="scorecard-value">${avgSpeed}s</span>
+                    <span class="scorecard-label">Shields Retained</span>
+                    <span class="scorecard-value" style="font-size: 1rem;">${'🛡️'.repeat(state.recallShields) || 'None'}</span>
                 </div>
             </div>
             
