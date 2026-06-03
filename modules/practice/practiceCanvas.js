@@ -167,6 +167,9 @@ export function initPracticeCanvasControls(mapData) {
             const containerWidth = scrollContainer.clientWidth || 400;
             const containerHeight = scrollContainer.clientHeight || 400;
             
+            viewport.style.width = `${viewportWidth}px`;
+            viewport.style.height = `${viewportHeight}px`;
+            
             const initialZoom = 1.0;
             
             setPracticeMapZoom(initialZoom);
