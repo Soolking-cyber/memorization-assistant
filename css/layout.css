@@ -942,7 +942,7 @@ body.logged-out .app-container {
     border-color: var(--text-primary) !important;
 }
 
-.card-front:hover .image-card-frame {
+.card-front:hover .image-card-frame img {
     border-color: var(--text-primary) !important;
 }
 
