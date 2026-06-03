@@ -1,7 +1,7 @@
 /* === css/gamification.css - Recall Decks stylesheet === */
 
 .collection-container {
-    max-width: 1000px;
+    width: 100%;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -123,20 +123,20 @@
     box-shadow: 0 8px 24px rgba(179, 136, 21, 0.15);
 }
 
-.stack-epic .stack-card { border-color: #7b1fa2; }
+.stack-epic .stack-card { border-color: var(--epic); }
 .stack-epic .stack-card-3 {
-    background: linear-gradient(135deg, var(--bg-card) 75%, rgba(123, 31, 162, 0.03) 100%);
+    background: linear-gradient(135deg, var(--bg-card) 75%, color-mix(in srgb, var(--epic) 3%, transparent) 100%);
 }
 .stack-epic:hover .stack-card-3 {
-    box-shadow: 0 8px 24px rgba(123, 31, 162, 0.15);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--epic) 15%, transparent);
 }
 
-.stack-rare .stack-card { border-color: #0288d1; }
+.stack-rare .stack-card { border-color: var(--rare); }
 .stack-rare .stack-card-3 {
-    background: linear-gradient(135deg, var(--bg-card) 75%, rgba(2, 136, 209, 0.03) 100%);
+    background: linear-gradient(135deg, var(--bg-card) 75%, color-mix(in srgb, var(--rare) 3%, transparent) 100%);
 }
 .stack-rare:hover .stack-card-3 {
-    box-shadow: 0 8px 24px rgba(2, 136, 209, 0.15);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--rare) 15%, transparent);
 }
 
 .stack-common .stack-card { border-color: var(--success); }
@@ -170,8 +170,8 @@
 }
 .stack-ultrarare .stack-badge { background: var(--danger); }
 .stack-legendary .stack-badge { background: var(--warning); }
-.stack-epic .stack-badge { background: #7b1fa2; }
-.stack-rare .stack-badge { background: #0288d1; }
+.stack-epic .stack-badge { background: var(--epic); }
+.stack-rare .stack-badge { background: var(--rare); }
 .stack-common .stack-badge { background: var(--success); }
 
 .stack-title {
@@ -239,8 +239,8 @@
 
 /* Tier Accent Line Indicators */
 .study-pokemon-card.tier-common::before { background: var(--success); }
-.study-pokemon-card.tier-rare::before { background: #0288d1; }
-.study-pokemon-card.tier-epic::before { background: #7b1fa2; }
+.study-pokemon-card.tier-rare::before { background: var(--rare); }
+.study-pokemon-card.tier-epic::before { background: var(--epic); }
 .study-pokemon-card.tier-legendary::before { background: var(--warning); }
 .study-pokemon-card.tier-ultrarare::before { background: var(--danger); }
 
@@ -264,11 +264,11 @@
     color: var(--text-secondary);
 }
 
-.study-pokemon-card.tier-common .card-rarity-badge { color: var(--success); border-color: rgba(74, 128, 90, 0.2); background: rgba(74, 128, 90, 0.05); }
-.study-pokemon-card.tier-rare .card-rarity-badge { color: #0288d1; border-color: rgba(2, 136, 209, 0.2); background: rgba(2, 136, 209, 0.05); }
-.study-pokemon-card.tier-epic .card-rarity-badge { color: #7b1fa2; border-color: rgba(123, 31, 162, 0.2); background: rgba(123, 31, 162, 0.05); }
-.study-pokemon-card.tier-legendary .card-rarity-badge { color: var(--warning); border-color: rgba(179, 136, 21, 0.2); background: rgba(179, 136, 21, 0.05); }
-.study-pokemon-card.tier-ultrarare .card-rarity-badge { color: var(--danger); border-color: rgba(176, 82, 75, 0.2); background: rgba(176, 82, 75, 0.05); }
+.study-pokemon-card.tier-common .card-rarity-badge { color: var(--success); border-color: color-mix(in srgb, var(--success) 20%, transparent); background: color-mix(in srgb, var(--success) 5%, transparent); }
+.study-pokemon-card.tier-rare .card-rarity-badge { color: var(--rare); border-color: color-mix(in srgb, var(--rare) 20%, transparent); background: color-mix(in srgb, var(--rare) 5%, transparent); }
+.study-pokemon-card.tier-epic .card-rarity-badge { color: var(--epic); border-color: color-mix(in srgb, var(--epic) 20%, transparent); background: color-mix(in srgb, var(--epic) 5%, transparent); }
+.study-pokemon-card.tier-legendary .card-rarity-badge { color: var(--warning); border-color: color-mix(in srgb, var(--warning) 20%, transparent); background: color-mix(in srgb, var(--warning) 5%, transparent); }
+.study-pokemon-card.tier-ultrarare .card-rarity-badge { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 20%, transparent); background: color-mix(in srgb, var(--danger) 5%, transparent); }
 
 /* Illustration Panel - Sleek and Spacious Text Display */
 .study-pokemon-card .card-illustration {
@@ -340,8 +340,8 @@
 }
 
 .tier-common .card-hp-fill { background: var(--success); }
-.tier-rare .card-hp-fill { background: #0288d1; }
-.tier-epic .card-hp-fill { background: #7b1fa2; }
+.tier-rare .card-hp-fill { background: var(--rare); }
+.tier-epic .card-hp-fill { background: var(--epic); }
 .tier-legendary .card-hp-fill { background: var(--warning); }
 .tier-ultrarare .card-hp-fill { background: var(--danger); }
 
@@ -668,7 +668,7 @@
 }
 
 .hud-streak-container .hud-value {
-    color: #0288d1; /* Blue accent for combos */
+    color: var(--rare); /* Blue accent for combos */
 }
 
 .hud-shields-container .hud-value {
@@ -753,8 +753,8 @@
 
 .grade-s { background: linear-gradient(135deg, #ff9100, #ff5722); text-shadow: 0 2px 4px rgba(0,0,0,0.15); }
 .grade-a { background: var(--success); }
-.grade-b { background: #0288d1; }
-.grade-c { background: #7b1fa2; }
+.grade-b { background: var(--rare); }
+.grade-c { background: var(--epic); }
 .grade-d { background: var(--text-secondary); }
 
 .scorecard-grid {

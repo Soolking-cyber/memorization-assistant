@@ -26,6 +26,8 @@
     --danger: #b0524b;
     --warning: #b38815;
     --success: #4a805a;
+    --epic: #7b1fa2;
+    --rare: #0288d1;
 
     /* Heatmap styling variables for Light Mode - subtle yet distinctive pastels to solid midtones */
     --heatmap-empty: #ebeae4;
@@ -70,6 +72,8 @@ body.dark-theme {
     --danger: #b55e5e;
     --warning: #ab9351;
     --success: #488b72;
+    --epic: #ab47bc;
+    --rare: #29b6f6;
 
     /* Heatmap styling variables for Dark Mode - premium deep jewel tones and golds */
     --heatmap-empty: rgba(255, 255, 255, 0.06);
