@@ -155,7 +155,7 @@ input.letter-box:focus {
         display: grid;
         grid-template-columns: 1.25fr 1fr;
         gap: 24px;
-        align-items: start;
+        align-items: stretch;
     }
     .practice-layout-map .practice-workspace {
         display: flex;
@@ -163,8 +163,23 @@ input.letter-box:focus {
         gap: 16px;
         width: 100%;
     }
+    .practice-layout-split .flashcard-container {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
     .practice-layout-split .flashcard {
         margin-bottom: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    .practice-layout-split .card-face {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
     }
     .card-img {
         max-height: 450px;

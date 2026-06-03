@@ -236,20 +236,25 @@ export function renderCurrentCard() {
         if (cardFront) {
             cardFront.style.padding = '';
             cardFront.style.overflow = '';
+            cardFront.style.height = '';
         }
         const cardBack = activeCard.querySelector('.card-back');
-        if (cardBack) cardBack.style.padding = '';
+        if (cardBack) {
+            cardBack.style.padding = '';
+            cardBack.style.height = '';
+        }
     }
 
     if (card.type === 'Image Card') {
         if (exerciseTitleEl) exerciseTitleEl.style.display = 'none';
         if (activeCard) {
             const isMobile = window.innerWidth <= 768;
-            activeCard.style.height = isMobile ? '450px' : '655px';
+            activeCard.style.height = isMobile ? '450px' : '100%';
             const cardFront = activeCard.querySelector('.card-front');
             if (cardFront) {
                 cardFront.style.padding = '0';
                 cardFront.style.overflow = 'hidden';
+                cardFront.style.height = isMobile ? '450px' : '100%';
             }
         }
         
@@ -268,6 +273,16 @@ export function renderCurrentCard() {
                 </div>
             </div>
         `;
+
+        // Force-trigger image adjustment helper after render to handle caching
+        const imgEl = frontEl.querySelector('.image-card-frame img');
+        if (imgEl) {
+            if (imgEl.complete) {
+                window.adjustPracticeImage(imgEl);
+            } else {
+                imgEl.addEventListener('load', () => window.adjustPracticeImage(imgEl));
+            }
+        }
         
         backEl.innerHTML = `<strong style="color:var(--accent);">Target sequence:</strong> ${card.back}`;
         
