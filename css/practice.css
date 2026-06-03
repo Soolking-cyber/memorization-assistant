@@ -162,6 +162,27 @@ input.letter-box:focus {
         flex-direction: column;
         gap: 16px;
         width: 100%;
+        flex: 1;
+        min-height: 0;
+    }
+    .practice-layout-map .flashcard-container {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    .practice-layout-map .flashcard {
+        margin-bottom: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    .practice-layout-map .card-face {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
     }
     .practice-layout-split .flashcard-container {
         height: 100%;
