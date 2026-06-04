@@ -423,7 +423,7 @@ let tooltipTimeout = null;
 
 export function initGlobalTooltips() {
     document.addEventListener('mouseover', (e) => {
-        const target = e.target.closest('[title], [data-tooltip]');
+        const target = e.target.closest('[title], [data-tooltip], button, .btn, .btn-icon, .nav-btn, input[type="submit"]');
         if (!target) return;
 
         // Convert title to data-tooltip to avoid default browser tooltips
@@ -435,7 +435,94 @@ export function initGlobalTooltips() {
             }
         }
 
-        const tooltipText = target.getAttribute('data-tooltip');
+        let tooltipText = target.getAttribute('data-tooltip');
+
+        // Dynamic fallback logic for buttons
+        if (!tooltipText || tooltipText.trim() === '') {
+            const isButton = target.tagName === 'BUTTON' || 
+                             target.classList.contains('btn') || 
+                             target.classList.contains('btn-icon') || 
+                             target.classList.contains('nav-btn') || 
+                             target.getAttribute('type') === 'submit';
+                             
+            if (isButton) {
+                let rawText = target.textContent || target.innerText || '';
+                
+                // Handle empty text / icon-only buttons
+                if (rawText.trim() === '') {
+                    const iconChild = target.querySelector('svg');
+                    if (iconChild && iconChild.getAttribute('title')) {
+                        rawText = iconChild.getAttribute('title');
+                    } else {
+                        const id = target.id || '';
+                        const className = target.className || '';
+                        if (id.includes('zoom-in')) {
+                            rawText = 'Zoom In';
+                        } else if (id.includes('zoom-out')) {
+                            rawText = 'Zoom Out';
+                        } else if (id.includes('zoom-reset')) {
+                            rawText = 'Reset Zoom';
+                        } else if (id.includes('close') || className.includes('close')) {
+                            rawText = 'Close View';
+                        } else if (id.includes('fullscreen')) {
+                            rawText = 'Toggle Fullscreen';
+                        } else if (id.includes('grid')) {
+                            rawText = 'Toggle Grid Snapping';
+                        } else if (className.includes('edit-btn')) {
+                            rawText = 'Edit Card';
+                        } else if (className.includes('delete-btn')) {
+                            rawText = 'Delete Card';
+                        } else if (id === 'btn-theme-toggle') {
+                            rawText = 'Toggle Theme';
+                        } else if (id === 'btn-sound-toggle') {
+                            rawText = 'Toggle Sound';
+                        }
+                    }
+                }
+                
+                let cleanText = rawText.replace(/\s+/g, ' ').trim();
+                
+                // Map specific IDs to detailed tooltips
+                const id = target.id || '';
+                if (id === 'btn-theme-toggle') {
+                    cleanText = 'Toggle Theme (Light / Dark)';
+                } else if (id === 'btn-sound-toggle') {
+                    cleanText = 'Toggle Sound Effects';
+                } else if (id === 'btn-open-settings') {
+                    cleanText = 'Open Profile Settings';
+                } else if (id === 'btn-logout') {
+                    cleanText = 'Sign Out of Account';
+                } else if (id === 'btn-google-login') {
+                    cleanText = 'Sign in with Google Account';
+                } else if (id === 'btn-practice') {
+                    cleanText = 'Start Active Recall Spaced Repetition Practice';
+                } else if (id === 'btn-create-add-sentence' || id === 'btn-edit-add-sentence') {
+                    cleanText = 'Add Sentence Clue to Draft';
+                } else if (id === 'btn-submit-answer') {
+                    cleanText = 'Submit Answer (Enter)';
+                } else if (id === 'btn-next-card') {
+                    cleanText = 'Next Memory (Enter)';
+                } else if (id === 'btn-finish-practice') {
+                    cleanText = 'Return to Dashboard';
+                } else if (id === 'btn-save-sentence') {
+                    cleanText = 'Save Sentence Clue to Database';
+                } else if (id === 'btn-delete-selected') {
+                    cleanText = 'Delete Selected Memory Cards';
+                } else if (id === 'btn-back-to-stacks') {
+                    cleanText = 'Return to Decks Overview';
+                } else if (id === 'btn-create-map-add-node-bar' || id === 'btn-edit-map-add-node-bar') {
+                    cleanText = 'Add Card Node to Mind Map';
+                } else if (id === 'btn-create-map-clear-bar' || id === 'btn-edit-map-clear-bar') {
+                    cleanText = 'Clear Map Canvas';
+                }
+                
+                if (cleanText) {
+                    target.setAttribute('data-tooltip', cleanText);
+                    tooltipText = cleanText;
+                }
+            }
+        }
+
         if (!tooltipText || tooltipText.trim() === '') return;
 
         if (tooltipTimeout) clearTimeout(tooltipTimeout);
