@@ -417,3 +417,81 @@ document.addEventListener('click', (e) => {
         document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.remove('open'));
     }
 });
+
+let tooltipEl = null;
+let tooltipTimeout = null;
+
+export function initGlobalTooltips() {
+    document.addEventListener('mouseover', (e) => {
+        const target = e.target.closest('[title], [data-tooltip]');
+        if (!target) return;
+
+        // Convert title to data-tooltip to avoid default browser tooltips
+        if (target.hasAttribute('title')) {
+            const titleVal = target.getAttribute('title');
+            if (titleVal && titleVal.trim() !== '') {
+                target.setAttribute('data-tooltip', titleVal);
+                target.removeAttribute('title');
+            }
+        }
+
+        const tooltipText = target.getAttribute('data-tooltip');
+        if (!tooltipText || tooltipText.trim() === '') return;
+
+        if (tooltipTimeout) clearTimeout(tooltipTimeout);
+
+        tooltipTimeout = setTimeout(() => {
+            showTooltip(target, tooltipText);
+        }, 350);
+    });
+
+    document.addEventListener('mouseout', (e) => {
+        const target = e.target.closest('[data-tooltip]');
+        if (target) {
+            hideTooltip();
+        }
+    });
+
+    document.addEventListener('click', () => {
+        hideTooltip();
+    });
+}
+
+function showTooltip(target, text) {
+    if (!tooltipEl) {
+        tooltipEl = document.createElement('div');
+        tooltipEl.className = 'custom-tooltip';
+        document.body.appendChild(tooltipEl);
+    }
+
+    tooltipEl.textContent = text;
+    tooltipEl.classList.add('visible');
+
+    const targetRect = target.getBoundingClientRect();
+    const tooltipRect = tooltipEl.getBoundingClientRect();
+
+    let top = targetRect.top - tooltipRect.height - 8;
+    let left = targetRect.left + (targetRect.width - tooltipRect.width) / 2;
+
+    if (top < 8) {
+        top = targetRect.bottom + 8;
+    }
+    if (left < 8) left = 8;
+    if (left + tooltipRect.width > window.innerWidth - 8) {
+        left = window.innerWidth - tooltipRect.width - 8;
+    }
+
+    tooltipEl.style.top = `${top + window.scrollY}px`;
+    tooltipEl.style.left = `${left + window.scrollX}px`;
+}
+
+function hideTooltip() {
+    if (tooltipTimeout) {
+        clearTimeout(tooltipTimeout);
+        tooltipTimeout = null;
+    }
+    if (tooltipEl) {
+        tooltipEl.classList.remove('visible');
+    }
+}
+

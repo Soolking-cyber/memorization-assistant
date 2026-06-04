@@ -37,7 +37,7 @@ import {
     initMapCanvasListeners,
     renderEditorNodes
 } from './modules/canvas.js';
-import { toggleFullscreen, buildCustomDropdownUI } from './modules/uiHelpers.js';
+import { toggleFullscreen, buildCustomDropdownUI, initGlobalTooltips } from './modules/uiHelpers.js';
 
 // Bind necessary functions to window for DOM/inline event listeners
 window.switchView = switchView;
@@ -151,6 +151,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initNavigation();
     initProfileMenu();
     initSyncListeners();
+    initGlobalTooltips();
     
     // Initialize custom dropdowns for word types
     buildCustomDropdownUI('vocab-word-types');

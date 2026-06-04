@@ -3,6 +3,7 @@ import { supabase } from './supabaseClient.js';
 import { ICONS } from './icons.js';
 import { dbSet } from './db.js';
 import { getSelectedTypes } from './dashboard.js';
+import { validateExampleSentence } from './practice.js';
 
 import {
     handleCreateAddSentence,
@@ -129,8 +130,8 @@ export function renderManageView() {
                 <div class="manage-sentences-list" style="margin-top: 12px; display: flex; flex-direction: column; gap: 6px;">
                     <strong style="font-size: 0.8rem; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px;">Saved Clues:</strong>
                     ${sentencesArray.map((s, idx) => `
-                        <div class="manage-sentence-item" style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 8px; font-size: 0.85rem;">
-                            <span style="flex: 1; margin-right: 8px; line-height: 1.4;">${s}</span>
+                        <div class="manage-sentence-item" data-card-id="${card.id}" data-index="${idx}" data-tooltip="Double-click to edit clue" style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 8px; font-size: 0.85rem;">
+                            <span class="manage-sentence-text" style="flex: 1; margin-right: 8px; line-height: 1.4;">${s}</span>
                             <button type="button" class="delete-sentence-bank-btn" data-card-id="${card.id}" data-index="${idx}" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:0 4px; display:inline-flex; align-items:center;" title="Delete Clue">${ICONS.trash}</button>
                         </div>
                     `).join('')}
@@ -258,6 +259,85 @@ export function renderManageView() {
         });
     });
 
+    document.querySelectorAll('.manage-sentence-item').forEach(item => {
+        item.addEventListener('dblclick', (e) => {
+            if (e.target.closest('button')) return; // ignore delete button click
+            
+            const textSpan = item.querySelector('.manage-sentence-text');
+            if (!textSpan || item.classList.contains('editing')) return;
+            
+            item.classList.add('editing');
+            const originalText = textSpan.textContent.trim();
+            const cardId = item.dataset.cardId;
+            const index = parseInt(item.dataset.index);
+            const card = state.cards.find(c => c.id === cardId);
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'input-field edit-sentence-inline-input';
+            input.value = originalText;
+            input.style.flex = '1';
+            input.style.fontSize = '0.85rem';
+            input.style.padding = '4px 8px';
+            input.style.background = 'var(--bg-card)';
+            input.style.border = '1px solid var(--accent)';
+            input.style.borderRadius = '6px';
+            input.style.color = 'var(--text-primary)';
+            
+            const deleteBtn = item.querySelector('.delete-sentence-bank-btn');
+            if (deleteBtn) deleteBtn.style.display = 'none';
+            
+            textSpan.replaceWith(input);
+            input.focus();
+            input.select();
+            
+            let finished = false;
+            const saveEdit = async () => {
+                if (finished) return;
+                finished = true;
+                
+                const newText = input.value.trim();
+                if (newText === originalText || newText === '') {
+                    cancelEdit();
+                    return;
+                }
+                
+                if (card && !validateExampleSentence(newText, card.back)) {
+                    input.style.borderColor = '#ef4444';
+                    await window.alert(`Clue sentence must contain the target recall word "${card.back}"!`);
+                    finished = false;
+                    input.focus();
+                    return;
+                }
+                
+                input.disabled = true;
+                await updateExampleSentence(cardId, index, newText);
+            };
+            
+            const cancelEdit = () => {
+                input.replaceWith(textSpan);
+                if (deleteBtn) deleteBtn.style.display = '';
+                item.classList.remove('editing');
+            };
+            
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    saveEdit();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    cancelEdit();
+                }
+            });
+            
+            input.addEventListener('blur', () => {
+                setTimeout(() => {
+                    if (!finished) saveEdit();
+                }, 100);
+            });
+        });
+    });
+
     const cardBoxes = document.querySelectorAll('.card-checkbox');
     cardBoxes.forEach(cb => {
         cb.addEventListener('change', () => {
@@ -286,3 +366,38 @@ export function renderManageView() {
 }
 
 window.renderManageView = renderManageView;
+
+async function updateExampleSentence(cardId, index, newText) {
+    const savedSentences = state.exampleSentences[cardId];
+    let sentencesArray = [];
+    if (Array.isArray(savedSentences)) {
+        sentencesArray = [...savedSentences];
+    } else if (typeof savedSentences === 'string') {
+        sentencesArray = [savedSentences];
+    }
+    
+    sentencesArray[index] = newText;
+    state.exampleSentences[cardId] = sentencesArray;
+    
+    await dbSet('exampleSentences', state.exampleSentences);
+    
+    const cardIndex = state.cards.findIndex(c => c.id === cardId);
+    if (cardIndex !== -1) {
+        state.cards[cardIndex].example_sentences = sentencesArray;
+    }
+    
+    if (state.userSession && supabase) {
+        try {
+            await supabase
+                .from('flashcards')
+                .update({ example_sentences: sentencesArray })
+                .eq('id', cardId)
+                .eq('user_id', state.userSession.user.id);
+        } catch (err) {
+            console.error('Error syncing example sentence edit:', err);
+        }
+    }
+    
+    renderManageView();
+}
+
