@@ -72,9 +72,9 @@ export function renderCurrentCard() {
     const spellingArea = document.getElementById('spelling-indicator-area');
 
     const rightImgContainer = document.getElementById('practice-right-image-container');
+    const rightImg = document.getElementById('practice-right-img');
     if (rightImgContainer) {
         rightImgContainer.classList.add('hidden');
-        const rightImg = document.getElementById('practice-right-img');
         if (rightImg) rightImg.src = '';
     }
 
@@ -447,8 +447,6 @@ export function renderCurrentCard() {
     
     const frontImg = document.getElementById('practice-front-img');
     const backImg = document.getElementById('practice-back-img');
-    const rightImgContainer = document.getElementById('practice-right-image-container');
-    const rightImg = document.getElementById('practice-right-img');
 
     const isVocab = card.type === 'Vocabulary';
     const imageUrl = card.image_front_url || card.image_back_url;
