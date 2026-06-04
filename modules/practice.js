@@ -407,10 +407,27 @@ export function renderCurrentCard() {
     const targetWord = card.back.trim();
     const isSingleWord = !targetWord.includes(' ') && targetWord.length > 0;
     
+    let cleanFront = card.front;
+    let wordTypes = [];
+    if (card.type === 'Vocabulary' && card.front.includes('|||')) {
+        const parts = card.front.split('|||');
+        cleanFront = parts[0].trim();
+        wordTypes = parts[1].split(',').map(t => t.trim()).filter(Boolean);
+    }
+    
     if (sentences.length > 0) {
         exerciseTitleEl.textContent = "Complete the sentences with the correct word";
         
-        const explanationHtml = card.front.replace(/\n/g, '<br>');
+        const explanationHtml = cleanFront.replace(/\n/g, '<br>');
+        
+        let wordTypesHtml = '';
+        if (wordTypes.length > 0) {
+            wordTypesHtml = `
+                <div class="practice-word-types" style="display: flex; gap: 6px; justify-content: center; margin-top: 6px; flex-wrap: wrap;">
+                    ${wordTypes.map(t => `<span class="word-type-badge">${t}</span>`).join('')}
+                </div>
+            `;
+        }
         
         let sentencesHtml = '<div class="practice-sentence-list" style="display: flex; flex-direction: column; gap: 20px; width: 100%; text-align: left; margin: 10px 0;">';
         let currentInputIndex = 0;
@@ -433,6 +450,7 @@ export function renderCurrentCard() {
             <div class="practice-prompt-container" style="display: flex; flex-direction: column; gap: 16px; width: 100%; justify-content: center; align-items: center; text-align: center; margin: auto 0;">
                 <div class="practice-explanation" style="font-size: 1.15rem; font-weight: 600; color: var(--text-secondary); max-width: 100%; line-height: 1.5; word-break: normal; overflow-wrap: break-word;">
                     ${explanationHtml}
+                    ${wordTypesHtml}
                 </div>
                 <div class="practice-divider" style="width: 60px; height: 2px; background: var(--bg-tertiary); margin: 4px 0;"></div>
                 ${sentencesHtml}
@@ -442,10 +460,21 @@ export function renderCurrentCard() {
     } else {
         exerciseTitleEl.textContent = "Question";
         
-        const explanationHtml = card.front.replace(/\n/g, '<br>');
+        const explanationHtml = cleanFront.replace(/\n/g, '<br>');
+        
+        let wordTypesHtml = '';
+        if (wordTypes.length > 0) {
+            wordTypesHtml = `
+                <div class="practice-word-types" style="display: flex; gap: 6px; justify-content: center; margin-top: 10px; flex-wrap: wrap;">
+                    ${wordTypes.map(t => `<span class="word-type-badge">${t}</span>`).join('')}
+                </div>
+            `;
+        }
+
         frontEl.innerHTML = `
             <div class="practice-explanation-only" style="font-size: 1.45rem; font-weight: 700; color: var(--text-primary); max-width: 100%; line-height: 1.5; word-break: normal; overflow-wrap: break-word; text-align: center; margin: auto 0;">
                 ${explanationHtml}
+                ${wordTypesHtml}
             </div>
         `;
         
@@ -457,7 +486,12 @@ export function renderCurrentCard() {
         }
     }
     
-    backEl.innerHTML = card.back.replace(/\n/g, '<br>');
+    let backHtml = card.back.replace(/\n/g, '<br>');
+    if (card.type === 'Vocabulary' && wordTypes.length > 0) {
+        const badgesHtml = wordTypes.map(t => `<span class="word-type-badge">${t}</span>`).join('');
+        backHtml += ` <div class="word-types-container" style="margin-top: 12px; display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;">${badgesHtml}</div>`;
+    }
+    backEl.innerHTML = backHtml;
     
     const frontImg = document.getElementById('practice-front-img');
     if (frontImg) {

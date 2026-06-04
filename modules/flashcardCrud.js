@@ -139,17 +139,30 @@ export function renderManageView() {
         }
 
         let displayFront = '';
-        if (card.front.startsWith('{"mode":"memory_map"')) {
+        let cleanFront = card.front;
+        let wordTypes = [];
+        if (card.type === 'Vocabulary' && card.front.includes('|||')) {
+            const parts = card.front.split('|||');
+            cleanFront = parts[0].trim();
+            wordTypes = parts[1].split(',').map(t => t.trim()).filter(Boolean);
+        }
+
+        if (cleanFront.startsWith('{"mode":"memory_map"')) {
             try {
-                const mapData = JSON.parse(card.front);
+                const mapData = JSON.parse(cleanFront);
                 displayFront = `<strong style="color:var(--accent);">[Memory Map]</strong> ${mapData.title} (${mapData.nodes.length} nodes, ${mapData.links.length} connections)`;
             } catch (e) {
-                displayFront = card.front;
+                displayFront = cleanFront;
             }
         } else if (card.type === 'Image Card') {
-            displayFront = `<strong style="color:var(--accent);">[Image Card]</strong> ${card.front.replace(/\n/g, '<br>')}`;
+            displayFront = `<strong style="color:var(--accent);">[Image Card]</strong> ${cleanFront.replace(/\n/g, '<br>')}`;
         } else {
-            displayFront = card.front.replace(/\n/g, '<br>');
+            displayFront = cleanFront.replace(/\n/g, '<br>');
+        }
+
+        if (wordTypes.length > 0) {
+            const badgesHtml = wordTypes.map(t => `<span class="word-type-badge">${t}</span>`).join('');
+            displayFront += ` <div class="word-types-container" style="margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap;">${badgesHtml}</div>`;
         }
 
         cardEl.innerHTML = `

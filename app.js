@@ -37,7 +37,7 @@ import {
     initMapCanvasListeners,
     renderEditorNodes
 } from './modules/canvas.js';
-import { toggleFullscreen } from './modules/uiHelpers.js';
+import { toggleFullscreen, buildCustomDropdownUI } from './modules/uiHelpers.js';
 
 // Bind necessary functions to window for DOM/inline event listeners
 window.switchView = switchView;
@@ -151,6 +151,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     initNavigation();
     initProfileMenu();
     initSyncListeners();
+    
+    // Initialize custom dropdowns for word types
+    buildCustomDropdownUI('vocab-word-types');
+    buildCustomDropdownUI('edit-vocab-word-types');
     
     // Auth events
     document.getElementById('btn-google-login').addEventListener('click', handleLogin);

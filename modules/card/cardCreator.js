@@ -30,6 +30,15 @@ export function updateFormLabelsAndPlaceholders(isEdit, type) {
         if (textareaBack) textareaBack.placeholder = "Mitochondria";
         if (sentencesGroup) sentencesGroup.classList.remove('hidden');
     }
+
+    const wordTypesGroup = document.getElementById(isEdit ? 'edit-word-types-group' : 'create-word-types-group');
+    if (wordTypesGroup) {
+        if (type === 'Vocabulary') {
+            wordTypesGroup.classList.remove('hidden');
+        } else {
+            wordTypesGroup.classList.add('hidden');
+        }
+    }
 }
 
 export async function handleCreateCard(e) {
@@ -63,6 +72,14 @@ export async function handleCreateCard(e) {
         frontText = document.getElementById('card-front').value.trim();
         backText = document.getElementById('card-back').value.trim();
         if (!frontText || !backText) return;
+
+        if (activeType === 'Vocabulary') {
+            const select = document.getElementById('vocab-word-types');
+            const wordTypes = select && select.selectedValues ? select.selectedValues : [];
+            if (wordTypes.length > 0) {
+                frontText = `${frontText} ||| ${wordTypes.join(', ')}`;
+            }
+        }
     }
 
     const btn = document.querySelector('#create-card-form button[type="submit"]');
@@ -140,6 +157,14 @@ export async function handleCreateCard(e) {
         buildCustomDropdownUI('card-type');
     }
     updateFormLabelsAndPlaceholders(false, 'mixed');
+
+    // Clear word types selection
+    const createWordTypesSelect = document.getElementById('vocab-word-types');
+    if (createWordTypesSelect) {
+        createWordTypesSelect.selectedValues = [];
+        [...createWordTypesSelect.options].forEach(o => o.selected = false);
+        buildCustomDropdownUI('vocab-word-types');
+    }
 
     // Clear standard text areas and file inputs
     const frontEl = document.getElementById('card-front');
@@ -266,8 +291,25 @@ export function openEditView(cardId) {
         
         updateFormLabelsAndPlaceholders(true, card.type);
         
-        document.getElementById('edit-card-front').value = card.front;
+        let cleanFront = card.front;
+        let wordTypes = [];
+        if (card.type === 'Vocabulary' && card.front.includes('|||')) {
+            const parts = card.front.split('|||');
+            cleanFront = parts[0].trim();
+            wordTypes = parts[1].split(',').map(t => t.trim()).filter(Boolean);
+        }
+        
+        document.getElementById('edit-card-front').value = cleanFront;
         document.getElementById('edit-card-back').value = card.back;
+        
+        const select = document.getElementById('edit-vocab-word-types');
+        if (select) {
+            select.selectedValues = [...wordTypes];
+            [...select.options].forEach(opt => {
+                opt.selected = wordTypes.includes(opt.value);
+            });
+            buildCustomDropdownUI('edit-vocab-word-types');
+        }
         
         const savedSentences = state.exampleSentences[card.id];
         if (Array.isArray(savedSentences)) {
@@ -321,6 +363,13 @@ export async function handleEditCardSubmit(e) {
     } else {
         frontText = document.getElementById('edit-card-front').value.trim();
         backText = document.getElementById('edit-card-back').value.trim();
+        if (typeText === 'Vocabulary') {
+            const select = document.getElementById('edit-vocab-word-types');
+            const wordTypes = select && select.selectedValues ? select.selectedValues : [];
+            if (wordTypes.length > 0) {
+                frontText = `${frontText} ||| ${wordTypes.join(', ')}`;
+            }
+        }
     }
     
     if (!frontText || !backText || !cardId) return;

@@ -205,7 +205,7 @@ export function buildCustomDropdownUI(selectId) {
     
     select.style.display = 'none';
     
-    const isMultiSelect = selectId === 'practice-type-select' || selectId === 'manage-type-select';
+    const isMultiSelect = selectId === 'practice-type-select' || selectId === 'manage-type-select' || selectId === 'vocab-word-types' || selectId === 'edit-vocab-word-types';
     
     let customWrapper = document.getElementById(`custom-dropdown-${selectId}`);
     if (!customWrapper) {
@@ -222,8 +222,12 @@ export function buildCustomDropdownUI(selectId) {
     }
     
     if (isMultiSelect && !select.selectedValues) {
-        const options = [...select.options].map(o => o.value).filter(v => v !== 'add_new');
-        select.selectedValues = options;
+        if (selectId === 'vocab-word-types' || selectId === 'edit-vocab-word-types') {
+            select.selectedValues = [];
+        } else {
+            const options = [...select.options].map(o => o.value).filter(v => v !== 'add_new');
+            select.selectedValues = options;
+        }
     }
     
     customWrapper.innerHTML = '';
@@ -236,17 +240,27 @@ export function buildCustomDropdownUI(selectId) {
     triggerText.className = 'custom-dropdown-text';
     
     if (isMultiSelect) {
-        const activeIndividualTypes = select.selectedValues.filter(v => v !== 'mixed');
-        const totalTypes = [...select.options].filter(o => o.value !== 'mixed' && o.value !== 'add_new').length;
-        
-        if (select.selectedValues.includes('mixed') || activeIndividualTypes.length === totalTypes) {
-            triggerText.textContent = 'All Types (Mixed)';
-        } else if (activeIndividualTypes.length === 0) {
-            triggerText.textContent = 'None Selected';
-        } else if (activeIndividualTypes.length <= 2) {
-            triggerText.textContent = activeIndividualTypes.join(', ');
+        if (selectId === 'vocab-word-types' || selectId === 'edit-vocab-word-types') {
+            if (select.selectedValues.length === 0) {
+                triggerText.textContent = 'Select Word Type(s)';
+            } else if (select.selectedValues.length <= 2) {
+                triggerText.textContent = select.selectedValues.join(', ');
+            } else {
+                triggerText.textContent = `${select.selectedValues.length} Types Selected`;
+            }
         } else {
-            triggerText.textContent = `${activeIndividualTypes.length} Types Selected`;
+            const activeIndividualTypes = select.selectedValues.filter(v => v !== 'mixed');
+            const totalTypes = [...select.options].filter(o => o.value !== 'mixed' && o.value !== 'add_new').length;
+            
+            if (select.selectedValues.includes('mixed') || activeIndividualTypes.length === totalTypes) {
+                triggerText.textContent = 'All Types (Mixed)';
+            } else if (activeIndividualTypes.length === 0) {
+                triggerText.textContent = 'None Selected';
+            } else if (activeIndividualTypes.length <= 2) {
+                triggerText.textContent = activeIndividualTypes.join(', ');
+            } else {
+                triggerText.textContent = `${activeIndividualTypes.length} Types Selected`;
+            }
         }
     } else {
         const activeOpt = [...select.options].find(o => o.value === select.value) || select.options[0];
@@ -299,40 +313,52 @@ export function buildCustomDropdownUI(selectId) {
                 e.stopPropagation();
                 playUISound('click');
                 
-                if (opt.value === 'mixed') {
-                    const wasChecked = select.selectedValues.includes('mixed');
-                    if (wasChecked) {
-                        select.selectedValues = [];
-                    } else {
-                        select.selectedValues = [...select.options]
-                            .map(o => o.value)
-                            .filter(v => v !== 'add_new');
-                    }
-                } else {
+                if (selectId === 'vocab-word-types' || selectId === 'edit-vocab-word-types') {
                     const isChecked = select.selectedValues.includes(opt.value);
                     if (isChecked) {
                         select.selectedValues = select.selectedValues.filter(v => v !== opt.value);
-                        select.selectedValues = select.selectedValues.filter(v => v !== 'mixed');
                     } else {
                         select.selectedValues.push(opt.value);
-                        
-                        const allIndividualTypes = [...select.options]
-                            .map(o => o.value)
-                            .filter(v => v !== 'mixed' && v !== 'add_new');
-                        
-                        const allChecked = allIndividualTypes.every(v => select.selectedValues.includes(v));
-                        if (allChecked) {
-                            select.selectedValues.push('mixed');
+                    }
+                    [...select.options].forEach(o => {
+                        o.selected = select.selectedValues.includes(o.value);
+                    });
+                } else {
+                    if (opt.value === 'mixed') {
+                        const wasChecked = select.selectedValues.includes('mixed');
+                        if (wasChecked) {
+                            select.selectedValues = [];
+                        } else {
+                            select.selectedValues = [...select.options]
+                                .map(o => o.value)
+                                .filter(v => v !== 'add_new');
+                        }
+                    } else {
+                        const isChecked = select.selectedValues.includes(opt.value);
+                        if (isChecked) {
+                            select.selectedValues = select.selectedValues.filter(v => v !== opt.value);
+                            select.selectedValues = select.selectedValues.filter(v => v !== 'mixed');
+                        } else {
+                            select.selectedValues.push(opt.value);
+                            
+                            const allIndividualTypes = [...select.options]
+                                .map(o => o.value)
+                                .filter(v => v !== 'mixed' && v !== 'add_new');
+                            
+                            const allChecked = allIndividualTypes.every(v => select.selectedValues.includes(v));
+                            if (allChecked) {
+                                select.selectedValues.push('mixed');
+                            }
                         }
                     }
-                }
-                
-                if (select.selectedValues.includes('mixed')) {
-                    select.value = 'mixed';
-                } else if (select.selectedValues.length > 0) {
-                    select.value = select.selectedValues[0];
-                } else {
-                    select.value = '';
+                    
+                    if (select.selectedValues.includes('mixed')) {
+                        select.value = 'mixed';
+                    } else if (select.selectedValues.length > 0) {
+                        select.value = select.selectedValues[0];
+                    } else {
+                        select.value = '';
+                    }
                 }
                 
                 select.dispatchEvent(new Event('change', { bubbles: true }));

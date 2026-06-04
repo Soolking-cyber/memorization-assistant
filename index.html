@@ -219,6 +219,20 @@
                                 <textarea id="card-back" placeholder="Mitochondria"></textarea>
                                 <input type="file" id="card-back-image" class="file-input" accept="image/*">
                             </div>
+                            <div id="create-word-types-group" class="input-group hidden">
+                                <label for="vocab-word-types">Word Type(s) (Optional)</label>
+                                <select id="vocab-word-types" multiple>
+                                    <option value="Noun">Noun</option>
+                                    <option value="Verb">Verb</option>
+                                    <option value="Adjective">Adjective</option>
+                                    <option value="Adverb">Adverb</option>
+                                    <option value="Pronoun">Pronoun</option>
+                                    <option value="Preposition">Preposition</option>
+                                    <option value="Conjunction">Conjunction</option>
+                                    <option value="Interjection">Interjection</option>
+                                    <option value="Phrase">Phrase</option>
+                                </select>
+                            </div>
                             <div id="create-vocab-sentences-group" class="input-group" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
                                 <label>Example Sentences (Vocabulary Memory Clues)</label>
                                 <div id="create-sentences-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
@@ -318,6 +332,20 @@
                                 </div>
                                 <input type="file" id="edit-card-back-image" class="file-input" accept="image/*">
                                 <small style="color: var(--text-secondary);">Select a new image to replace the current one.</small>
+                            </div>
+                            <div id="edit-word-types-group" class="input-group hidden">
+                                <label for="edit-vocab-word-types">Word Type(s) (Optional)</label>
+                                <select id="edit-vocab-word-types" multiple>
+                                    <option value="Noun">Noun</option>
+                                    <option value="Verb">Verb</option>
+                                    <option value="Adjective">Adjective</option>
+                                    <option value="Adverb">Adverb</option>
+                                    <option value="Pronoun">Pronoun</option>
+                                    <option value="Preposition">Preposition</option>
+                                    <option value="Conjunction">Conjunction</option>
+                                    <option value="Interjection">Interjection</option>
+                                    <option value="Phrase">Phrase</option>
+                                </select>
                             </div>
                             <div id="edit-vocab-sentences-group" class="input-group" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
                                 <label>Example Sentences (Vocabulary Memory Clues)</label>
