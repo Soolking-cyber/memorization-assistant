@@ -10,7 +10,7 @@ export function updateSyncIndicator(status, count = 0) {
 
     if (status === 'syncing') {
         syncInd.innerHTML = `
-            <svg class="spin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="animation: rotate-sync 1.5s linear infinite;">
+            <svg class="spin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" style="vertical-align: middle; margin-right: 4px;">
                 <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
             </svg>
             <span>Syncing...</span>
@@ -21,20 +21,24 @@ export function updateSyncIndicator(status, count = 0) {
         syncInd.style.display = 'inline-flex';
     } else if (status === 'pending') {
         syncInd.innerHTML = `
-            <span style="font-size: 0.95rem; line-height: 1; margin-right: 2px;">☁️</span>
-            <span>Unsynced Changes (${count})</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" style="vertical-align: middle; margin-right: 4px;">
+                <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+            </svg>
+            <span>Unsynced (${count})</span>
         `;
-        syncInd.style.borderColor = '#e67e22';
-        syncInd.style.color = '#e67e22';
+        syncInd.style.borderColor = 'var(--warning)';
+        syncInd.style.color = 'var(--warning)';
         syncInd.classList.remove('hidden');
         syncInd.style.display = 'inline-flex';
     } else if (status === 'synced') {
         syncInd.innerHTML = `
-            <span style="color: #2ecc71; font-size: 0.8rem; line-height: 1; margin-right: 2px;">●</span>
-            <span style="color: #2ecc71;">Cloud Saved</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" style="vertical-align: middle; margin-right: 4px;">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Cloud Saved</span>
         `;
-        syncInd.style.borderColor = '#2ecc71';
-        syncInd.style.color = '#2ecc71';
+        syncInd.style.borderColor = 'var(--success)';
+        syncInd.style.color = 'var(--success)';
         syncInd.classList.remove('hidden');
         syncInd.style.display = 'inline-flex';
         
@@ -47,11 +51,13 @@ export function updateSyncIndicator(status, count = 0) {
         }, 3000);
     } else if (status === 'offline') {
         syncInd.innerHTML = `
-            <span style="font-size: 0.9rem; line-height: 1; margin-right: 2px;">📡</span>
-            <span>Offline Mode</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" style="vertical-align: middle; margin-right: 4px;">
+                <path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.5M5 12.5a10.94 10.94 0 0 1 5.83-2.84M8.58 6.14A16.94 16.94 0 0 1 18 8.5M4.88 4.88A16.92 16.92 0 0 1 12 5M12 19h.01"></path>
+            </svg>
+            <span>Offline</span>
         `;
-        syncInd.style.borderColor = '#ea4335';
-        syncInd.style.color = '#ea4335';
+        syncInd.style.borderColor = 'var(--danger)';
+        syncInd.style.color = 'var(--danger)';
         syncInd.classList.remove('hidden');
         syncInd.style.display = 'inline-flex';
     } else {
