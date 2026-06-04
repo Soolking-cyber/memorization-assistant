@@ -142,7 +142,7 @@ export function initPracticeCanvasControls(mapData) {
     if (!mapData) return;
     
     setTimeout(() => {
-        const scrollContainer = document.getElementById('practice-map-canvas-container');
+        const scrollContainer = document.getElementById('practice-map-scroll-pane') || document.getElementById('practice-map-canvas-container');
         const viewport = document.getElementById('practice-map-viewport');
         if (scrollContainer && viewport && mapData.nodes && mapData.nodes.length > 0) {
             let minX = Infinity;

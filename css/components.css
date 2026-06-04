@@ -395,7 +395,7 @@
     font-weight: 500;
     max-width: 220px;
     text-align: center;
-    z-index: 1000;
+    z-index: 100000 !important;
     pointer-events: none;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
     animation: tooltip-fade-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;

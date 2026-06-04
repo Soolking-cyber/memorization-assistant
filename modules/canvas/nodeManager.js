@@ -15,7 +15,7 @@ export function showExplanationTooltip(nodeEl, text) {
     
     const tooltip = document.createElement('div');
     tooltip.className = 'node-explanation-tooltip';
-    tooltip.style = 'position: absolute; background: rgba(0,0,0,0.85); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; max-width: 220px; z-index: 1000; pointer-events: none; box-shadow: var(--shadow-sm); line-height: 1.3; font-family: inherit; word-break: break-word;';
+    tooltip.style = 'position: absolute; background: rgba(0,0,0,0.85); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; max-width: 220px; z-index: 100000 !important; pointer-events: none; box-shadow: var(--shadow-sm); line-height: 1.3; font-family: inherit; word-break: break-word;';
     tooltip.textContent = text;
     
     document.body.appendChild(tooltip);

@@ -184,30 +184,32 @@ export function renderCurrentCard() {
                 <span style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">${mapData ? mapData.title : 'Recall this Memory Map'}</span>
             </div>
             
-            <div id="practice-map-canvas-container" style="position: relative; width: 100%; background: transparent; border: none; overflow: auto; box-shadow: none; user-select: none; flex-grow: 1; z-index: 1;">
+            <div id="practice-map-canvas-container" style="position: relative; width: 100%; background: transparent; border: none; overflow: hidden; box-shadow: none; user-select: none; flex-grow: 1; z-index: 1;">
                 <button type="button" class="fullscreen-close-btn hidden" title="Exit Fullscreen">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
                 
-                <div id="practice-map-viewport" style="position: absolute; left: 0; top: 0; width: ${viewportWidth}px; height: ${viewportHeight}px; transform-origin: 0 0;">
-                    <div style="position: absolute; inset: 0; background-size: 20px 20px; background-image: radial-gradient(var(--border-color) 1px, transparent 0); opacity: 0.4; pointer-events: none;"></div>
-                    <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;" id="practice-map-svg">
-                        <defs>
-                            <marker id="practice-arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                                <polygon points="0 1.5, 5 3.5, 0 5.5" fill="currentColor" />
-                            </marker>
-                        </defs>
-                    </svg>
-                    <div id="practice-map-nodes-container" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2;"></div>
+                <div id="practice-map-scroll-pane" style="width: 100%; height: 100%; overflow: auto; position: relative;">
+                    <div id="practice-map-viewport" style="position: absolute; left: 0; top: 0; width: ${viewportWidth}px; height: ${viewportHeight}px; transform-origin: 0 0;">
+                        <div style="position: absolute; inset: 0; background-size: 20px 20px; background-image: radial-gradient(var(--border-color) 1px, transparent 0); opacity: 0.4; pointer-events: none;"></div>
+                        <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;" id="practice-map-svg">
+                            <defs>
+                                <marker id="practice-arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                                    <polygon points="0 1.5, 5 3.5, 0 5.5" fill="currentColor" />
+                                </marker>
+                            </defs>
+                        </svg>
+                        <div id="practice-map-nodes-container" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2;"></div>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="canvas-zoom-controls">
-                <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-out">−</button>
-                <span class="zoom-percent" id="practice-zoom-label">100%</span>
-                <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-in">+</button>
-                <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-reset" style="font-size: 0.65rem; margin-left: 2px;">R</button>
-                <button type="button" class="zoom-ctrl-btn" id="btn-practice-fullscreen" style="font-size: 0.65rem; margin-left: 2px;" title="Toggle Fullscreen">⛶</button>
+                
+                <div class="canvas-zoom-controls">
+                    <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-out">−</button>
+                    <span class="zoom-percent" id="practice-zoom-label">100%</span>
+                    <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-in">+</button>
+                    <button type="button" class="zoom-ctrl-btn" id="btn-practice-zoom-reset" style="font-size: 0.65rem; margin-left: 2px;">R</button>
+                    <button type="button" class="zoom-ctrl-btn" id="btn-practice-fullscreen" style="font-size: 0.65rem; margin-left: 2px;" title="Toggle Fullscreen">⛶</button>
+                </div>
             </div>
         `;
         

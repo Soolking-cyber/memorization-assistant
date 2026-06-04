@@ -40,7 +40,7 @@ export function showLinkToolbar(midX, midY, container, link, nodes, links, svgId
         scrollContainer = document.getElementById('create-map-canvas-container');
         zoom = state.createMapZoom;
     } else if (containerId === 'practice-map-nodes-container') {
-        scrollContainer = document.getElementById('practice-map-canvas-container');
+        scrollContainer = document.getElementById('practice-map-scroll-pane') || document.getElementById('practice-map-canvas-container');
         zoom = state.practiceMapZoom;
     }
     
@@ -366,7 +366,7 @@ export function showNodeToolbar(node, container, containerId, nodes, links, svgI
         scrollContainer = document.getElementById('create-map-canvas-container');
         zoom = state.createMapZoom;
     } else if (containerId === 'practice-map-nodes-container') {
-        scrollContainer = document.getElementById('practice-map-canvas-container');
+        scrollContainer = document.getElementById('practice-map-scroll-pane') || document.getElementById('practice-map-canvas-container');
         zoom = state.practiceMapZoom;
     }
     

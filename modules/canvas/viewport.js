@@ -42,7 +42,7 @@ export function setPracticeMapZoom(level) {
 
 export function adjustPracticeViewportCentering(viewportWidth, viewportHeight) {
     const viewport = document.getElementById('practice-map-viewport');
-    const scrollContainer = document.getElementById('practice-map-canvas-container');
+    const scrollContainer = document.getElementById('practice-map-scroll-pane') || document.getElementById('practice-map-canvas-container');
     if (!viewport || !scrollContainer) return;
     
     if (viewportWidth !== undefined && viewportHeight !== undefined) {
