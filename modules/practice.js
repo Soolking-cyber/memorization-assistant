@@ -29,52 +29,7 @@ import {
     saveIncorrectExampleSentence
 } from './practice/clueCollector.js';
 
-// Dynamic image stretch and aspect ratio shrink-wrap adjust helper
-window.adjustPracticeImage = (img) => {
-    if (!img) return;
-    const parent = img.parentElement; // .image-card-frame
-    if (!parent) return;
-    const container = parent.parentElement; // .practice-image-card-container
-    if (!container) return;
-    
-    const clueRow = container.querySelector('.image-card-clue-row');
-    const clueHeight = clueRow ? clueRow.offsetHeight : 0;
-    
-    const style = window.getComputedStyle(container);
-    const paddingTop = parseFloat(style.paddingTop) || 0;
-    const paddingBottom = parseFloat(style.paddingBottom) || 0;
-    const paddingLeft = parseFloat(style.paddingLeft) || 0;
-    const paddingRight = parseFloat(style.paddingRight) || 0;
-    const gap = 12; // gap: 12px
-    
-    const maxAvailableWidth = container.clientWidth - paddingLeft - paddingRight;
-    const maxAvailableHeight = container.clientHeight - paddingTop - paddingBottom - clueHeight - gap;
-    
-    if (maxAvailableWidth > 0 && maxAvailableHeight > 0 && img.naturalWidth > 0 && img.naturalHeight > 0) {
-        const aspect = img.naturalWidth / img.naturalHeight;
-        const availableAspect = maxAvailableWidth / maxAvailableHeight;
-        
-        if (aspect > availableAspect) {
-            // Landscape dominated: stretch to full width, scale height
-            parent.style.width = `${maxAvailableWidth}px`;
-            parent.style.height = `${maxAvailableWidth / aspect}px`;
-        } else {
-            // Portrait dominated: stretch to full height, scale width
-            parent.style.height = `${maxAvailableHeight}px`;
-            parent.style.width = `${maxAvailableHeight * aspect}px`;
-        }
-    } else {
-        parent.style.width = '100%';
-        parent.style.height = '100%';
-    }
-};
 
-window.addEventListener('resize', () => {
-    const practiceImg = document.querySelector('.image-card-frame img');
-    if (practiceImg) {
-        window.adjustPracticeImage(practiceImg);
-    }
-});
 
 import {
     startForcedPractice,
@@ -335,20 +290,10 @@ export function renderCurrentCard() {
                     </div>
                 </div>
                 <div class="image-card-frame">
-                    <img src="${card.image_front_url || card.image_back_url}" alt="Memory step image" onload="window.adjustPracticeImage(this)" />
+                    <img src="${card.image_front_url || card.image_back_url}" alt="Memory step image" />
                 </div>
             </div>
         `;
-
-        // Force-trigger image adjustment helper after render to handle caching
-        const imgEl = frontEl.querySelector('.image-card-frame img');
-        if (imgEl) {
-            if (imgEl.complete) {
-                window.adjustPracticeImage(imgEl);
-            } else {
-                imgEl.addEventListener('load', () => window.adjustPracticeImage(imgEl));
-            }
-        }
         
         backEl.innerHTML = `<strong style="color:var(--accent);">Target sequence:</strong> ${card.back}`;
         
