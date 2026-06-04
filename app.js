@@ -209,8 +209,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    document.getElementById('card-type').addEventListener('change', handleTypeSelectChange);
-    document.getElementById('edit-card-type').addEventListener('change', handleTypeSelectChange);
+    const validateExistingImagesForType = (isEdit) => {
+        const cardTypeSelectId = isEdit ? 'edit-card-type' : 'card-type';
+        const cardTypeSelect = document.getElementById(cardTypeSelectId);
+        const cardType = cardTypeSelect ? cardTypeSelect.value : 'mixed';
+        
+        const limit = (cardType === 'Image Card') ? 1024 * 1024 : 500 * 1024;
+        const limitLabel = (cardType === 'Image Card') ? '1 MB' : '500 KB';
+
+        const frontInputId = isEdit ? 'edit-card-front-image' : 'card-front-image';
+        const backInputId = isEdit ? 'edit-card-back-image' : 'card-back-image';
+
+        [frontInputId, backInputId].forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.files && el.files[0]) {
+                const file = el.files[0];
+                if (file.size > limit) {
+                    window.alert(`Existing upload cleared: ${id.includes('front') ? 'Front' : 'Back'} image exceeds the new ${limitLabel} size limit for ${cardType} cards.\nSelected file: ${(file.size / 1024).toFixed(1)} KB.`);
+                    el.value = ''; // clear input selection
+                }
+            }
+        });
+    };
+
+    document.getElementById('card-type').addEventListener('change', (e) => {
+        handleTypeSelectChange(e);
+        validateExistingImagesForType(false);
+    });
+    document.getElementById('edit-card-type').addEventListener('change', (e) => {
+        handleTypeSelectChange(e);
+        validateExistingImagesForType(true);
+    });
     document.getElementById('practice-type-select').addEventListener('change', updateDashboard);
     
     const manageSelect = document.getElementById('manage-type-select');
