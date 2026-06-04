@@ -71,6 +71,13 @@ export function renderCurrentCard() {
     const backEl = document.getElementById('practice-back');
     const spellingArea = document.getElementById('spelling-indicator-area');
 
+    const rightImgContainer = document.getElementById('practice-right-image-container');
+    if (rightImgContainer) {
+        rightImgContainer.classList.add('hidden');
+        const rightImg = document.getElementById('practice-right-img');
+        if (rightImg) rightImg.src = '';
+    }
+
     document.getElementById('practice-input').classList.remove('hidden');
     document.getElementById('practice-input').value = '';
     document.getElementById('btn-submit-answer').classList.remove('hidden');
@@ -439,23 +446,51 @@ export function renderCurrentCard() {
     backEl.innerHTML = backHtml;
     
     const frontImg = document.getElementById('practice-front-img');
-    if (frontImg) {
-        if (card.image_front_url) {
-            frontImg.src = card.image_front_url;
-            frontImg.classList.remove('hidden');
-        } else {
+    const backImg = document.getElementById('practice-back-img');
+    const rightImgContainer = document.getElementById('practice-right-image-container');
+    const rightImg = document.getElementById('practice-right-img');
+
+    const isVocab = card.type === 'Vocabulary';
+    const imageUrl = card.image_front_url || card.image_back_url;
+
+    if (isVocab && imageUrl) {
+        if (frontImg) {
             frontImg.src = '';
             frontImg.classList.add('hidden');
         }
-    }
-    const backImg = document.getElementById('practice-back-img');
-    if (backImg) {
-        if (card.image_back_url) {
-            backImg.src = card.image_back_url;
-            backImg.classList.remove('hidden');
-        } else {
+        if (backImg) {
             backImg.src = '';
             backImg.classList.add('hidden');
+        }
+        if (rightImgContainer && rightImg) {
+            rightImg.src = imageUrl;
+            rightImgContainer.classList.remove('hidden');
+        }
+    } else {
+        if (rightImgContainer) {
+            rightImgContainer.classList.add('hidden');
+        }
+        if (rightImg) {
+            rightImg.src = '';
+        }
+
+        if (frontImg) {
+            if (card.image_front_url) {
+                frontImg.src = card.image_front_url;
+                frontImg.classList.remove('hidden');
+            } else {
+                frontImg.src = '';
+                frontImg.classList.add('hidden');
+            }
+        }
+        if (backImg) {
+            if (card.image_back_url) {
+                backImg.src = card.image_back_url;
+                backImg.classList.remove('hidden');
+            } else {
+                backImg.src = '';
+                backImg.classList.add('hidden');
+            }
         }
     }
     
