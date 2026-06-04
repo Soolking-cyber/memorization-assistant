@@ -431,6 +431,7 @@ input.letter-box:focus {
     padding: 6px 10px !important;
     border-radius: 24px !important;
     gap: 6px !important;
+    z-index: 10000 !important;
 }
 
 .canvas-zoom-controls .zoom-ctrl-btn {
