@@ -226,6 +226,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Image Upload Size Filter & Verification
+    const validateImageSizeOnChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const isEdit = e.target.id.startsWith('edit-');
+        const cardTypeSelectId = isEdit ? 'edit-card-type' : 'card-type';
+        const cardTypeSelect = document.getElementById(cardTypeSelectId);
+        const cardType = cardTypeSelect ? cardTypeSelect.value : 'mixed';
+        
+        const limit = (cardType === 'Image Card') ? 1024 * 1024 : 500 * 1024;
+        const limitLabel = (cardType === 'Image Card') ? '1 MB' : '500 KB';
+        
+        if (file.size > limit) {
+            window.alert(`Upload failed: Image exceeds ${limitLabel} size limit for ${cardType} cards.\nSelected file: ${(file.size / 1024).toFixed(1)} KB.`);
+            e.target.value = ''; // clear input selection
+        }
+    };
+
+    ['card-front-image', 'card-back-image', 'edit-card-front-image', 'edit-card-back-image'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', validateImageSizeOnChange);
+    });
+
     initSpellingInputListeners();
 
     document.getElementById('btn-save-sentence').addEventListener('click', saveIncorrectExampleSentence);

@@ -108,6 +108,18 @@ export async function handleCreateCard(e) {
     const frontImageFile = document.getElementById('card-front-image').files[0];
     const backImageFile = document.getElementById('card-back-image').files[0];
 
+    const createLimit = (activeType === 'Image Card') ? 1024 * 1024 : 500 * 1024;
+    const createLimitLabel = (activeType === 'Image Card') ? '1 MB' : '500 KB';
+
+    if (frontImageFile && frontImageFile.size > createLimit) {
+        await window.alert(`Front image exceeds ${createLimitLabel} limit for ${activeType} cards! Selected file: ${(frontImageFile.size / 1024).toFixed(1)} KB.`);
+        return;
+    }
+    if (backImageFile && backImageFile.size > createLimit) {
+        await window.alert(`Back image exceeds ${createLimitLabel} limit for ${activeType} cards! Selected file: ${(backImageFile.size / 1024).toFixed(1)} KB.`);
+        return;
+    }
+
     if (frontImageFile) image_front_url = await uploadImage(frontImageFile, 'front');
     if (backImageFile) image_back_url = await uploadImage(backImageFile, 'back');
 
@@ -385,6 +397,22 @@ export async function handleEditCardSubmit(e) {
 
     const frontImageFile = document.getElementById('edit-card-front-image') ? document.getElementById('edit-card-front-image').files[0] : null;
     const backImageFile = document.getElementById('edit-card-back-image') ? document.getElementById('edit-card-back-image').files[0] : null;
+
+    const editLimit = (typeText === 'Image Card') ? 1024 * 1024 : 500 * 1024;
+    const editLimitLabel = (typeText === 'Image Card') ? '1 MB' : '500 KB';
+
+    if (frontImageFile && frontImageFile.size > editLimit) {
+        await window.alert(`Front image exceeds ${editLimitLabel} limit for ${typeText} cards! Selected file: ${(frontImageFile.size / 1024).toFixed(1)} KB.`);
+        btn.textContent = oldText;
+        btn.disabled = false;
+        return;
+    }
+    if (backImageFile && backImageFile.size > editLimit) {
+        await window.alert(`Back image exceeds ${editLimitLabel} limit for ${typeText} cards! Selected file: ${(backImageFile.size / 1024).toFixed(1)} KB.`);
+        btn.textContent = oldText;
+        btn.disabled = false;
+        return;
+    }
 
     let new_image_front_url = existingCard.image_front_url;
     let new_image_back_url = existingCard.image_back_url;
