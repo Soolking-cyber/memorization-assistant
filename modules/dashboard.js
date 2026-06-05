@@ -64,6 +64,10 @@ export function updateTypeDatalists() {
     const populateSelect = (selectId, addMixed = false) => {
         const select = document.getElementById(selectId);
         if (!select) return;
+        
+        // Reset selectedValues since options are being repopulated
+        select.selectedValues = null;
+        
         const currentVal = select.value;
         select.innerHTML = '';
         
