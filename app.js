@@ -1,23 +1,23 @@
-import { state } from './modules/state.js?v=10';
-import { supabase } from './modules/supabaseClient.js?v=10';
-import { playUISound, initSoundSystem } from './modules/sound.js?v=10';
-import { dbGet } from './modules/db.js?v=10';
-import { parseNextReview } from './modules/card/syncEngine.js?v=10';
-import { initSyncListeners } from './modules/syncQueue.js?v=10';
+import { state } from './modules/state.js';
+import { supabase } from './modules/supabaseClient.js';
+import { playUISound, initSoundSystem } from './modules/sound.js';
+import { dbGet } from './modules/db.js';
+import { parseNextReview } from './modules/card/syncEngine.js';
+import { initSyncListeners } from './modules/syncQueue.js';
 import {
     initThemeSystem,
     initNavigation,
     switchView,
     updateUserAvatarBadge,
     initProfileMenu
-} from './modules/navigation.js?v=10';
+} from './modules/navigation.js';
 import {
     loadData,
     handleCreateCard,
     handleEditCardSubmit,
     handleCreateAddSentence,
     handleEditAddSentence
-} from './modules/flashcardCrud.js?v=10';
+} from './modules/flashcardCrud.js';
 import {
     startPractice,
     startForcedPractice,
@@ -25,19 +25,19 @@ import {
     proceedToNextCard,
     saveIncorrectExampleSentence,
     initSpellingInputListeners
-} from './modules/practice.js?v=10';
+} from './modules/practice.js';
 import {
     updateDashboard,
     handleTypeSelectChange
-} from './modules/dashboard.js?v=10';
+} from './modules/dashboard.js';
 import {
     setCreateMapZoom,
     setEditMapZoom,
     toggleGridSnapping,
     initMapCanvasListeners,
     renderEditorNodes
-} from './modules/canvas.js?v=10';
-import { toggleFullscreen, buildCustomDropdownUI, initGlobalTooltips } from './modules/uiHelpers.js?v=10';
+} from './modules/canvas.js';
+import { toggleFullscreen, buildCustomDropdownUI, initGlobalTooltips } from './modules/uiHelpers.js';
 
 // Bind necessary functions to window for DOM/inline event listeners
 window.switchView = switchView;
