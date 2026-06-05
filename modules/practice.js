@@ -440,11 +440,21 @@ export function renderCurrentCard() {
         }
     }
     
-    let backHtml = card.back.replace(/\n/g, '<br>');
+    let backHtml = `
+        <div class="practice-answer-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 100%; text-align: center;">
+            <div class="practice-answer-word" style="font-size: 1.8rem; font-weight: 700; color: var(--text-primary); line-height: 1.2;">
+                ${card.back.replace(/\n/g, '<br>')}
+            </div>
+    `;
     if (card.type === 'Vocabulary' && wordTypes.length > 0) {
         const badgesHtml = wordTypes.map(t => `<span class="word-type-badge">${t}</span>`).join('');
-        backHtml += ` <div class="word-types-container" style="margin-top: 12px; display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;">${badgesHtml}</div>`;
+        backHtml += `
+            <div class="word-types-container" style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 2px;">
+                ${badgesHtml}
+            </div>
+        `;
     }
+    backHtml += `</div>`;
     backEl.innerHTML = backHtml;
     
     const frontImg = document.getElementById('practice-front-img');
