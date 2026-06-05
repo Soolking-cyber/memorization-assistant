@@ -441,15 +441,15 @@ export function renderCurrentCard() {
     }
     
     let backHtml = `
-        <div class="practice-answer-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 100%; text-align: center;">
-            <div class="practice-answer-word" style="font-size: 1.8rem; font-weight: 700; color: var(--text-primary); line-height: 1.2;">
+        <div class="practice-answer-container">
+            <div class="practice-answer-word">
                 ${card.back.replace(/\n/g, '<br>')}
             </div>
     `;
     if (card.type === 'Vocabulary' && wordTypes.length > 0) {
         const badgesHtml = wordTypes.map(t => `<span class="word-type-badge">${t}</span>`).join('');
         backHtml += `
-            <div class="word-types-container" style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 2px;">
+            <div class="word-types-container">
                 ${badgesHtml}
             </div>
         `;
