@@ -26,6 +26,7 @@ import {
     saveIncorrectExampleSentence,
     initSpellingInputListeners
 } from './modules/practice.js';
+import { handleScrambleKeydown } from './modules/practice/scrambleGame.js';
 import {
     updateDashboard,
     handleTypeSelectChange
@@ -170,6 +171,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('btn-submit-answer').addEventListener('click', evaluateAnswer);
     document.getElementById('btn-next-card').addEventListener('click', proceedToNextCard);
     document.getElementById('btn-finish-practice').addEventListener('click', () => switchView('dashboard'));
+
+    // Keyboard handler for Word Scramble game
+    document.addEventListener('keydown', (e) => {
+        const viewScramble = document.getElementById('view-scramble');
+        if (viewScramble && !viewScramble.classList.contains('hidden')) {
+            handleScrambleKeydown(e);
+        }
+    });
 
     // Global Enter key handler for Practice Mode
     document.addEventListener('keydown', (e) => {

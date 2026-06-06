@@ -7,6 +7,7 @@ import { updateDashboard, handleTypeSelectChange } from './dashboard.js';
 import { renderStatistics } from './stats.js';
 import { renderCollectionDeck } from './gamification.js';
 import { buildCustomDropdownUI } from './uiHelpers.js';
+import { initScrambleView, resetScrambleGame } from './practice/scrambleGame.js';
 
 
 export function initThemeSystem() {
@@ -63,6 +64,9 @@ export async function switchView(viewId) {
         clearInterval(state.recallTimerInterval);
         state.recallTimerInterval = null;
     }
+
+    // Reset active Scramble Game timers & states
+    resetScrambleGame();
 
     const fullscreens = document.querySelectorAll('.canvas-container-fullscreen');
     fullscreens.forEach(el => {
@@ -147,6 +151,8 @@ export async function switchView(viewId) {
         await renderStatistics();
     } else if (viewId === 'collection') {
         await renderCollectionDeck();
+    } else if (viewId === 'scramble') {
+        await initScrambleView();
     }
     if (viewId === 'create') {
         state.draftCreateSentences = [];
