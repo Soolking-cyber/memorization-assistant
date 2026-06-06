@@ -506,6 +506,7 @@ export function initProfileMenu() {
                     card.repetitions = 0;
                     card.interval = 1;
                     card.ease = 2.5;
+                    card.score = 48;
                     card.nextReview = Date.now();
                     updateCardInDB(card);
                 });

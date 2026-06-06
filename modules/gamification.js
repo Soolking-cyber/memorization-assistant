@@ -309,7 +309,8 @@ function renderActiveStackCard() {
         
         const scorePercent = stats.score;
         
-        container.innerHTML = `
+                const easeVal = (card.ease !== undefined && card.ease !== null ? card.ease : (1.3 + (scorePercent/100)*2.5)).toFixed(2);
+                container.innerHTML = `
             <div class="study-pokemon-card study-pokemon-card-layout ${stats.tier.class} card-slide-in">
                 <div class="card-header">
                     <div class="card-title-area">
@@ -322,7 +323,7 @@ function renderActiveStackCard() {
                     ${illustrationContent}
                 </div>
                 
-                <div class="card-hp-section" data-tooltip="Memory Strength: ${scorePercent}%\nDetermines next review: (Score/17)^2.5 days\n• Easy: +40% gap (min +10)\n• Good: +25% gap (min +8)\n• Hard: -15% score (min -5)\n• Again/Timeout: -35% score (min -10)\n• Category tuning adjusts interval: 1.15x (success rate ≥90%) or 0.80x (success rate ≤80%)" style="cursor: help;">
+                <div class="card-hp-section" data-tooltip="Memory Strength: ${scorePercent}% (Ease: ${easeVal}x)\nSuperMemo-2 Spaced Repetition:\n• Easy: +0.10 Ease (+4% Strength; 1st: 4d, 2nd: 8d)\n• Good: +0.00 Ease (0% Strength change; 1st: 1d, 2nd: 6d)\n• Hard: -0.14 Ease (-6% Strength; 1st: 1d, 2nd: 6d)\n• Again/Timeout: -0.80 Ease (-32% Strength) & resets interval\n• Subsequent correct intervals multiply by final Ease\n• Category tuning: 1.15x interval (success rate ≥90%) or 0.80x (success rate ≤80%)" style="cursor: help;">
                     <div class="card-hp-label">
                         <span>Memory Strength</span>
                         <span class="hp-val">${scorePercent}%</span>

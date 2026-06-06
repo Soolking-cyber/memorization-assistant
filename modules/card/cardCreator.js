@@ -144,7 +144,7 @@ export async function handleCreateCard(e) {
         ease: 2.5,
         interval: 0,
         repetitions: 0,
-        score: 50,
+        score: 48,
         example_sentences: activeType !== 'Memory Map' ? [...state.draftCreateSentences] : []
     };
 
