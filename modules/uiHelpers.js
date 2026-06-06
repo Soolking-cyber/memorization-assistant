@@ -525,6 +525,12 @@ export function initGlobalTooltips() {
 
         if (!tooltipText || tooltipText.trim() === '') return;
 
+        // Skip repeating/redundant tooltips where tooltip matches visible text
+        const visibleText = (target.textContent || target.innerText || '').replace(/\s+/g, ' ').trim().toLowerCase();
+        if (visibleText && tooltipText.trim().toLowerCase() === visibleText) {
+            return;
+        }
+
         if (tooltipTimeout) clearTimeout(tooltipTimeout);
 
         tooltipTimeout = setTimeout(() => {
