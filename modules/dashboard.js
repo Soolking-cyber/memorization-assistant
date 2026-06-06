@@ -139,6 +139,13 @@ export function updateDashboard() {
     const dueCards = filteredCards.filter(c => c.nextReview <= now);
 
     if (totalElement) totalElement.textContent = state.cards.length;
+    
+    const scoreElement = document.getElementById('stat-score');
+    if (scoreElement) {
+        const totalScore = state.cards.reduce((acc, curr) => acc + (curr.score !== undefined && curr.score !== null ? curr.score : 50), 0);
+        scoreElement.textContent = totalScore;
+    }
+
     if (dueElement) {
         dueElement.textContent = dueCards.length;
         const duePill = dueElement.closest('.stat-pill');

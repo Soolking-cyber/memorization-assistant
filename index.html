@@ -179,6 +179,11 @@
                         <span class="pill-label">Total Memories:</span>
                         <span id="stat-total" class="pill-value">0</span>
                     </div>
+                    <div class="stat-pill" data-tooltip="Total Memory Score
+Sum of all cards' memory strength scores (max 100 per card).">
+                        <span class="pill-label">Total Score:</span>
+                        <span id="stat-score" class="pill-value" style="color: var(--accent);">0</span>
+                    </div>
                     <div class="stat-pill">
                         <span class="pill-label">Due Today:</span>
                         <span id="stat-due" class="pill-value highlight">0</span>
@@ -467,7 +472,7 @@
                             
                             <div id="evaluation-area" class="glass hidden slide-up" style="width: 100%; text-align: left; padding: 24px;">
                                 <h3 style="margin-bottom: 8px; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Match Analysis</h3>
-                                <p style="font-size: 1.3rem; margin-bottom: 8px; font-weight: 700;">Score: <span id="eval-score">0%</span> - <span id="eval-grade" style="color: var(--accent);">Good</span></p>
+                                <p style="font-size: 1.3rem; margin-bottom: 8px; font-weight: 700;">Accuracy: <span id="eval-score">0%</span> - <span id="eval-grade" style="color: var(--accent);">Good</span></p>
                                 <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">Your Grade has been locked in automatically.</p>
                                 
                                 <!-- Incorrect example sentence collector container -->
@@ -631,12 +636,7 @@
                             </div>
                         </div>
 
-                        <!-- Scramble HUD Stats -->
                         <div class="scramble-hud">
-                            <div class="scramble-hud-item">
-                                <span class="scramble-hud-label">Score</span>
-                                <span id="scramble-score-val" class="scramble-hud-value">0</span>
-                            </div>
                             <div class="scramble-hud-item">
                                 <span class="scramble-hud-label">Streak</span>
                                 <span id="scramble-streak-val" class="scramble-hud-value highlight">0x</span>
@@ -692,10 +692,6 @@
                             <p id="scramble-result-desc" style="color: var(--text-secondary); margin-bottom: 8px;">You cleared the entire deck stack!</p>
                             
                             <div class="scramble-stats-grid">
-                                <div class="scramble-stat-box">
-                                    <span class="scramble-stat-lbl">Final Score</span>
-                                    <span id="scramble-stat-score" class="scramble-stat-val">1250</span>
-                                </div>
                                 <div class="scramble-stat-box">
                                     <span class="scramble-stat-lbl">Max Streak</span>
                                     <span id="scramble-stat-streak" class="scramble-stat-val">8x</span>
@@ -810,9 +806,9 @@
                                     <span id="stats-total-reviews" style="font-weight: 800; font-size: 1.75rem; color: var(--text-primary); margin-top: 8px;">0</span>
                                 </div>
                                 
-                                <!-- 4. Recall Accuracy -->
-                                <div class="stats-mini-card">
-                                    <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Recall Accuracy</span>
+                                <!-- 4. Avg Memory Strength -->
+                                <div class="stats-mini-card" data-tooltip="Average Memory Strength across all active vocabulary/memory cards (from 1 to 100).">
+                                    <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Avg Memory Strength</span>
                                     <span id="stats-avg-score" style="font-weight: 800; font-size: 1.75rem; color: var(--accent); margin-top: 8px;">0%</span>
                                 </div>
  

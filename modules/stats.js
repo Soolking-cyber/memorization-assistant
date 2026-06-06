@@ -221,9 +221,9 @@ export async function renderStatistics() {
     if (perfectReviewsEl) perfectReviewsEl.textContent = perfectCount;
 
     let avgScore = 0;
-    if (logs.length > 0) {
-        const sum = logs.reduce((acc, curr) => acc + (curr.score || 0), 0);
-        avgScore = Math.round(sum / logs.length);
+    if (state.cards.length > 0) {
+        const sum = state.cards.reduce((acc, curr) => acc + (curr.score !== undefined && curr.score !== null ? curr.score : 50), 0);
+        avgScore = Math.round(sum / state.cards.length);
     }
     if (avgScoreEl) avgScoreEl.textContent = `${avgScore}%`;
     if (strongPctEl) strongPctEl.textContent = totalActive > 0 ? `${strongPct}% (${strongCount}/${totalActive})` : `0%`;
