@@ -106,7 +106,7 @@ export function renderCurrentCard() {
     } catch (e) {}
 
     const hasImage = !!(card.image_front_url || card.image_back_url);
-    const isSplit = (card.type === 'Image Card' || hasImage) && !(isMap || card.type === 'Memory Map');
+    const isSplit = hasImage && !(isMap || card.type === 'Memory Map');
     const viewPractice = document.getElementById('view-practice');
     if (viewPractice) {
         if (isMap || card.type === 'Memory Map') {
@@ -277,32 +277,32 @@ export function renderCurrentCard() {
     }
 
     if (card.type === 'Image Card') {
-        if (exerciseTitleEl) exerciseTitleEl.style.display = 'none';
-        if (activeCard) {
-            const isMobile = window.innerWidth <= 768;
-            activeCard.style.height = isMobile ? '450px' : '100%';
-            const cardFront = activeCard.querySelector('.card-front');
-            if (cardFront) {
-                cardFront.style.padding = '0';
-                cardFront.style.overflow = 'hidden';
-                cardFront.style.height = isMobile ? '450px' : '100%';
+        if (hasImage) {
+            if (exerciseTitleEl) exerciseTitleEl.style.display = 'none';
+            if (activeCard) {
+                const isMobile = window.innerWidth <= 768;
+                activeCard.style.height = isMobile ? '450px' : '100%';
+                const cardFront = activeCard.querySelector('.card-front');
+                if (cardFront) {
+                    cardFront.style.padding = '0';
+                    cardFront.style.overflow = 'hidden';
+                    cardFront.style.height = isMobile ? '450px' : '100%';
+                }
             }
-        }
-        
-        frontEl.innerHTML = `
-            <div class="practice-image-card-container">
-                <div class="image-card-clue-row">
-                    <div class="image-card-clue-header">
-                        Recall the Steps in Sequence Order
+            
+            frontEl.innerHTML = `
+                <div class="practice-image-card-container">
+                    <div class="image-card-clue-row">
+                        <div class="image-card-clue-header">
+                            Recall the Steps in Sequence Order
+                        </div>
+                        <div class="image-card-clue-title">
+                            ${card.front}
+                        </div>
                     </div>
-                    <div class="image-card-clue-title">
-                        ${card.front}
-                    </div>
-                </div>
-                <div class="image-card-frame">
-                    ${(card.image_front_url || card.image_back_url) ? 
-                        `<img src="${card.image_front_url || card.image_back_url}" alt="Memory step image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                         <div style="display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: 100%; width: 100%; color: var(--text-secondary); padding: 20px; text-align: center; box-sizing: border-box;">
+                    <div class="image-card-frame">
+                        <img src="${card.image_front_url || card.image_back_url}" alt="Memory step image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <div style="display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: 100%; width: 100%; color: var(--text-secondary); padding: 20px; text-align: center; box-sizing: border-box;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="48" height="48" style="opacity: 0.6; color: var(--danger);">
                                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                                 <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -311,19 +311,21 @@ export function renderCurrentCard() {
                                 <line x1="15" y1="9" x2="9" y2="15"></line>
                             </svg>
                             <span style="font-size: 0.85rem; font-weight: 700; opacity: 0.7;">Image failed to load</span>
-                         </div>` :
-                        `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: 100%; width: 100%; color: var(--text-secondary); padding: 20px; text-align: center; box-sizing: border-box;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="48" height="48" style="opacity: 0.6; color: var(--accent);">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                <polyline points="21 15 16 10 5 21"></polyline>
-                            </svg>
-                            <span style="font-size: 0.85rem; font-weight: 700; opacity: 0.7;">No image attached to this memory</span>
-                        </div>`
-                    }
+                        </div>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        } else {
+            if (exerciseTitleEl) {
+                exerciseTitleEl.textContent = "Recall the Steps in Sequence Order";
+                exerciseTitleEl.style.display = '';
+            }
+            frontEl.innerHTML = `
+                <div class="practice-explanation-only" style="font-size: 1.45rem; font-weight: 700; color: var(--text-primary); max-width: 100%; line-height: 1.5; word-break: normal; overflow-wrap: break-word; text-align: center; margin: auto 0;">
+                    ${card.front.replace(/\n/g, '<br>')}
+                </div>
+            `;
+        }
         
         backEl.innerHTML = `<strong style="color:var(--accent);">Target sequence:</strong> ${card.back}`;
         
