@@ -304,7 +304,10 @@ function renderActiveStackCard() {
         
         let illustrationContent = `<div class="illustration-text" style="font-size: 1.15rem; font-weight: 800; line-height: 1.55; overflow-y: auto; max-height: 100%; text-align: center; padding: 16px 20px; font-family: 'Outfit', sans-serif; color: var(--text-primary);">${titleText}</div>`;
         if (card.type === 'Image Card' && card.image_front_url) {
-            illustrationContent = `<img class="illustration-img" src="${card.image_front_url}" alt="Memory Art">`;
+            illustrationContent = `
+                <img class="illustration-img" src="${card.image_front_url}" alt="Memory Art" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="illustration-text" style="display: none; font-size: 1.15rem; font-weight: 800; line-height: 1.55; overflow-y: auto; max-height: 100%; text-align: center; padding: 16px 20px; font-family: 'Outfit', sans-serif; color: var(--text-primary); align-items: center; justify-content: center; height: 100%; width: 100%; box-sizing: border-box;">${titleText}</div>
+            `;
         }
         
                 const scorePercent = stats.score;

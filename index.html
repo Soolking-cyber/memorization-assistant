@@ -426,6 +426,7 @@ Sum of all cards' memory strength scores (max 100 per card).">
                         <h2 style="display: flex; align-items: center; gap: 12px;">
                             Practice Session
                             <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); background: var(--bg-secondary); padding: 4px 10px; border-radius: 12px; border: 2px solid var(--border-color);"><span id="practice-progress">1</span> / <span id="practice-total">10</span></span>
+                            <span id="practice-card-score-badge-container" style="display: inline-flex; align-items: center;"></span>
                         </h2>
                         <button class="btn-icon close-view" data-view="dashboard">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -439,12 +440,12 @@ Sum of all cards' memory strength scores (max 100 per card).">
                                     <h3 id="practice-exercise-title">Complete the sentence with the correct word</h3>
                                     <!-- Inline letter boxes inside the front face if sentence prompt exists -->
                                     <div class="card-content" id="practice-front"></div>
-                                    <img id="practice-front-img" class="card-img hidden" alt="Front Attachment">
+                                    <img id="practice-front-img" class="card-img hidden" alt="Front Attachment" onerror="this.classList.add('hidden');">
                                 </div>
                                 <div class="card-face card-back glass hidden">
                                     <h3>Answer</h3>
                                     <div class="card-content" id="practice-back"></div>
-                                    <img id="practice-back-img" class="card-img hidden" alt="Back Attachment">
+                                    <img id="practice-back-img" class="card-img hidden" alt="Back Attachment" onerror="this.classList.add('hidden');">
                                 </div>
                             </div>
                         </div>
@@ -453,7 +454,7 @@ Sum of all cards' memory strength scores (max 100 per card).">
                             <!-- Right Column Image for Vocabulary Cards -->
                             <div id="practice-right-image-container" class="hidden practice-right-image-container">
                                 <div class="practice-right-image-frame">
-                                    <img id="practice-right-img" alt="Vocabulary clue image" />
+                                    <img id="practice-right-img" alt="Vocabulary clue image" onerror="document.getElementById('practice-right-image-container').classList.add('hidden');" />
                                 </div>
                             </div>
 

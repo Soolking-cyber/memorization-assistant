@@ -113,8 +113,8 @@ export function renderManageView() {
         const cardEl = document.createElement('div');
         cardEl.className = 'glass manage-card';
         
-        let frontImgHtml = card.image_front_url ? `<img src="${card.image_front_url}" class="manage-card-img" alt="Front">` : '';
-        let backImgHtml = card.image_back_url ? `<img src="${card.image_back_url}" class="manage-card-img" alt="Back">` : '';
+        let frontImgHtml = card.image_front_url ? `<img src="${card.image_front_url}" class="manage-card-img" alt="Front" onerror="this.style.display='none';">` : '';
+        let backImgHtml = card.image_back_url ? `<img src="${card.image_back_url}" class="manage-card-img" alt="Back" onerror="this.style.display='none';">` : '';
 
         const savedSentences = state.exampleSentences[card.id];
         let sentencesArray = [];

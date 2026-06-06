@@ -300,7 +300,27 @@ export function renderCurrentCard() {
                     </div>
                 </div>
                 <div class="image-card-frame">
-                    <img src="${card.image_front_url || card.image_back_url}" alt="Memory step image" />
+                    ${(card.image_front_url || card.image_back_url) ? 
+                        `<img src="${card.image_front_url || card.image_back_url}" alt="Memory step image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                         <div style="display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: 100%; width: 100%; color: var(--text-secondary); padding: 20px; text-align: center; box-sizing: border-box;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="48" height="48" style="opacity: 0.6; color: var(--danger);">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                            </svg>
+                            <span style="font-size: 0.85rem; font-weight: 700; opacity: 0.7;">Image failed to load</span>
+                         </div>` :
+                        `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: 100%; width: 100%; color: var(--text-secondary); padding: 20px; text-align: center; box-sizing: border-box;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="48" height="48" style="opacity: 0.6; color: var(--accent);">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                            <span style="font-size: 0.85rem; font-weight: 700; opacity: 0.7;">No image attached to this memory</span>
+                        </div>`
+                    }
                 </div>
             </div>
         `;
@@ -534,7 +554,7 @@ export function updatePracticeScoreBadges(card) {
     const tooltipText = `Memory Strength: ${score}%\nFSRS Spaced Repetition (DSR Model):\n• Stability (Lifespan): ${S} days\n• Difficulty (1-10): ${D}\n• Easy: Boosts Stability significantly & decreases Difficulty\n• Good: Expands Stability normally & maintains Difficulty\n• Hard: Increases Stability slightly & increases Difficulty\n• Again/Timeout: Shrinks Stability heavily & resets interval\n• Memory Strength (1-100%) maps logarithmically from Stability (S)\n• Category tuning: adjusts stability/difficulty based on category reviews`;
     
     const badgeHtml = `
-        <span class="card-score-badge" data-tooltip="${tooltipText}" style="position: absolute; top: 12px; right: 16px; z-index: 100;">
+        <span class="card-score-badge" data-tooltip="${tooltipText}" style="cursor: help;">
             ${ICONS.zap} ${score}%
         </span>
     `;
@@ -547,7 +567,6 @@ export function updatePracticeScoreBadges(card) {
         if (frontBadge) {
             frontBadge.remove();
         }
-        frontFace.insertAdjacentHTML('beforeend', badgeHtml);
     }
     
     if (backFace) {
@@ -555,7 +574,11 @@ export function updatePracticeScoreBadges(card) {
         if (backBadge) {
             backBadge.remove();
         }
-        backFace.insertAdjacentHTML('beforeend', badgeHtml);
+    }
+
+    const container = document.getElementById('practice-card-score-badge-container');
+    if (container) {
+        container.innerHTML = badgeHtml;
     }
 }
 
