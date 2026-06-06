@@ -521,6 +521,40 @@ export function renderCurrentCard() {
         document.getElementById('practice-input').classList.remove('hidden');
         document.getElementById('practice-input').focus();
     }
+
+    // Render universal memory strength badge
+    updatePracticeScoreBadges(card);
+}
+
+export function updatePracticeScoreBadges(card) {
+    const score = card.score !== undefined && card.score !== null ? card.score : 50;
+    
+    const frontFace = document.querySelector('.card-face.card-front');
+    const backFace = document.querySelector('.card-face.card-back');
+    
+    const tooltipText = `Memory Strength: ${score}%\nDetermines next review: (Score/20)² days\n• Easy: +40% gap (min +10)\n• Good: +25% gap (min +8)\n• Hard: -15% score (min -5)\n• Again/Timeout: -35% score (min -10)`;
+    
+    const badgeHtml = `
+        <span class="card-score-badge" data-tooltip="${tooltipText}" style="position: absolute; top: 12px; right: 16px; font-size: 0.72rem; font-weight: 700; background: var(--bg-secondary); color: var(--accent); border: 1.5px solid var(--border-color); padding: 2px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; cursor: help; z-index: 100; user-select: none;">
+            ⚡ ${score}%
+        </span>
+    `;
+    
+    if (frontFace) {
+        let frontBadge = frontFace.querySelector('.card-score-badge');
+        if (frontBadge) {
+            frontBadge.remove();
+        }
+        frontFace.insertAdjacentHTML('beforeend', badgeHtml);
+    }
+    
+    if (backFace) {
+        let backBadge = backFace.querySelector('.card-score-badge');
+        if (backBadge) {
+            backBadge.remove();
+        }
+        backFace.insertAdjacentHTML('beforeend', badgeHtml);
+    }
 }
 
 export async function logReviewAttempt(cardId, gradeInt, score) {
@@ -752,6 +786,7 @@ export async function evaluateAnswer() {
 
     applySM2Grade(gradeInt);
     logReviewAttempt(card.id, gradeInt, score);
+    updatePracticeScoreBadges(card);
 
     if (card.type === 'Image Card') {
         document.querySelector('.card-front').classList.remove('hidden');

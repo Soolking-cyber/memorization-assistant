@@ -259,6 +259,9 @@ function loadNextWord() {
         clueText.textContent = card.front || 'Memory Clue';
     }
 
+    // Render universal memory strength badge
+    updateScrambleScoreBadge(card);
+
     // Scramble letters (only alphabetical/numeric characters)
     const rawLetters = [];
     for (let i = 0; i < targetWord.length; i++) {
@@ -563,6 +566,7 @@ function checkSpelling() {
         // SM-2 sync
         applySM2Grade(3);
         logReviewAttempt(card.id, 3, 100);
+        updateScrambleScoreBadge(card);
 
         // Update score HUD
         const scoreVal = document.getElementById('scramble-score-val');
@@ -600,6 +604,7 @@ function checkSpelling() {
         // SM-2 sync
         applySM2Grade(0);
         logReviewAttempt(card.id, 0, 0);
+        updateScrambleScoreBadge(card);
 
         const streakVal = document.getElementById('scramble-streak-val');
         if (streakVal) streakVal.textContent = '0x';
@@ -665,6 +670,7 @@ function handleWordTimeout() {
     state.currentReviewIndex = scrambleState.currentIndex;
     applySM2Grade(0);
     logReviewAttempt(card.id, 0, 0);
+    updateScrambleScoreBadge(card);
     state.reviewQueue = origQueue;
     state.currentReviewIndex = origIndex;
 
@@ -845,3 +851,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+function updateScrambleScoreBadge(card) {
+    const score = card.score !== undefined && card.score !== null ? card.score : 50;
+    const scoreTooltip = `Memory Strength: ${score}%\nDetermines next review: (Score/20)² days\n• Easy: +40% gap (min +10)\n• Good: +25% gap (min +8)\n• Hard: -15% score (min -5)\n• Again/Timeout: -35% score (min -10)`;
+    const arena = document.getElementById('scramble-card-arena');
+    if (arena) {
+        let existingBadge = arena.querySelector('.card-score-badge');
+        if (existingBadge) {
+            existingBadge.remove();
+        }
+        arena.insertAdjacentHTML('beforeend', `
+            <span class="card-score-badge" data-tooltip="${scoreTooltip}" style="position: absolute; top: 12px; right: 16px; font-size: 0.72rem; font-weight: 700; background: var(--bg-secondary); color: var(--accent); border: 1.5px solid var(--border-color); padding: 2px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; cursor: help; z-index: 100; user-select: none;">
+                ⚡ ${score}%
+            </span>
+        `);
+    }
+}

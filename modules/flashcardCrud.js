@@ -166,10 +166,18 @@ export function renderManageView() {
             displayFront += ` <div class="word-types-container" style="margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap;">${badgesHtml}</div>`;
         }
 
+        const score = card.score !== undefined && card.score !== null ? card.score : 50;
+        const scoreTooltip = `Memory Strength: ${score}%\nDetermines next review: (Score/20)² days\n• Easy: +40% gap (min +10)\n• Good: +25% gap (min +8)\n• Hard: -15% score (min -5)\n• Again/Timeout: -35% score (min -10)`;
+
         cardEl.innerHTML = `
             <input type="checkbox" class="card-checkbox" data-id="${card.id}" style="display: none;">
             <div class="manage-card-content" style="flex: 1;">
-                <span class="type-tag">${card.type === 'mixed' ? 'All Types' : (card.type || 'All Types')}</span><br>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+                    <span class="type-tag" style="margin: 0;">${card.type === 'mixed' ? 'All Types' : (card.type || 'All Types')}</span>
+                    <span class="card-score-badge" data-tooltip="${scoreTooltip}" style="font-size: 0.72rem; font-weight: 700; background: var(--bg-secondary); color: var(--accent); border: 1.5px solid var(--border-color); padding: 2px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; cursor: help; user-select: none;">
+                        ⚡ ${score}%
+                    </span>
+                </div>
                 <strong>Front:</strong> <br> ${displayFront} ${frontImgHtml} <br><br>
                 <strong>Back:</strong> <br> ${card.back.replace(/\n/g, '<br>')} ${backImgHtml}
                 ${sentencesHtml}
