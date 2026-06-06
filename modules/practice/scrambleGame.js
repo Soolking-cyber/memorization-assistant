@@ -41,10 +41,8 @@ export async function initScrambleView() {
     document.getElementById('scramble-play-view')?.classList.add('hidden');
     document.getElementById('scramble-results-view')?.classList.add('hidden');
 
-    const grid = document.getElementById('scramble-decks-grid');
-    if (!grid) return;
-
-    grid.innerHTML = '<div style="text-align: center; padding: 40px; font-weight: 600; color: var(--text-secondary);">Preparing Decks...</div>';
+    const select = document.getElementById('scramble-difficulty-select');
+    if (!select) return;
 
     // Retrieve logs for calculating struggle index
     let logs = [];
@@ -80,82 +78,45 @@ export async function initScrambleView() {
         else commonCards.push(cardObj.card);
     });
 
+    scrambleState.availableDecks = {
+        ultrarare: ultraRareCards,
+        legendary: legendaryCards,
+        epic: epicCards,
+        rare: rareCards,
+        common: commonCards
+    };
+
     const decksConfig = [
-        {
-            key: 'ultrarare',
-            name: 'Critical Focus',
-            badge: 'Critical',
-            class: 'scramble-deck-ultrarare',
-            cards: ultraRareCards,
-            desc: 'Top 10 absolute hardest cards.'
-        },
-        {
-            key: 'legendary',
-            name: 'High Struggle',
-            badge: 'High Struggle',
-            class: 'scramble-deck-legendary',
-            cards: legendaryCards,
-            desc: 'High difficulty recall cards.'
-        },
-        {
-            key: 'epic',
-            name: 'Medium Struggle',
-            badge: 'Medium Struggle',
-            class: 'scramble-deck-epic',
-            cards: epicCards,
-            desc: 'Struggling cards needing review.'
-        },
-        {
-            key: 'rare',
-            name: 'Low Struggle',
-            badge: 'Low Struggle',
-            class: 'scramble-deck-rare',
-            cards: rareCards,
-            desc: 'Moderate difficulty memories.'
-        },
-        {
-            key: 'common',
-            name: 'Mastered',
-            badge: 'Mastered',
-            class: 'scramble-deck-common',
-            cards: commonCards,
-            desc: 'Strong retention memories.'
-        }
+        { key: 'ultrarare', name: 'Critical Focus', cards: ultraRareCards },
+        { key: 'legendary', name: 'High Struggle', cards: legendaryCards },
+        { key: 'epic', name: 'Medium Struggle', cards: epicCards },
+        { key: 'rare', name: 'Low Struggle', cards: rareCards },
+        { key: 'common', name: 'Mastered', cards: commonCards }
     ];
 
-    grid.innerHTML = '';
-
+    select.innerHTML = '';
     decksConfig.forEach(cfg => {
-        const count = cfg.cards.length;
-        const cardEl = document.createElement('div');
-        cardEl.className = `scramble-deck-card ${cfg.class}`;
+        const option = document.createElement('option');
+        option.value = cfg.key;
+        option.textContent = `${cfg.name} (${cfg.cards.length} Cards)`;
+        select.options.add(option);
+    });
 
-        const emptyText = count === 0 ? '<div class="scramble-deck-empty-badge">Deck Empty</div>' : '';
-
-        cardEl.innerHTML = `
-            <div>
-                <span class="scramble-deck-badge">${cfg.badge}</span>
-                <h4 class="scramble-deck-title">${cfg.name}</h4>
-                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 6px;">${cfg.desc}</p>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%;">
-                <span class="scramble-deck-count">${count} Cards</span>
-                ${emptyText}
-            </div>
-        `;
-
-        cardEl.addEventListener('click', () => {
-            if (count === 0) {
+    const startBtn = document.getElementById('btn-scramble-start');
+    if (startBtn) {
+        startBtn.onclick = () => {
+            const selectedKey = select.value;
+            const selectedDeck = decksConfig.find(d => d.key === selectedKey);
+            const cards = scrambleState.availableDecks[selectedKey] || [];
+            if (cards.length === 0) {
                 try { playUISound('fail'); } catch(e) {}
-                alert(`No cards in the ${cfg.name} deck! Create or fail more cards to unlock this struggle deck.`);
+                alert(`No cards in the ${selectedDeck.name} deck! Create or fail more cards to unlock this struggle deck.`);
                 return;
             }
             try { playUISound('click'); } catch(e) {}
-            startScrambleSession(cfg.key, cfg.name, cfg.cards);
-        });
-
-        grid.appendChild(cardEl);
-    });
+            startScrambleSession(selectedKey, selectedDeck.name, cards);
+        };
+    }
 }
 
 /**

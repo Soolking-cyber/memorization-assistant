@@ -616,9 +616,19 @@ Sum of all cards' memory strength scores (max 100 per card).">
                             <p>Test your spelling and reaction speed. Reassemble scrambled letters from your vocabulary cards before the time runs out!</p>
                         </div>
 
-                        <!-- Decks Grid -->
-                        <div id="scramble-decks-grid" class="scramble-decks-grid">
-                            <!-- Populated dynamically via JS -->
+                        <!-- Selection Area: Start Button & Dropdown Selector -->
+                        <div class="scramble-selector-container">
+                            <div class="scramble-dropdown-wrapper">
+                                <label for="scramble-difficulty-select" class="hud-label">Select Difficulty</label>
+                                <select id="scramble-difficulty-select" class="scramble-select">
+                                    <!-- Populated dynamically via JS -->
+                                </select>
+                            </div>
+                            
+                            <button id="btn-scramble-start" class="btn primary">
+                                <svg viewBox="0 0 24 24" class="icon-svg" style="width: 18px; height: 18px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                Start Scramble
+                            </button>
                         </div>
                     </div>
 

@@ -493,3 +493,75 @@ body.dark-theme .scramble-slot.active-slot {
     width: 18px;
     height: 18px;
 }
+
+/* Scramble Selector Dropdown and Start Button */
+.scramble-selector-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 32px 24px;
+    margin: 30px auto;
+    max-width: 420px;
+    border-radius: 20px;
+    border: 2px solid var(--border-color);
+    background: var(--bg-card);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+}
+
+.scramble-dropdown-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+
+.scramble-dropdown-wrapper .hud-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.scramble-select {
+    width: 100%;
+    font-size: 0.95rem;
+    padding: 12px 40px 12px 16px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23706e68%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px top 50%;
+    background-size: 10px auto;
+}
+
+.scramble-select:focus {
+    border-color: var(--text-primary);
+    box-shadow: 0 0 0 3px var(--border-color);
+}
+
+#btn-scramble-start {
+    width: 100%;
+    font-size: 1rem;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 2px solid var(--border-dark);
+    cursor: pointer;
+    box-shadow: inset 0 -2px 0 var(--btn-primary-shadow);
+}
