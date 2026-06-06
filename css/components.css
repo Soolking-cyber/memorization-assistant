@@ -692,6 +692,71 @@
     cursor: pointer;
 }
 
+/* ==========================================================================
+   Tactile & Professional Outline Icon SVG System
+   ========================================================================== */
+
+/* Target all icon-like SVGs in the application to enforce the same elegant, thin-stroke aesthetic language */
+.icon-svg,
+.nav-icon svg,
+.nav-btn svg,
+.btn svg,
+.btn-icon svg,
+.header-icon-btn svg,
+.scramble-header svg,
+.scramble-feedback svg,
+.stats-mini-card svg,
+.custom-dropdown-trigger svg,
+.card-header svg,
+.attack-title svg,
+.feedback-result-title svg,
+.illustration-text svg,
+.manage-card-content svg,
+.node-btn svg,
+.edit-btn svg,
+.delete-btn svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: inline-block;
+    vertical-align: middle;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease, opacity 0.15s ease;
+}
+
+/* Specific size adjustments to keep visual hierarchy consistent and clean */
+.nav-icon svg,
+.nav-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-icon svg,
+.header-icon-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Ensure colored icons or canvases are not broken by the general outline override rules */
+.btn-google svg {
+    fill: initial !important;
+    stroke: none !important;
+    stroke-width: 0 !important;
+}
+
+/* Palette inner dots should retain their color fills */
+svg.icon-svg circle[fill="currentColor"],
+svg.icon-svg path[fill="currentColor"] {
+    fill: currentColor !important;
+}
+
+
 
 
 
