@@ -193,7 +193,7 @@ export function getTypedAnswersForSentences(targetWords, sentencesCount) {
 
 export function initSpellingInputListeners() {
     document.addEventListener('input', (e) => {
-        if (e.target.classList.contains('letter-input')) {
+        if (e.target && e.target.classList && e.target.classList.contains('letter-input')) {
             const container = e.target.closest('#practice-letter-boxes') || e.target.closest('.practice-sentence-list') || e.target.closest('#deck-letter-boxes');
             if (!container) return;
             const inputs = Array.from(container.querySelectorAll('.letter-input'));
@@ -212,7 +212,7 @@ export function initSpellingInputListeners() {
     });
 
     document.addEventListener('keydown', (e) => {
-        if (e.target.classList.contains('letter-input')) {
+        if (e.target && e.target.classList && e.target.classList.contains('letter-input')) {
             const container = e.target.closest('#practice-letter-boxes') || e.target.closest('.practice-sentence-list') || e.target.closest('#deck-letter-boxes');
             if (!container) return;
             const inputs = Array.from(container.querySelectorAll('.letter-input'));
@@ -242,10 +242,6 @@ export function initSpellingInputListeners() {
                     inputs[currentIndex + 1].select();
                     e.preventDefault();
                 }
-            } else if (e.key === 'Enter') {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                document.getElementById('btn-submit-answer').click();
             }
         }
     });

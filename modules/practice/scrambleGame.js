@@ -777,7 +777,7 @@ export function handleScrambleKeydown(e) {
     if (!scrambleState.active) return;
 
     // Block keyboard handling when settings modals or inputs are focused
-    if (e.target.closest('#settings-modal') || e.target.closest('textarea') || e.target.closest('input')) {
+    if (e.target.closest && (e.target.closest('#settings-modal') || e.target.closest('textarea') || e.target.closest('input'))) {
         return;
     }
 

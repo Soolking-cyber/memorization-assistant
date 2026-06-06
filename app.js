@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (e.key === 'Enter') {
             const viewPractice = document.getElementById('view-practice');
             if (viewPractice && !viewPractice.classList.contains('hidden')) {
-                if (e.target.closest('#settings-modal') || e.target.closest('#settings-sidebar')) {
+                if (e.target.closest && (e.target.closest('#settings-modal') || e.target.closest('#settings-sidebar'))) {
                     return;
                 }
                 
