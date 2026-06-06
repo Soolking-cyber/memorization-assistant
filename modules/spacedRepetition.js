@@ -134,18 +134,19 @@ export async function applySM2Grade(gradeInt) {
         }
     }
 
-    // Apply category retention multiplier to stability interval (if correct recall)
+    // Apply category retention multiplier (if correct recall) and bound stability
     if (g > 1) {
         const multiplier = tuning.retentionMultiplier || 1.0;
-        card.interval = Math.min(365.0, card.interval * multiplier);
+        S_new = S_new * multiplier;
     }
-
-    // Keep Stability bound between 0.1 and 365 days
     S_new = Math.max(0.1, Math.min(365.0, S_new));
 
-    // Save FSRS Difficulty and Stability
+    // Save FSRS Difficulty, Stability, and Interval
     card.ease = D_new;
-    
+    if (g > 1) {
+        card.interval = S_new;
+    }
+
     // Update 1-100 score logarithmically based on Stability
     card.score = Math.max(1, Math.min(100, Math.round(100 * Math.log(S_new / 0.1) / Math.log(3650))));
 
