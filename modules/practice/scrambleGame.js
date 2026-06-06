@@ -647,7 +647,7 @@ function handleWordTimeout() {
         feedbackBox.className = 'scramble-feedback danger';
         feedbackBox.innerHTML = `
             <div class="scramble-feedback-title">
-                💔 Time Expired!
+                ${ICONS.heartBreak} Time Expired!
             </div>
             <div style="font-size: 0.8rem; margin-top: 2px;">Correct spelling was:</div>
             <div class="scramble-feedback-correct">${card.back.toUpperCase()}</div>
@@ -719,11 +719,17 @@ function endScrambleSession() {
     try { playUISound(solvedCount > 0 ? 'complete' : 'fail'); } catch(e) {}
 
     if (scrambleState.lives <= 0) {
-        if (statusIcon) statusIcon.textContent = '💔';
+        if (statusIcon) {
+            statusIcon.innerHTML = ICONS.heartBreak;
+            statusIcon.style.color = 'var(--danger)';
+        }
         if (titleEl) titleEl.textContent = 'Game Over';
         if (descEl) descEl.textContent = 'You lost all your lives! Don\'t worry, practice makes perfect.';
     } else {
-        if (statusIcon) statusIcon.textContent = '🏆';
+        if (statusIcon) {
+            statusIcon.innerHTML = ICONS.trophy;
+            statusIcon.style.color = 'var(--warning)';
+        }
         if (titleEl) titleEl.textContent = 'Victory!';
         if (descEl) descEl.textContent = 'Incredible! You cleared the entire struggle deck stack.';
         
