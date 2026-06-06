@@ -167,7 +167,7 @@ export function renderManageView() {
         }
 
         const score = card.score !== undefined && card.score !== null ? card.score : 50;
-        const scoreTooltip = `Memory Strength: ${score}%\nDetermines next review: (Score/20)² days\n• Easy: +40% gap (min +10)\n• Good: +25% gap (min +8)\n• Hard: -15% score (min -5)\n• Again/Timeout: -35% score (min -10)\n• Category tuning adjusts interval: 1.5x (success rate ≥90%) or 0.5x (success rate ≤80%)`;
+        const scoreTooltip = `Memory Strength: ${score}%\nDetermines next review: (Score/17)^2.5 days\n• Easy: +40% gap (min +10)\n• Good: +25% gap (min +8)\n• Hard: -15% score (min -5)\n• Again/Timeout: -35% score (min -10)\n• Category tuning adjusts interval: 1.15x (success rate ≥90%) or 0.80x (success rate ≤80%)`;
 
         cardEl.innerHTML = `
             <input type="checkbox" class="card-checkbox" data-id="${card.id}" style="display: none;">

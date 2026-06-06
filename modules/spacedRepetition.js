@@ -31,11 +31,11 @@ export function getCategoryTuning(cardType, logs) {
         let easeAdjustment = 0.0;
 
         if (successRate >= 0.90) {
-            retentionMultiplier = 1.50; // High retention: Space reviews 50% further apart to reduce fatigue
-            easeAdjustment = 0.20;
+            retentionMultiplier = 1.15; // Space reviews further apart
+            easeAdjustment = 0.10;      // Boost ease factor
         } else if (successRate <= 0.80) {
-            retentionMultiplier = 0.50; // Low retention: Space reviews 50% closer together (2x more repetitions) to reinforce memory
-            easeAdjustment = -0.30;
+            retentionMultiplier = 0.80; // Space reviews closer together
+            easeAdjustment = -0.15;     // Penalize ease factor
         }
 
         return { retentionMultiplier, easeAdjustment, successRate };
@@ -80,7 +80,7 @@ export async function applySM2Grade(gradeInt) {
     // interval = 0.01 + Math.pow(score / 20, 2)
     // Applying category retentionMultiplier from logs tuning if active
     const multiplier = tuning.retentionMultiplier || 1.0;
-    card.interval = (0.01 + Math.pow(card.score / 20, 2)) * multiplier;
+    card.interval = (0.01 + Math.pow(card.score / 17, 2.5)) * multiplier;
     
     card.repetitions += 1;
 
