@@ -795,47 +795,8 @@ Sum of all cards' memory strength scores (max 100 per card).">
                         </div>
 
                         <!-- 2. Consolidated Progress Overview -->
-                        <div class="stats-card">
-                            <h3 style="margin-top: 0; margin-bottom: 6px; font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">Progress Overview</h3>
-                            <p style="margin: 0 0 20px 0; font-size: 0.85rem; color: var(--text-secondary);">Your essential card creation, practice, and accuracy metrics tracked over time.</p>
-                            
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
-                                <!-- 1. Total Cards Created -->
-                                <div class="stats-mini-card">
-                                    <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Total Cards Created</span>
-                                    <span id="stats-total-cards" style="font-weight: 800; font-size: 1.75rem; color: var(--text-primary); margin-top: 8px;">0</span>
-                                </div>
-                                
-                                <!-- 2. Added This Week -->
-                                <div class="stats-mini-card">
-                                    <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Added This Week</span>
-                                    <span id="stats-added-week" style="font-weight: 800; font-size: 1.75rem; color: var(--text-primary); margin-top: 8px;">0</span>
-                                </div>
-                                
-                                <!-- 3. Cards Recalled (Reviews) -->
-                                <div class="stats-mini-card">
-                                    <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Cards Recalled</span>
-                                    <span id="stats-total-reviews" style="font-weight: 800; font-size: 1.75rem; color: var(--text-primary); margin-top: 8px;">0</span>
-                                </div>
-                                
-                                <!-- 4. Avg Memory Strength -->
-                                <div class="stats-mini-card" data-tooltip="Average Memory Strength across all active vocabulary/memory cards (from 1 to 100).">
-                                    <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Avg Memory Strength</span>
-                                    <span id="stats-avg-score" style="font-weight: 800; font-size: 1.75rem; color: var(--accent); margin-top: 8px;">0%</span>
-                                </div>
- 
-                                <!-- 5. Perfect Retrievals -->
-                                <div class="stats-mini-card">
-                                    <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Perfect Retrievals (100%)</span>
-                                    <span id="stats-perfect-reviews" style="font-weight: 800; font-size: 1.75rem; color: var(--success); margin-top: 8px;">0</span>
-                                </div>
- 
-                                <!-- 6. Strong Memories Ratio -->
-                                <div class="stats-mini-card">
-                                    <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Strong Memories</span>
-                                    <span id="stats-strong-pct" style="font-weight: 800; font-size: 1.75rem; color: var(--text-primary); margin-top: 8px;">0%</span>
-                                </div>
-                            </div>
+                        <div id="stats-dashboard-container" style="display: flex; flex-direction: column; gap: 24px; width: 100%;">
+                            <!-- Dynamically generated in stats.js -->
                         </div>
                     </div>
                 </div>
