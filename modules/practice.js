@@ -539,6 +539,9 @@ export function updatePracticeScoreBadges(card) {
         </span>
     `;
     
+    const frontFace = document.querySelector('.card-front');
+    const backFace = document.querySelector('.card-back');
+    
     if (frontFace) {
         let frontBadge = frontFace.querySelector('.card-score-badge');
         if (frontBadge) {
