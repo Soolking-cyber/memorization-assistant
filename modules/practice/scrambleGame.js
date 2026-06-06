@@ -547,12 +547,23 @@ function checkSpelling() {
             });
         }
 
-        // Float Tag XP popup
+        const oldScore = card.score !== undefined && card.score !== null ? card.score : 50;
+
+        // SM-2 sync
+        applySM2Grade(3);
+        logReviewAttempt(card.id, 3, 100);
+        updateScrambleScoreBadge(card);
+
+        const newScore = card.score !== undefined && card.score !== null ? card.score : 50;
+        const diff = newScore - oldScore;
+        const diffText = diff >= 0 ? `+${diff}%` : `${diff}%`;
+
+        // Float Tag popup
         const playCard = document.getElementById('scramble-card-arena');
         if (playCard) {
             const floatTag = document.createElement('div');
             floatTag.className = 'scramble-floating-points';
-            floatTag.textContent = `+${finalXP} XP`;
+            floatTag.textContent = `${diffText} Strength`;
             playCard.appendChild(floatTag);
             setTimeout(() => floatTag.remove(), 1200);
         }
@@ -565,18 +576,10 @@ function checkSpelling() {
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="16" height="16" style="vertical-align: middle;"><polyline points="20 6 9 17 4 12"></polyline></svg>
                     Spelling Correct!
                 </div>
-                <div style="font-size: 0.82rem;">Retention score updated. Good job!</div>
+                <div style="font-size: 0.82rem;">Memory Strength increased to ${newScore}%.</div>
             `;
         }
 
-        // SM-2 sync
-        applySM2Grade(3);
-        logReviewAttempt(card.id, 3, 100);
-        updateScrambleScoreBadge(card);
-
-        // Update score HUD
-        const scoreVal = document.getElementById('scramble-score-val');
-        if (scoreVal) scoreVal.textContent = scrambleState.score;
         const streakVal = document.getElementById('scramble-streak-val');
         if (streakVal) streakVal.textContent = `${scrambleState.streak}x`;
 
@@ -607,10 +610,28 @@ function checkSpelling() {
             `;
         }
 
+        const oldScore = card.score !== undefined && card.score !== null ? card.score : 50;
+
         // SM-2 sync
         applySM2Grade(0);
         logReviewAttempt(card.id, 0, 0);
         updateScrambleScoreBadge(card);
+
+        const newScore = card.score !== undefined && card.score !== null ? card.score : 50;
+        const diff = newScore - oldScore;
+        const diffText = diff >= 0 ? `+${diff}%` : `${diff}%`;
+
+        // Float Tag popup
+        const playCard = document.getElementById('scramble-card-arena');
+        if (playCard) {
+            const floatTag = document.createElement('div');
+            floatTag.className = 'scramble-floating-points';
+            floatTag.style.color = 'var(--danger)';
+            floatTag.style.borderColor = 'var(--danger)';
+            floatTag.textContent = `${diffText} Strength`;
+            playCard.appendChild(floatTag);
+            setTimeout(() => floatTag.remove(), 1200);
+        }
 
         const streakVal = document.getElementById('scramble-streak-val');
         if (streakVal) streakVal.textContent = '0x';
@@ -669,6 +690,8 @@ function handleWordTimeout() {
         `;
     }
 
+    const oldScore = card.score !== undefined && card.score !== null ? card.score : 50;
+
     // Log SM-2 failure
     const origQueue = state.reviewQueue;
     const origIndex = state.currentReviewIndex;
@@ -679,6 +702,22 @@ function handleWordTimeout() {
     updateScrambleScoreBadge(card);
     state.reviewQueue = origQueue;
     state.currentReviewIndex = origIndex;
+
+    const newScore = card.score !== undefined && card.score !== null ? card.score : 50;
+    const diff = newScore - oldScore;
+    const diffText = diff >= 0 ? `+${diff}%` : `${diff}%`;
+
+    // Float Tag popup
+    const playCard = document.getElementById('scramble-card-arena');
+    if (playCard) {
+        const floatTag = document.createElement('div');
+        floatTag.className = 'scramble-floating-points';
+        floatTag.style.color = 'var(--danger)';
+        floatTag.style.borderColor = 'var(--danger)';
+        floatTag.textContent = `${diffText} Strength`;
+        playCard.appendChild(floatTag);
+        setTimeout(() => floatTag.remove(), 1200);
+    }
 
     const streakVal = document.getElementById('scramble-streak-val');
     if (streakVal) streakVal.textContent = '0x';

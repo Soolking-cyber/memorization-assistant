@@ -246,8 +246,6 @@ function startStackStudy(tierKey, tierName, decoratedCards) {
     state.recallPrecisionCount = 0;
     
     // Reset HUD display
-    const scoreVal = document.getElementById('hud-score-val');
-    if (scoreVal) scoreVal.textContent = '0 XP';
     const streakVal = document.getElementById('hud-streak-val');
     if (streakVal) streakVal.textContent = '0x';
     const shieldsVal = document.getElementById('hud-shields-val');
@@ -611,11 +609,7 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
         state.recallShields = Math.max(0, state.recallShields - 1);
     }
     
-    // Update HUD display
-    const scoreVal = document.getElementById('hud-score-val');
-    if (scoreVal) {
-        scoreVal.textContent = `${state.recallScore} XP`;
-    }
+    // Update HUD display (Combo and Shields)
     const streakVal = document.getElementById('hud-streak-val');
     if (streakVal) {
         streakVal.textContent = state.recallStreak > 0 ? `${state.recallStreak}x` : '0x';
@@ -625,17 +619,8 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
         shieldsVal.innerHTML = renderShieldsHTML(state.recallShields);
     }
     
-    // Spawn floating points animation over card
-    const attackArea = document.querySelector('.recall-attack-area');
-    if (attackArea && success) {
-        const floatTag = document.createElement('div');
-        floatTag.className = 'floating-points';
-        floatTag.textContent = `+${cardXP} XP${bonusText}`;
-        attackArea.appendChild(floatTag);
-        setTimeout(() => {
-            floatTag.remove();
-        }, 1200);
-    }
+    // Capture old score to calculate difference
+    const oldScore = card.score !== undefined && card.score !== null ? card.score : 50;
 
     // Play correct / incorrect sound effects
     if (success) {
@@ -651,6 +636,33 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
     // Recalculate SM-2 Intervals & Log attempt
     applySM2Grade(gradeInt);
     logReviewAttempt(card.id, gradeInt, score);
+
+    // Calculate score difference
+    const newScore = card.score !== undefined && card.score !== null ? card.score : 50;
+    const diff = newScore - oldScore;
+    const diffText = diff >= 0 ? `+${diff}%` : `${diff}%`;
+
+    // Update HP bar in UI to show new score immediately
+    const hpVal = document.querySelector('.study-pokemon-card .hp-val');
+    const hpFill = document.querySelector('.study-pokemon-card .card-hp-fill');
+    if (hpVal) hpVal.textContent = `${newScore}%`;
+    if (hpFill) hpFill.style.width = `${newScore}%`;
+
+    // Spawn floating memory strength change animation over card
+    const attackArea = document.querySelector('.recall-attack-area');
+    if (attackArea) {
+        const floatTag = document.createElement('div');
+        floatTag.className = 'floating-points';
+        floatTag.textContent = `${diffText} Strength`;
+        if (diff < 0) {
+            floatTag.style.color = 'var(--danger)';
+            floatTag.style.borderColor = 'var(--danger)';
+        }
+        attackArea.appendChild(floatTag);
+        setTimeout(() => {
+            floatTag.remove();
+        }, 1200);
+    }
     
     // Inject visual feedback details
     feedbackBox.classList.remove('hidden');
@@ -827,11 +839,6 @@ function finishStackStudy() {
             
             <div class="scorecard-grid">
                 <div class="scorecard-item">
-                    <span class="scorecard-label">Total Score</span>
-                    <span class="scorecard-value text-gold">${state.recallScore} XP</span>
-                    ${shieldBonus > 0 ? `<span style="font-size: 0.72rem; color: var(--success); font-weight: 700; margin-top: 2px;">+100 Shield Bonus!</span>` : ''}
-                </div>
-                <div class="scorecard-item">
                     <span class="scorecard-label">Accuracy</span>
                     <span class="scorecard-value">${accuracy}%</span>
                 </div>
@@ -839,11 +846,12 @@ function finishStackStudy() {
                     <span class="scorecard-label">Precision Recalls</span>
                     <span class="scorecard-value">${state.recallPrecisionCount} / ${totalCount}</span>
                 </div>
-                <div class="scorecard-item">
+                <div class="scorecard-item" style="grid-column: span 2;">
                     <span class="scorecard-label">Shields Retained</span>
                     <span class="scorecard-value" style="display: inline-flex; gap: 4px; align-items: center; justify-content: center; min-height: 24px;">
                         ${renderShieldsHTML(state.recallShields)}
                     </span>
+                    ${shieldBonus > 0 ? `<span style="font-size: 0.72rem; color: var(--success); font-weight: 700; margin-top: 2px;">Perfect Recall!</span>` : ''}
                 </div>
             </div>
             
