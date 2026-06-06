@@ -141,10 +141,10 @@ export async function handleCreateCard(e) {
         image_front_url: image_front_url,
         image_back_url: image_back_url,
         nextReview: Date.now(),
-        ease: 2.5,
+        ease: 5.0,
         interval: 0,
         repetitions: 0,
-        score: 48,
+        score: 39,
         example_sentences: activeType !== 'Memory Map' ? [...state.draftCreateSentences] : []
     };
 

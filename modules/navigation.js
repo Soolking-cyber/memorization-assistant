@@ -504,9 +504,9 @@ export function initProfileMenu() {
             if (await window.confirm("Are you sure you want to reset spaced repetition intervals on all memories? This will reschedule all cards to be due immediately and cannot be undone.")) {
                 state.cards.forEach(card => {
                     card.repetitions = 0;
-                    card.interval = 1;
-                    card.ease = 2.5;
-                    card.score = 48;
+                    card.interval = 0;
+                    card.ease = 5.0;
+                    card.score = 39;
                     card.nextReview = Date.now();
                     updateCardInDB(card);
                 });

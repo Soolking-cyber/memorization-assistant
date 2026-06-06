@@ -528,9 +528,10 @@ export function renderCurrentCard() {
 }
 
 export function updatePracticeScoreBadges(card) {
-    const score = card.score !== undefined && card.score !== null ? card.score : 50;
-    const easeVal = (card.ease !== undefined && card.ease !== null ? card.ease : (1.3 + (score/100)*2.5)).toFixed(2);
-    const tooltipText = `Memory Strength: ${score}% (Ease: ${easeVal}x)\nSuperMemo-2 Spaced Repetition:\n• Easy: +0.10 Ease (+4% Strength; 1st: 4d, 2nd: 8d)\n• Good: +0.00 Ease (0% Strength change; 1st: 1d, 2nd: 6d)\n• Hard: -0.14 Ease (-6% Strength; 1st: 1d, 2nd: 6d)\n• Again/Timeout: -0.80 Ease (-32% Strength) & resets interval\n• Subsequent correct intervals multiply by final Ease\n• Category tuning: 1.15x interval (success rate ≥90%) or 0.80x (success rate ≤80%)`;
+    const score = card.score !== undefined && card.score !== null ? card.score : 39;
+    const S = (card.interval && card.interval > 0.01 ? card.interval : 0.1 * Math.exp((score / 100) * Math.log(3650))).toFixed(1);
+    const D = (card.ease !== undefined && card.ease !== null ? card.ease : 5.0).toFixed(1);
+    const tooltipText = `Memory Strength: ${score}%\nFSRS Spaced Repetition (DSR Model):\n• Stability (Lifespan): ${S} days\n• Difficulty (1-10): ${D}\n• Easy: Boosts Stability significantly & decreases Difficulty\n• Good: Expands Stability normally & maintains Difficulty\n• Hard: Increases Stability slightly & increases Difficulty\n• Again/Timeout: Shrinks Stability heavily & resets interval\n• Memory Strength (1-100%) maps logarithmically from Stability (S)\n• Category tuning: adjusts stability/difficulty based on category reviews`;
     
     const badgeHtml = `
         <span class="card-score-badge" data-tooltip="${tooltipText}" style="position: absolute; top: 12px; right: 16px; z-index: 100;">

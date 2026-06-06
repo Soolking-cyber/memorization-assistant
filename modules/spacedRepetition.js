@@ -44,6 +44,9 @@ export function getCategoryTuning(cardType, logs) {
     return { retentionMultiplier: 1.0, easeAdjustment: 0.0, successRate: null };
 }
 
+// FSRS v4 Default Parameters (Weights)
+const w = [0.4, 0.6, 2.4, 5.8, 4.93, 0.94, 0.86, 0.01, 1.49, 0.14, 0.94, 2.18, 0.05, 0.34, 1.26, 0.29, 2.61];
+
 export async function applySM2Grade(gradeInt) {
     const cardId = state.reviewQueue[state.currentReviewIndex].id;
     const cardIndexInGlobal = state.cards.findIndex(c => c.id === cardId);
@@ -51,19 +54,26 @@ export async function applySM2Grade(gradeInt) {
     
     let card = state.cards[cardIndexInGlobal];
     
-    // Ensure card has a valid score initialized (1-100, default 50)
+    // Ensure card has a valid score initialized (default 39 matching 2.4-day Good starting stability)
     if (card.score === undefined || card.score === null) {
-        card.score = 50;
-    }
-
-    // Ensure ease factor is initialized based on score if missing
-    if (card.ease === undefined || card.ease === null) {
-        card.ease = 1.3 + (card.score / 100) * 2.5;
+        card.score = 39;
     }
 
     // Ensure repetitions counter is initialized
     if (card.repetitions === undefined || card.repetitions === null) {
         card.repetitions = 0;
+    }
+
+    // Load Stability (S) from interval column. Fallback to score mapping if missing
+    let S = card.interval;
+    if (!S || S <= 0.01) {
+        S = 0.1 * Math.exp((card.score / 100) * Math.log(3650));
+    }
+
+    // Load Difficulty (D) from ease column. Fallback to 5.0 if missing
+    let D = card.ease;
+    if (!D || D < 1.0 || D > 10.0) {
+        D = 5.0;
     }
     
     let logs = [];
@@ -75,51 +85,69 @@ export async function applySM2Grade(gradeInt) {
 
     const tuning = getCategoryTuning(card.type, logs);
 
-    // Calculate delta EF and handle repetitions based on SM-2 rules
-    let deltaEF = 0.0;
-    if (gradeInt === 3) { // Easy (q = 5)
-        deltaEF = 0.10;
-        card.repetitions += 1;
-    } else if (gradeInt === 2) { // Good (q = 4)
-        deltaEF = 0.00;
-        card.repetitions += 1;
-    } else if (gradeInt === 1) { // Hard (q = 3)
-        deltaEF = -0.14;
-        card.repetitions += 1; // Correct response, increment repetitions
-    } else { // Fail/Again (gradeInt = 0, q = 0)
-        deltaEF = -0.80;
-        card.repetitions = 0; // Reset consecutive correct reviews
-    }
+    // Map 0-3 gradeInt to 1-4 FSRS rating (1=Again, 2=Hard, 3=Good, 4=Easy)
+    const g = gradeInt + 1; 
 
-    // Update Ease Factor (bounded to standard [1.3, 3.8])
-    card.ease = Math.max(1.3, Math.min(3.8, card.ease + deltaEF));
+    let S_new = S;
+    let D_new = D;
 
-    // Keep 1-100 score mathematically in sync with Ease Factor
-    card.score = Math.max(1, Math.min(100, Math.round((card.ease - 1.3) / 2.5 * 100)));
-
-    // Incorporate category ease adjustment for interval scaling
-    let finalEase = card.ease + (tuning.easeAdjustment || 0.0);
-    finalEase = Math.max(1.3, Math.min(3.8, finalEase));
-
-    // Calculate next interval in days based on standard SM-2 rules
-    if (gradeInt === 0) {
-        // Failed: review again in 15 minutes (0.01 days)
-        card.interval = 0.01;
-    } else {
-        if (card.repetitions === 1) {
-            card.interval = (gradeInt === 3) ? 4.0 : 1.0;
-        } else if (card.repetitions === 2) {
-            card.interval = (gradeInt === 3) ? 8.0 : 6.0;
+    if (card.repetitions === 0) {
+        // First review: Initialize Stability & Difficulty
+        S_new = w[g - 1];
+        D_new = Math.max(1.0, Math.min(10.0, w[4] - w[5] * (g - 3)));
+        
+        if (g > 1) {
+            card.repetitions = 1;
+            card.interval = S_new;
         } else {
-            // Subsequent successful repetitions scale exponentially by final adjusted Ease Factor
-            const baseInterval = card.interval && card.interval > 0.1 ? card.interval : 6.0;
-            card.interval = Math.min(365, baseInterval * finalEase);
+            card.repetitions = 0;
+            card.interval = 0.01; // Review in 15 mins
+        }
+    } else {
+        // Subsequent review: calculate elapsed time and retrievability
+        const MS_PER_DAY = 86400000;
+        const lastReviewDate = card.nextReview - (card.interval || 1.0) * MS_PER_DAY;
+        const elapsedDays = Math.max(0.01, (Date.now() - lastReviewDate) / MS_PER_DAY);
+        
+        // Retrievability: power function forgetting curve
+        const R = Math.pow(1 + 19 * elapsedDays / S, -0.4);
+
+        // Update Difficulty (mean-reverted)
+        const d_prime = D - w[6] * (g - 3);
+        D_new = Math.max(1.0, Math.min(10.0, w[7] * w[4] + (1 - w[7]) * d_prime));
+
+        // Apply category ease adjustment to difficulty
+        D_new = Math.max(1.0, Math.min(10.0, D_new - (tuning.easeAdjustment || 0.0) * 10));
+
+        if (g === 1) {
+            // Forget stability
+            S_new = w[11] * Math.pow(D_new, -w[12]) * (Math.pow(S + 1, w[13]) - 1) * Math.exp((1 - R) * w[14]);
+            card.repetitions = 0;
+            card.interval = 0.01; // Review in 15 mins
+        } else {
+            // Recall stability
+            const hard_penalty = (g === 2) ? w[15] : 1.0;
+            const easy_bonus = (g === 4) ? w[16] : 1.0;
+            S_new = S * (1 + Math.exp(w[8]) * (11 - D_new) * Math.pow(S, -w[9]) * (Math.exp((1 - R) * w[10]) - 1)) * hard_penalty * easy_bonus;
+            card.repetitions += 1;
+            card.interval = S_new;
         }
     }
 
-    // Apply category retentionMultiplier from logs tuning if active
-    const multiplier = tuning.retentionMultiplier || 1.0;
-    card.interval = card.interval * multiplier;
+    // Apply category retention multiplier to stability interval (if correct recall)
+    if (g > 1) {
+        const multiplier = tuning.retentionMultiplier || 1.0;
+        card.interval = Math.min(365.0, card.interval * multiplier);
+    }
+
+    // Keep Stability bound between 0.1 and 365 days
+    S_new = Math.max(0.1, Math.min(365.0, S_new));
+
+    // Save FSRS Difficulty and Stability
+    card.ease = D_new;
+    
+    // Update 1-100 score logarithmically based on Stability
+    card.score = Math.max(1, Math.min(100, Math.round(100 * Math.log(S_new / 0.1) / Math.log(3650))));
 
     const MS_PER_DAY = 86400000;
     card.nextReview = Date.now() + (card.interval * MS_PER_DAY);
