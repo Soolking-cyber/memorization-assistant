@@ -110,7 +110,7 @@ export async function applySM2Grade(gradeInt) {
         const elapsedDays = Math.max(0.01, (Date.now() - lastReviewDate) / MS_PER_DAY);
         
         // Retrievability: power function forgetting curve
-        const R = Math.pow(1 + 19 * elapsedDays / S, -0.4);
+        const R = Math.pow(1 + elapsedDays / (9 * S), -0.4);
 
         // Update Difficulty (mean-reverted)
         const d_prime = D - w[6] * (g - 3);
