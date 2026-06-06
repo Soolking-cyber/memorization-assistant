@@ -533,7 +533,7 @@ export function updatePracticeScoreBadges(card) {
     const frontFace = document.querySelector('.card-face.card-front');
     const backFace = document.querySelector('.card-face.card-back');
     
-    const tooltipText = `Memory Strength: ${score}%\nDetermines next review: (Score/20)² days\n• Easy: +40% gap (min +10)\n• Good: +25% gap (min +8)\n• Hard: -15% score (min -5)\n• Again/Timeout: -35% score (min -10)`;
+    const tooltipText = `Memory Strength: ${score}%\nDetermines next review: (Score/20)² days\n• Easy: +40% gap (min +10)\n• Good: +25% gap (min +8)\n• Hard: -15% score (min -5)\n• Again/Timeout: -35% score (min -10)\n• Category tuning adjusts interval: 1.5x (success rate ≥90%) or 0.5x (success rate ≤80%)`;
     
     const badgeHtml = `
         <span class="card-score-badge" data-tooltip="${tooltipText}" style="position: absolute; top: 12px; right: 16px; z-index: 100;">

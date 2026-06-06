@@ -322,7 +322,7 @@ function renderActiveStackCard() {
                     ${illustrationContent}
                 </div>
                 
-                <div class="card-hp-section" data-tooltip="Memory Strength: ${scorePercent}%\nDetermines next review: (Score/20)² days\n• Easy: +40% gap (min +10)\n• Good: +25% gap (min +8)\n• Hard: -15% score (min -5)\n• Again/Timeout: -35% score (min -10)" style="cursor: help;">
+                <div class="card-hp-section" data-tooltip="Memory Strength: ${scorePercent}%\nDetermines next review: (Score/20)² days\n• Easy: +40% gap (min +10)\n• Good: +25% gap (min +8)\n• Hard: -15% score (min -5)\n• Again/Timeout: -35% score (min -10)\n• Category tuning adjusts interval: 1.5x (success rate ≥90%) or 0.5x (success rate ≤80%)" style="cursor: help;">
                     <div class="card-hp-label">
                         <span>Memory Strength</span>
                         <span class="hp-val">${scorePercent}%</span>
