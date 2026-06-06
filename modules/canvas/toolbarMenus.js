@@ -304,7 +304,7 @@ export function showLinkToolbar(midX, midY, container, link, nodes, links, svgId
     delBtn.className = 'link-delete-btn';
     delBtn.innerHTML = ICONS.trash;
     delBtn.title = 'Delete Connection';
-    delBtn.style = 'border: none; background: none; cursor: pointer; color: #ef4444; display: flex; align-items: center; justify-content: center; padding: 2px; transition: transform 0.1s;';
+    delBtn.style = 'border: none; background: none; cursor: pointer; color: var(--danger); display: flex; align-items: center; justify-content: center; padding: 2px; transition: transform 0.1s;';
     delBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
         if (await window.confirm("Are you sure you want to delete this connection?")) {

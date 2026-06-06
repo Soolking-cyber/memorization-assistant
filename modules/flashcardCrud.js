@@ -132,7 +132,7 @@ export function renderManageView() {
                     ${sentencesArray.map((s, idx) => `
                         <div class="manage-sentence-item" data-card-id="${card.id}" data-index="${idx}" data-tooltip="Double-click to edit clue" style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 8px; font-size: 0.85rem;">
                             <span class="manage-sentence-text" style="flex: 1; margin-right: 8px; line-height: 1.4;">${s}</span>
-                            <button type="button" class="delete-sentence-bank-btn" data-card-id="${card.id}" data-index="${idx}" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:0 4px; display:inline-flex; align-items:center;" title="Delete Clue">${ICONS.trash}</button>
+                            <button type="button" class="delete-sentence-bank-btn" data-card-id="${card.id}" data-index="${idx}" style="background:none; border:none; color:var(--danger); cursor:pointer; padding:0 4px; display:inline-flex; align-items:center;" title="Delete Clue">${ICONS.trash}</button>
                         </div>
                     `).join('')}
                 </div>
@@ -311,7 +311,7 @@ export function renderManageView() {
                 }
                 
                 if (card && !validateExampleSentence(newText, card.back)) {
-                    input.style.borderColor = '#ef4444';
+                    input.style.borderColor = 'var(--danger)';
                     await window.alert(`Clue sentence must contain the target recall word "${card.back}"!`);
                     finished = false;
                     input.focus();
