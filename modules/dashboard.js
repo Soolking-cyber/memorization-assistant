@@ -65,9 +65,7 @@ export function updateTypeDatalists() {
         const select = document.getElementById(selectId);
         if (!select) return;
         
-        // Reset selectedValues since options are being repopulated
-        select.selectedValues = null;
-        
+        const previousSelected = select.selectedValues;
         const currentVal = select.value;
         select.innerHTML = '';
         
@@ -97,6 +95,20 @@ export function updateTypeDatalists() {
             select.value = 'Vocabulary';
         } else {
             select.value = 'mixed';
+        }
+
+        // Restore selected values
+        if (previousSelected) {
+            const validOptions = [...select.options].map(o => o.value);
+            select.selectedValues = previousSelected.filter(v => validOptions.includes(v));
+            if (previousSelected.includes('mixed')) {
+                const allOpts = [...select.options].map(o => o.value).filter(v => v !== 'add_new');
+                allOpts.forEach(val => {
+                    if (!select.selectedValues.includes(val)) {
+                        select.selectedValues.push(val);
+                    }
+                });
+            }
         }
         
         buildCustomDropdownUI(selectId);
