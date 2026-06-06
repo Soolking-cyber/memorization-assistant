@@ -5,6 +5,7 @@ import { logReviewAttempt } from '../practice.js';
 import { playUISound } from '../sound.js';
 import { calculateCardStats } from '../gamification.js';
 import { switchView } from '../navigation.js';
+import { ICONS } from '../icons.js';
 
 // Gameplay state
 const scrambleState = {
@@ -459,7 +460,12 @@ function handleSlotClick(slotIndex) {
 function updateLivesHUD() {
     const livesHud = document.getElementById('scramble-lives-hud');
     if (livesHud) {
-        livesHud.innerHTML = '❤️'.repeat(scrambleState.lives) + '🖤'.repeat(3 - scrambleState.lives);
+        let html = '';
+        for (let i = 0; i < 3; i++) {
+            const isActive = i < scrambleState.lives;
+            html += `<span class="game-life ${isActive ? 'active' : 'lost'}">${ICONS.heart}</span>`;
+        }
+        livesHud.innerHTML = html;
     }
 }
 
@@ -862,8 +868,8 @@ function updateScrambleScoreBadge(card) {
             existingBadge.remove();
         }
         arena.insertAdjacentHTML('beforeend', `
-            <span class="card-score-badge" data-tooltip="${scoreTooltip}" style="position: absolute; top: 12px; right: 16px; font-size: 0.72rem; font-weight: 700; background: var(--bg-secondary); color: var(--accent); border: 1.5px solid var(--border-color); padding: 2px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; cursor: help; z-index: 100; user-select: none;">
-                ⚡ ${score}%
+            <span class="card-score-badge" data-tooltip="${scoreTooltip}" style="position: absolute; top: 12px; right: 16px; z-index: 100;">
+                ${ICONS.zap} ${score}%
             </span>
         `);
     }

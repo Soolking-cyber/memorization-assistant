@@ -756,6 +756,34 @@ svg.icon-svg path[fill="currentColor"] {
     fill: currentColor !important;
 }
 
+/* Card Score Badge with Muted Gold Lightning Bolt Icon */
+.card-score-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1.5px solid var(--border-color);
+    padding: 2px 8px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: help;
+    user-select: none;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.card-score-badge:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--text-secondary);
+}
+
+.card-score-badge .icon-svg {
+    color: var(--warning) !important;
+    width: 14px;
+    height: 14px;
+}
+
 
 
 

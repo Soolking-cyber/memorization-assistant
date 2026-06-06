@@ -795,3 +795,25 @@
 .text-gold {
     color: var(--warning) !important;
 }
+
+/* Status/Game HUD Shield Icons */
+.hud-shield {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hud-shield.active {
+    color: var(--danger);
+}
+
+.hud-shield.lost {
+    color: var(--text-tertiary);
+    opacity: 0.25;
+}
+
+.hud-shield .icon-svg {
+    width: 18px;
+    height: 18px;
+}

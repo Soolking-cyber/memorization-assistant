@@ -585,7 +585,11 @@ Sum of all cards' memory strength scores (max 100 per card).">
                             </div>
                             <div class="hud-item hud-shields-container">
                                 <span class="hud-label">Shields</span>
-                                <span id="hud-shields-val" class="hud-value">🛡️🛡️🛡️</span>
+                                <span id="hud-shields-val" class="hud-value" style="display: inline-flex; align-items: center; gap: 4px;">
+                                    <span class="hud-shield active"><svg viewBox="0 0 24 24" class="icon-svg"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></span>
+                                    <span class="hud-shield active"><svg viewBox="0 0 24 24" class="icon-svg"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></span>
+                                    <span class="hud-shield active"><svg viewBox="0 0 24 24" class="icon-svg"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></span>
+                                </span>
                             </div>
                         </div>
 
@@ -631,9 +635,11 @@ Sum of all cards' memory strength scores (max 100 per card).">
                                 Exit Game
                             </button>
                             <h3 id="scramble-game-title" style="margin: 0; font-size: 1.2rem; color: var(--text-primary);">Word Scramble</h3>
-                            <div class="scramble-lives" id="scramble-lives-hud" title="Remaining Lives">
-                                🛡️🛡️🛡️
-                            </div>
+                             <div class="scramble-lives" id="scramble-lives-hud" title="Remaining Lives">
+                                 <span class="game-life active"><svg viewBox="0 0 24 24" class="icon-svg"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></span>
+                                 <span class="game-life active"><svg viewBox="0 0 24 24" class="icon-svg"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></span>
+                                 <span class="game-life active"><svg viewBox="0 0 24 24" class="icon-svg"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></span>
+                             </div>
                         </div>
 
                         <div class="scramble-hud">

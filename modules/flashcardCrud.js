@@ -174,8 +174,8 @@ export function renderManageView() {
             <div class="manage-card-content" style="flex: 1;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
                     <span class="type-tag" style="margin: 0;">${card.type === 'mixed' ? 'All Types' : (card.type || 'All Types')}</span>
-                    <span class="card-score-badge" data-tooltip="${scoreTooltip}" style="font-size: 0.72rem; font-weight: 700; background: var(--bg-secondary); color: var(--accent); border: 1.5px solid var(--border-color); padding: 2px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; cursor: help; user-select: none;">
-                        ⚡ ${score}%
+                    <span class="card-score-badge" data-tooltip="${scoreTooltip}">
+                        ${ICONS.zap} ${score}%
                     </span>
                 </div>
                 <strong>Front:</strong> <br> ${displayFront} ${frontImgHtml} <br><br>

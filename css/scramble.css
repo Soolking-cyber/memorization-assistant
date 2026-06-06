@@ -471,3 +471,25 @@ body.dark-theme .scramble-slot.active-slot {
         font-size: 1.15rem;
     }
 }
+
+/* Status/Game HUD Life (Heart) Icons */
+.game-life {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.game-life.active {
+    color: var(--danger);
+}
+
+.game-life.lost {
+    color: var(--text-tertiary);
+    opacity: 0.25;
+}
+
+.game-life .icon-svg {
+    width: 18px;
+    height: 18px;
+}

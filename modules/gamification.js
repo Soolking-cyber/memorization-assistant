@@ -6,6 +6,7 @@ import { calculateMatchPercentage } from './practice/spellingEngine.js';
 import { applySM2Grade } from './spacedRepetition.js';
 import { logReviewAttempt } from './practice.js';
 import { playUISound } from './sound.js';
+import { ICONS } from './icons.js';
 
 /**
  * Calculates difficulty and gamification rarity statistics for a single card.
@@ -210,6 +211,18 @@ export async function renderCollectionDeck() {
 }
 
 /**
+ * Helper to render SVG shield status indicators.
+ */
+export function renderShieldsHTML(count) {
+    let html = '';
+    for (let i = 0; i < 3; i++) {
+        const isActive = i < count;
+        html += `<span class="hud-shield ${isActive ? 'active' : 'lost'}">${ICONS.shield}</span>`;
+    }
+    return html;
+}
+
+/**
  * Initializes and starts the stack active study session.
  */
 function startStackStudy(tierKey, tierName, decoratedCards) {
@@ -238,7 +251,7 @@ function startStackStudy(tierKey, tierName, decoratedCards) {
     const streakVal = document.getElementById('hud-streak-val');
     if (streakVal) streakVal.textContent = '0x';
     const shieldsVal = document.getElementById('hud-shields-val');
-    if (shieldsVal) shieldsVal.textContent = '🛡️🛡️🛡️';
+    if (shieldsVal) shieldsVal.innerHTML = renderShieldsHTML(3);
     
     // Toggle active view states
     document.getElementById('deck-stacks-view')?.classList.add('hidden');
@@ -609,7 +622,7 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
     }
     const shieldsVal = document.getElementById('hud-shields-val');
     if (shieldsVal) {
-        shieldsVal.textContent = '🛡️'.repeat(state.recallShields) || 'None';
+        shieldsVal.innerHTML = renderShieldsHTML(state.recallShields);
     }
     
     // Spawn floating points animation over card
@@ -828,7 +841,9 @@ function finishStackStudy() {
                 </div>
                 <div class="scorecard-item">
                     <span class="scorecard-label">Shields Retained</span>
-                    <span class="scorecard-value" style="font-size: 1rem;">${'🛡️'.repeat(state.recallShields) || 'None'}</span>
+                    <span class="scorecard-value" style="display: inline-flex; gap: 4px; align-items: center; justify-content: center; min-height: 24px;">
+                        ${renderShieldsHTML(state.recallShields)}
+                    </span>
                 </div>
             </div>
             
