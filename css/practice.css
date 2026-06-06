@@ -348,13 +348,14 @@ input.letter-box:focus {
     position: absolute;
     z-index: 10000;
     pointer-events: none;
-    background: rgba(18, 18, 18, 0.95);
+    /* Light Mode Default */
+    background: rgba(250, 250, 247, 0.96);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 10px 14px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     transform: translate(-50%, -100%) scale(0.95);
     opacity: 0;
     transition: opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
@@ -363,6 +364,12 @@ input.letter-box:focus {
     flex-direction: column;
     gap: 4px;
     min-width: 160px;
+}
+
+body.dark-theme .heatmap-tooltip {
+    background: rgba(34, 34, 32, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .heatmap-tooltip.visible {
@@ -378,24 +385,41 @@ input.letter-box:focus {
     transform: translateX(-50%) rotate(45deg);
     width: 10px;
     height: 10px;
-    background: rgba(18, 18, 18, 0.95);
-    border-right: 1px solid rgba(255, 255, 255, 0.12);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    /* Light Mode Default */
+    background: rgba(250, 250, 247, 0.96);
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+body.dark-theme .heatmap-tooltip::after {
+    background: rgba(34, 34, 32, 0.96);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .heatmap-tooltip-date {
     font-weight: 700;
-    color: #ffffff;
+    /* Light mode */
+    color: var(--text-primary);
     font-size: 0.8rem;
     letter-spacing: -0.01em;
 }
 
+body.dark-theme .heatmap-tooltip-date {
+    color: #ffffff;
+}
+
 .heatmap-tooltip-activity {
     font-size: 0.72rem;
-    color: rgba(255, 255, 255, 0.7);
+    /* Light mode */
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
     gap: 6px;
+}
+
+body.dark-theme .heatmap-tooltip-activity {
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .heatmap-tooltip-pill {
@@ -410,13 +434,13 @@ input.letter-box:focus {
 
 .heatmap-tooltip-pill.creation {
     background: rgba(212, 166, 59, 0.15);
-    color: #e5b955;
+    color: var(--warning);
     border: 1px solid rgba(212, 166, 59, 0.3);
 }
 
 .heatmap-tooltip-pill.review {
     background: rgba(74, 128, 90, 0.15);
-    color: #62c37e;
+    color: var(--success);
     border: 1px solid rgba(74, 128, 90, 0.3);
 }
 
