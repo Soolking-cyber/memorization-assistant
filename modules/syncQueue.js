@@ -121,7 +121,8 @@ export async function processSyncQueue() {
                             nextReview: item.payload.nextReview,
                             ease: item.payload.ease,
                             interval: item.payload.interval,
-                            repetitions: item.payload.repetitions
+                            repetitions: item.payload.repetitions,
+                            score: item.payload.score || 50
                         })
                         .eq('id', item.payload.id)
                         .eq('user_id', state.userSession.user.id);

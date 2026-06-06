@@ -51,6 +51,11 @@ export async function applySM2Grade(gradeInt) {
     
     let card = state.cards[cardIndexInGlobal];
     
+    // Ensure card has a valid score initialized (1-100, default 50)
+    if (card.score === undefined || card.score === null) {
+        card.score = 50;
+    }
+    
     let logs = [];
     try {
         logs = await dbGet('review_activity_logs') || [];
@@ -59,33 +64,25 @@ export async function applySM2Grade(gradeInt) {
     }
 
     const tuning = getCategoryTuning(card.type, logs);
-    if (tuning.successRate !== null) {
-        console.log(`[Personalized SM-2] Type: ${card.type} | Success Rate: ${Math.round(tuning.successRate * 100)}% | Spacing Multiplier: ${tuning.retentionMultiplier}x | Ease Shift: ${tuning.easeAdjustment}`);
+
+    // Update 1-100 score dynamically based on gradeInt
+    if (gradeInt === 3) { // Easy
+        card.score = Math.min(100, card.score + Math.max(10, Math.round((100 - card.score) * 0.4)));
+    } else if (gradeInt === 2) { // Good
+        card.score = Math.min(100, card.score + Math.max(8, Math.round((100 - card.score) * 0.25)));
+    } else if (gradeInt === 1) { // Hard
+        card.score = Math.max(1, card.score - Math.max(5, Math.round(card.score * 0.15)));
+    } else { // Fail/Again (gradeInt = 0)
+        card.score = Math.max(1, card.score - Math.max(10, Math.round(card.score * 0.35)));
     }
 
-    if (gradeInt === 0) {
-        card.repetitions = 0;
-        card.interval = 1 / (24 * 60); // 1 minute
-        card.ease = Math.max(1.3, card.ease - 0.2 + tuning.easeAdjustment);
-    } else {
-        if (gradeInt === 1) { // Hard
-            card.interval = Math.max(10 / (24 * 60), card.interval * 1.2 * tuning.retentionMultiplier); 
-            card.ease = Math.max(1.3, card.ease - 0.15 + tuning.easeAdjustment);
-        } 
-        else if (gradeInt === 2) { // Good
-            if (card.repetitions === 0) card.interval = (10 / (24 * 60)) * tuning.retentionMultiplier; 
-            else if (card.repetitions === 1) card.interval = 0.5 * tuning.retentionMultiplier; 
-            else if (card.repetitions === 2) card.interval = 1.0 * tuning.retentionMultiplier; 
-            else card.interval = Math.max(1, Math.round(card.interval * card.ease * tuning.retentionMultiplier));
-        }
-        else if (gradeInt === 3) { // Easy
-            if (card.repetitions === 0) card.interval = 1.0 * tuning.retentionMultiplier; 
-            else if (card.repetitions === 1) card.interval = 4.0 * tuning.retentionMultiplier; 
-            else card.interval = Math.max(1, Math.round(card.interval * card.ease * 1.3 * tuning.retentionMultiplier));
-            card.ease += 0.15 + tuning.easeAdjustment;
-        }
-        card.repetitions += 1;
-    }
+    // Spaced repetition interval is determined directly by this score:
+    // interval = 0.01 + Math.pow(score / 20, 2)
+    // Applying category retentionMultiplier from logs tuning if active
+    const multiplier = tuning.retentionMultiplier || 1.0;
+    card.interval = (0.01 + Math.pow(card.score / 20, 2)) * multiplier;
+    
+    card.repetitions += 1;
 
     const MS_PER_DAY = 86400000;
     card.nextReview = Date.now() + (card.interval * MS_PER_DAY);

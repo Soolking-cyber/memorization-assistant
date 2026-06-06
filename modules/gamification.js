@@ -15,10 +15,8 @@ export function calculateCardStats(card, logs) {
     const cardLogs = (logs || []).filter(log => log.cardId === card.id);
     const attempts = cardLogs.length;
     const failures = cardLogs.filter(log => log.grade < 2 || log.score < 75).length;
-    const successes = attempts - failures;
     
     const savedSentences = state.exampleSentences[card.id];
-    let cluesCount = 0;
     let sentences = [];
     
     if (savedSentences) {
@@ -28,10 +26,8 @@ export function calculateCardStats(card, logs) {
             sentences = [savedSentences];
         }
     }
-    cluesCount = sentences.length;
     
-    const struggleIndex = Math.max(0, (failures * 6) - (successes * 3) + (cluesCount * 4));
-    const successRate = attempts > 0 ? Math.round(((attempts - failures) / attempts) * 100) : 100;
+    const scoreVal = card.score !== undefined && card.score !== null ? card.score : 50;
     
     let tier = {
         name: 'Mastered',
@@ -40,21 +36,28 @@ export function calculateCardStats(card, logs) {
         title: 'Mastered Card'
     };
     
-    if (struggleIndex >= 22) {
+    if (scoreVal <= 20) {
+        tier = {
+            name: 'Critical Focus',
+            key: 'ultrarare',
+            class: 'tier-ultrarare',
+            title: 'Critical Focus Card'
+        };
+    } else if (scoreVal <= 40) {
         tier = {
             name: 'High Struggle',
             key: 'legendary',
             class: 'tier-legendary',
             title: 'High Struggle Card'
         };
-    } else if (struggleIndex >= 12) {
+    } else if (scoreVal <= 60) {
         tier = {
             name: 'Medium Struggle',
             key: 'epic',
             class: 'tier-epic',
             title: 'Medium Struggle Card'
         };
-    } else if (struggleIndex >= 5) {
+    } else if (scoreVal <= 80) {
         tier = {
             name: 'Low Struggle',
             key: 'rare',
@@ -66,9 +69,10 @@ export function calculateCardStats(card, logs) {
     return {
         attempts,
         failures,
-        cluesCount,
-        struggleIndex,
-        successRate,
+        cluesCount: sentences.length,
+        struggleIndex: scoreVal,
+        score: scoreVal,
+        successRate: scoreVal,
         tier,
         sentences
     };
@@ -111,27 +115,16 @@ export async function renderCollectionDeck() {
             return { card, stats };
         });
         
-    // Sort vocabulary cards descending by struggleIndex to isolate the absolute hardest
-    vocabCards.sort((a, b) => b.stats.struggleIndex - a.stats.struggleIndex);
+    // Sort vocabulary cards ascending by score (lowest score first = study hardest words first)
+    vocabCards.sort((a, b) => a.stats.score - b.stats.score);
     
-    // The top 10 most difficult cards are classified as "Critical Focus"
-    vocabCards.forEach((cardObj, idx) => {
-        if (idx < 10) {
-            cardObj.stats.tier = {
-                name: 'Critical Focus',
-                key: 'ultrarare',
-                class: 'tier-ultrarare',
-                title: 'Critical Focus Card'
-            };
-            ultraRareCards.push(cardObj);
-        } else {
-            // Re-allocate remaining cards to their native struggle-based tiers
-            const stats = cardObj.stats;
-            if (stats.tier.key === 'legendary') legendaryCards.push(cardObj);
-            else if (stats.tier.key === 'epic') epicCards.push(cardObj);
-            else if (stats.tier.key === 'rare') rareCards.push(cardObj);
-            else commonCards.push(cardObj);
-        }
+    vocabCards.forEach((cardObj) => {
+        const stats = cardObj.stats;
+        if (stats.tier.key === 'ultrarare') ultraRareCards.push(cardObj);
+        else if (stats.tier.key === 'legendary') legendaryCards.push(cardObj);
+        else if (stats.tier.key === 'epic') epicCards.push(cardObj);
+        else if (stats.tier.key === 'rare') rareCards.push(cardObj);
+        else commonCards.push(cardObj);
     });
     
     stacksGrid.innerHTML = '';
@@ -220,8 +213,8 @@ export async function renderCollectionDeck() {
  * Initializes and starts the stack active study session.
  */
 function startStackStudy(tierKey, tierName, decoratedCards) {
-    // Sort cards by struggle index descending (hardest first)
-    const sorted = decoratedCards.sort((a, b) => b.stats.struggleIndex - a.stats.struggleIndex);
+    // Sort cards by score ascending (lowest score first = study hardest words first)
+    const sorted = decoratedCards.sort((a, b) => a.stats.score - b.stats.score);
     
     state.reviewQueue = sorted.map(c => c.card);
     state.currentReviewIndex = 0;
@@ -303,10 +296,10 @@ function renderActiveStackCard() {
             illustrationContent = `<img class="illustration-img" src="${card.image_front_url}" alt="Memory Art">`;
         }
         
-        const hpPercent = Math.min(100, Math.max(25, stats.struggleIndex * 3));
+        const scorePercent = stats.score;
         
         container.innerHTML = `
-            <div class="study-pokemon-card ${stats.tier.class} card-slide-in">
+            <div class="study-pokemon-card study-pokemon-card-layout ${stats.tier.class} card-slide-in">
                 <div class="card-header">
                     <div class="card-title-area">
                         <span class="card-rarity-badge">${stats.tier.name}</span>
@@ -320,11 +313,11 @@ function renderActiveStackCard() {
                 
                 <div class="card-hp-section">
                     <div class="card-hp-label">
-                        <span>Struggle Index</span>
-                        <span class="hp-val">${stats.struggleIndex}</span>
+                        <span>Memory Strength</span>
+                        <span class="hp-val">${scorePercent}%</span>
                     </div>
                     <div class="card-hp-bar">
-                        <div class="card-hp-fill" style="width: ${hpPercent}%"></div>
+                        <div class="card-hp-fill" style="width: ${scorePercent}%"></div>
                     </div>
                 </div>
                 

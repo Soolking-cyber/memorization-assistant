@@ -53,7 +53,7 @@ export async function initScrambleView() {
         console.warn("Could not retrieve review logs for Scramble:", e);
     }
 
-    // Filter vocabulary cards and compute struggle index
+    // Filter vocabulary cards and compute stats (now based on unified score)
     const vocabCards = state.cards
         .filter(card => card.type && card.type.toLowerCase() === 'vocabulary')
         .map(card => {
@@ -61,8 +61,8 @@ export async function initScrambleView() {
             return { card, stats };
         });
 
-    // Sort descending to isolate hardest cards
-    vocabCards.sort((a, b) => b.stats.struggleIndex - a.stats.struggleIndex);
+    // Sort vocabulary cards ascending by score (lowest score first = study hardest words first)
+    vocabCards.sort((a, b) => a.stats.score - b.stats.score);
 
     const legendaryCards = [];
     const ultraRareCards = [];
@@ -70,22 +70,13 @@ export async function initScrambleView() {
     const rareCards = [];
     const commonCards = [];
 
-    vocabCards.forEach((cardObj, idx) => {
-        if (idx < 10) {
-            cardObj.stats.tier = {
-                name: 'Critical Focus',
-                key: 'ultrarare',
-                class: 'tier-ultrarare',
-                title: 'Critical Focus Card'
-            };
-            ultraRareCards.push(cardObj.card);
-        } else {
-            const stats = cardObj.stats;
-            if (stats.tier.key === 'legendary') legendaryCards.push(cardObj.card);
-            else if (stats.tier.key === 'epic') epicCards.push(cardObj.card);
-            else if (stats.tier.key === 'rare') rareCards.push(cardObj.card);
-            else commonCards.push(cardObj.card);
-        }
+    vocabCards.forEach((cardObj) => {
+        const stats = cardObj.stats;
+        if (stats.tier.key === 'ultrarare') ultraRareCards.push(cardObj.card);
+        else if (stats.tier.key === 'legendary') legendaryCards.push(cardObj.card);
+        else if (stats.tier.key === 'epic') epicCards.push(cardObj.card);
+        else if (stats.tier.key === 'rare') rareCards.push(cardObj.card);
+        else commonCards.push(cardObj.card);
     });
 
     const decksConfig = [

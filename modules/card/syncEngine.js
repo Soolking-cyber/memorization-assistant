@@ -83,6 +83,7 @@ export async function loadData() {
                     cached.ease !== card.ease ||
                     cached.interval !== card.interval ||
                     cached.repetitions !== card.repetitions ||
+                    cached.score !== card.score ||
                     JSON.stringify(cached.example_sentences) !== JSON.stringify(card.example_sentences)
                 ) {
                     cacheChanged = true;
@@ -105,6 +106,11 @@ export async function loadData() {
                 migratedCards.push(card);
             }
             
+            if (card.score === undefined || card.score === null) {
+                card.score = 50;
+                needsUpdate = true;
+                cacheChanged = true;
+            }
             if (card.example_sentences) {
                 state.exampleSentences[card.id] = card.example_sentences;
             } else {
@@ -163,7 +169,8 @@ export async function insertCardToDB(card) {
             nextReview: card.nextReview,
             ease: card.ease,
             interval: card.interval,
-            repetitions: card.repetitions
+            repetitions: card.repetitions,
+            score: card.score || 50
         }]);
 
     if (error) console.error("Error inserting:", error);
@@ -179,7 +186,8 @@ export async function updateCardInDB(card) {
         nextReview: card.nextReview,
         ease: card.ease,
         interval: card.interval,
-        repetitions: card.repetitions
+        repetitions: card.repetitions,
+        score: card.score || 50
     };
 
     if (!navigator.onLine) {
@@ -195,7 +203,8 @@ export async function updateCardInDB(card) {
                 nextReview: card.nextReview,
                 ease: card.ease,
                 interval: card.interval,
-                repetitions: card.repetitions
+                repetitions: card.repetitions,
+                score: card.score || 50
             })
             .eq('id', card.id)
             .eq('user_id', state.userSession.user.id);
