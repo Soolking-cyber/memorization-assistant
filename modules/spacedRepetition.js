@@ -151,7 +151,7 @@ export async function applySM2Grade(gradeInt) {
     card.score = Math.max(1, Math.min(100, Math.round(100 * Math.log(S_new / 0.1) / Math.log(3650))));
 
     const MS_PER_DAY = 86400000;
-    card.nextReview = Date.now() + (card.interval * MS_PER_DAY);
+    card.nextReview = Math.round(Date.now() + (card.interval * MS_PER_DAY));
 
     // Sync to DB silently
     updateCardInDB(card);

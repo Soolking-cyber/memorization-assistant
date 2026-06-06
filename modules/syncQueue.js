@@ -85,6 +85,23 @@ export async function queueTransaction(type, payload) {
     }
 }
 
+function isPermanentDbError(error) {
+    if (!error) return false;
+    const code = String(error.code || '');
+    // PostgreSQL error codes starting with:
+    // 22: Data Exception (e.g. 22P02 invalid text representation)
+    // 23: Integrity Constraint Violation (e.g. 23503 foreign key violation)
+    // 42: Syntax Error or Access Rule Violation (e.g. RLS)
+    if (code.startsWith('22') || code.startsWith('23') || code.startsWith('42')) {
+        return true;
+    }
+    const msg = (error.message || '').toLowerCase();
+    if (msg.includes('foreign key') || msg.includes('invalid input syntax') || msg.includes('violates row-level security')) {
+        return true;
+    }
+    return false;
+}
+
 export async function processSyncQueue() {
     if (isSyncing) return;
     if (!navigator.onLine) {
@@ -112,8 +129,22 @@ export async function processSyncQueue() {
 
         for (const item of queue) {
             let success = false;
+            let isPermanentError = false;
             
             try {
+                if (!state.userSession || !state.userSession.user) {
+                    console.warn("[Offline Sync] Cannot process sync queue because user session is missing.");
+                    break;
+                }
+
+                // Sanitize/round nextReview in update_card payload if it is a float/string number
+                if (item.type === 'update_card' && item.payload && item.payload.nextReview !== undefined) {
+                    const parsed = Number(item.payload.nextReview);
+                    if (!isNaN(parsed)) {
+                        item.payload.nextReview = Math.round(parsed);
+                    }
+                }
+
                 if (item.type === 'update_card') {
                     const { error } = await supabase
                         .from('flashcards')
@@ -127,8 +158,14 @@ export async function processSyncQueue() {
                         .eq('id', item.payload.id)
                         .eq('user_id', state.userSession.user.id);
                         
-                    if (!error) success = true;
-                    else console.error("Error syncing card update in queue:", error);
+                    if (!error) {
+                        success = true;
+                    } else {
+                        console.error("Error syncing card update in queue:", error);
+                        if (isPermanentDbError(error)) {
+                            isPermanentError = true;
+                        }
+                    }
                 } else if (item.type === 'insert_log') {
                     const { error } = await supabase
                         .from('review_logs')
@@ -139,8 +176,14 @@ export async function processSyncQueue() {
                             score: item.payload.score
                         }]);
                         
-                    if (!error) success = true;
-                    else console.error("Error syncing review log in queue:", error);
+                    if (!error) {
+                        success = true;
+                    } else {
+                        console.error("Error syncing review log in queue:", error);
+                        if (isPermanentDbError(error)) {
+                            isPermanentError = true;
+                        }
+                    }
                 }
             } catch (err) {
                 console.error("Network exception during queue processing:", err);
@@ -148,6 +191,9 @@ export async function processSyncQueue() {
 
             if (success) {
                 completedCount++;
+            } else if (isPermanentError) {
+                console.error("[Offline Sync] Discarding invalid queue item due to permanent database error:", item);
+                completedCount++; // Mark as processed so it gets removed from the queue
             } else {
                 failedItems.push(item);
                 // Stop processing on first connection failure to preserve order of updates

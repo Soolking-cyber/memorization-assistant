@@ -30,13 +30,17 @@ export async function fetchAndCacheReviewLogs() {
 
 export function parseNextReview(val) {
     if (!val) return Date.now();
-    if (typeof val === 'number') return val;
+    if (typeof val === 'number') return Math.round(val);
     if (typeof val === 'string') {
         if (/^\d+$/.test(val)) {
             return parseInt(val, 10);
         }
+        const floatVal = parseFloat(val);
+        if (!isNaN(floatVal) && /^\d+\.\d+$/.test(val)) {
+            return Math.round(floatVal);
+        }
         const parsed = Date.parse(val);
-        return isNaN(parsed) ? Date.now() : parsed;
+        return isNaN(parsed) ? Date.now() : Math.round(parsed);
     }
     return Date.now();
 }
