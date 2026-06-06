@@ -6,6 +6,7 @@ import { playUISound } from '../sound.js';
 import { calculateCardStats } from '../gamification.js';
 import { switchView } from '../navigation.js';
 import { ICONS } from '../icons.js';
+import { buildCustomDropdownUI } from '../uiHelpers.js';
 
 // Gameplay state
 const scrambleState = {
@@ -101,6 +102,8 @@ export async function initScrambleView() {
         option.textContent = `${cfg.name} (${cfg.cards.length} Cards)`;
         select.options.add(option);
     });
+
+    buildCustomDropdownUI('scramble-difficulty-select');
 
     const startBtn = document.getElementById('btn-scramble-start');
     if (startBtn) {
