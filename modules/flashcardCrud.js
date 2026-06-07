@@ -3,7 +3,6 @@ import { supabase } from './supabaseClient.js';
 import { ICONS } from './icons.js';
 import { dbSet } from './db.js';
 import { getSelectedTypes } from './dashboard.js';
-import { validateExampleSentence } from './practice.js';
 
 import {
     handleCreateAddSentence,

@@ -1,6 +1,6 @@
 import { state } from './modules/state.js';
 import { supabase } from './modules/supabaseClient.js';
-import { playUISound, initSoundSystem } from './modules/sound.js';
+import { initSoundSystem } from './modules/sound.js';
 import { dbGet } from './modules/db.js';
 import { parseNextReview } from './modules/card/syncEngine.js';
 import { initSyncListeners } from './modules/syncQueue.js';

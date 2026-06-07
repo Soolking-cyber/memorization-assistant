@@ -2,7 +2,6 @@ import { state } from '../state.js';
 import { supabase } from '../supabaseClient.js';
 import { ICONS } from '../icons.js';
 import { renderEditorNodes } from '../canvas.js';
-import { validateExampleSentence } from '../practice.js';
 import { switchView } from '../navigation.js';
 import { dbSet } from '../db.js';
 import { buildCustomDropdownUI } from '../uiHelpers.js';

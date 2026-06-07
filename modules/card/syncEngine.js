@@ -1,10 +1,8 @@
 import { state } from '../state.js';
 import { supabase } from '../supabaseClient.js';
 import { updateDashboard } from '../dashboard.js';
-import { renderStatistics } from '../stats.js';
 import { dbSet } from '../db.js';
 import { queueTransaction } from '../syncQueue.js';
-import { renderManageView } from '../flashcardCrud.js';
 
 export async function fetchAndCacheReviewLogs() {
     if (!state.userSession || !supabase) return;
