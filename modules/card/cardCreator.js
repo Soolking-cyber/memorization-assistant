@@ -1,4 +1,4 @@
-import { state } from '../state.js';
+import { state, isVocabularyType } from '../state.js';
 import { supabase } from '../supabaseClient.js';
 import { ICONS } from '../icons.js';
 import { renderEditorNodes } from '../canvas.js';
@@ -32,7 +32,7 @@ export function updateFormLabelsAndPlaceholders(isEdit, type) {
 
     const wordTypesGroup = document.getElementById(isEdit ? 'edit-word-types-group' : 'create-word-types-group');
     if (wordTypesGroup) {
-        if (type === 'Vocabulary') {
+        if (isVocabularyType(type)) {
             wordTypesGroup.classList.remove('hidden');
         } else {
             wordTypesGroup.classList.add('hidden');
@@ -72,7 +72,7 @@ export async function handleCreateCard(e) {
         backText = document.getElementById('card-back').value.trim();
         if (!frontText || !backText) return;
 
-        if (activeType === 'Vocabulary') {
+        if (isVocabularyType(activeType)) {
             const select = document.getElementById('vocab-word-types');
             const wordTypes = select && select.selectedValues ? select.selectedValues : [];
             if (wordTypes.length > 0) {
@@ -305,7 +305,7 @@ export function openEditView(cardId) {
         
         let cleanFront = card.front;
         let wordTypes = [];
-        if (card.type === 'Vocabulary' && card.front.includes('|||')) {
+        if (isVocabularyType(card.type) && card.front.includes('|||')) {
             const parts = card.front.split('|||');
             cleanFront = parts[0].trim();
             wordTypes = parts[1].split(',').map(t => t.trim()).filter(Boolean);
@@ -375,7 +375,7 @@ export async function handleEditCardSubmit(e) {
     } else {
         frontText = document.getElementById('edit-card-front').value.trim();
         backText = document.getElementById('edit-card-back').value.trim();
-        if (typeText === 'Vocabulary') {
+        if (isVocabularyType(typeText)) {
             const select = document.getElementById('edit-vocab-word-types');
             const wordTypes = select && select.selectedValues ? select.selectedValues : [];
             if (wordTypes.length > 0) {

@@ -42,3 +42,10 @@ export const state = {
     soundEnabled: localStorage.getItem('soundEnabled') !== 'false',
     audioCtx: null
 };
+
+export function isVocabularyType(type) {
+    if (!type) return false;
+    const lower = type.toLowerCase();
+    return lower.includes('vocabulary') || lower.includes('vocab');
+}
+

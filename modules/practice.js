@@ -1,4 +1,4 @@
-import { state } from './state.js';
+import { state, isVocabularyType } from './state.js';
 import { supabase } from './supabaseClient.js';
 import { playUISound } from './sound.js';
 import { toggleFullscreen } from './uiHelpers.js';
@@ -386,7 +386,7 @@ export function renderCurrentCard() {
     
     let cleanFront = card.front;
     let wordTypes = [];
-    if (card.type === 'Vocabulary' && card.front.includes('|||')) {
+    if (isVocabularyType(card.type) && card.front.includes('|||')) {
         const parts = card.front.split('|||');
         cleanFront = parts[0].trim();
         wordTypes = parts[1].split(',').map(t => t.trim()).filter(Boolean);
@@ -469,7 +469,7 @@ export function renderCurrentCard() {
                 ${card.back.replace(/\n/g, '<br>')}
             </div>
     `;
-    if (card.type === 'Vocabulary' && wordTypes.length > 0) {
+    if (isVocabularyType(card.type) && wordTypes.length > 0) {
         const badgesHtml = wordTypes.map(t => `<span class="word-type-badge">${t}</span>`).join('');
         backHtml += `
             <div class="word-types-container">
@@ -483,7 +483,7 @@ export function renderCurrentCard() {
     const frontImg = document.getElementById('practice-front-img');
     const backImg = document.getElementById('practice-back-img');
 
-    const isVocab = card.type === 'Vocabulary';
+    const isVocab = isVocabularyType(card.type);
     const imageUrl = card.image_front_url || card.image_back_url;
 
     if (isVocab && imageUrl) {

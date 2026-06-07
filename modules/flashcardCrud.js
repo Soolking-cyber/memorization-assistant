@@ -1,4 +1,4 @@
-import { state } from './state.js';
+import { state, isVocabularyType } from './state.js';
 import { supabase } from './supabaseClient.js';
 import { ICONS } from './icons.js';
 import { dbSet } from './db.js';
@@ -141,7 +141,7 @@ export function renderManageView() {
         let displayFront = '';
         let cleanFront = card.front;
         let wordTypes = [];
-        if (card.type === 'Vocabulary' && card.front.includes('|||')) {
+        if (isVocabularyType(card.type) && card.front.includes('|||')) {
             const parts = card.front.split('|||');
             cleanFront = parts[0].trim();
             wordTypes = parts[1].split(',').map(t => t.trim()).filter(Boolean);
