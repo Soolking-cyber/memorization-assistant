@@ -1,19 +1,23 @@
 import { state } from './state.js';
 
-export function getAudioContext() {
+export async function getAudioContext() {
     if (!state.audioCtx) {
         state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
     if (state.audioCtx.state === 'suspended') {
-        state.audioCtx.resume();
+        try {
+            await state.audioCtx.resume();
+        } catch (e) {
+            console.warn("Failed to resume AudioContext:", e);
+        }
     }
     return state.audioCtx;
 }
 
-export function playUISound(type) {
+export async function playUISound(type) {
     if (!state.soundEnabled) return;
     try {
-        const ctx = getAudioContext();
+        const ctx = await getAudioContext();
         const now = ctx.currentTime;
         
         if (type === 'click') {
@@ -102,6 +106,30 @@ export function playUISound(type) {
 }
 
 export function initSoundSystem() {
+    // Global listener to unlock AudioContext on first user gesture
+    const unlockAudio = () => {
+        if (!state.audioCtx) {
+            state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (state.audioCtx && state.audioCtx.state === 'suspended') {
+            state.audioCtx.resume().then(() => {
+                // Play a brief silent buffer to warm up/prime Web Audio on iOS Safari
+                try {
+                    const buffer = state.audioCtx.createBuffer(1, 1, 22050);
+                    const source = state.audioCtx.createBufferSource();
+                    source.buffer = buffer;
+                    source.connect(state.audioCtx.destination);
+                    source.start(0);
+                } catch (e) {}
+            });
+        }
+        // Remove listeners
+        document.removeEventListener('click', unlockAudio, true);
+        document.removeEventListener('touchstart', unlockAudio, true);
+    };
+    document.addEventListener('click', unlockAudio, true);
+    document.addEventListener('touchstart', unlockAudio, true);
+
     const btnSoundToggle = document.getElementById('btn-sound-toggle');
     if (!btnSoundToggle) return;
     
