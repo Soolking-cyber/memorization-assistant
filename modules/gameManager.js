@@ -1,6 +1,8 @@
 import { state } from './state.js';
 import { updateDashboard } from './dashboard.js';
 import { switchView } from './navigation.js';
+import { supabase } from './supabaseClient.js';
+
 
 // Game module registry
 const G_REGISTRY = {
@@ -122,6 +124,19 @@ export async function toggleModule(modId, active) {
             if (mod.loaded) {
                 mod.unload();
             }
+        }
+    }
+    
+    // Sync to Supabase auth user metadata
+    if (state.userSession && supabase) {
+        try {
+            await supabase.auth.updateUser({
+                data: {
+                    active_modules: state.activeModules
+                }
+            });
+        } catch (err) {
+            console.error("Failed to sync active modules to Supabase Auth:", err);
         }
     }
     

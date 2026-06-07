@@ -53,6 +53,12 @@ async function checkAuth() {
         state.userSession = session;
         updateUserAvatarBadge();
         
+        if (session.user && session.user.user_metadata && session.user.user_metadata.active_modules) {
+            state.activeModules = session.user.user_metadata.active_modules;
+            localStorage.setItem('active_modules', JSON.stringify(state.activeModules));
+            await loadModules();
+        }
+        
         try {
             const cached = await dbGet('cached_cards');
             if (cached) {
@@ -87,6 +93,12 @@ async function checkAuth() {
         if (session && !state.userSession) {
             state.userSession = session;
             updateUserAvatarBadge();
+            
+            if (session.user && session.user.user_metadata && session.user.user_metadata.active_modules) {
+                state.activeModules = session.user.user_metadata.active_modules;
+                localStorage.setItem('active_modules', JSON.stringify(state.activeModules));
+                await loadModules();
+            }
             
             try {
                 const cached = await dbGet('cached_cards');
