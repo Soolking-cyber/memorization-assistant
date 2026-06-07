@@ -335,13 +335,11 @@ function renderActiveStackCard() {
                         abilitiesContainer.querySelector('.btn-up').addEventListener('click', (e) => {
                             e.stopPropagation();
                             activeSentenceIndex = (activeSentenceIndex - 1 + stats.sentences.length) % stats.sentences.length;
-                            try { playUISound('click'); } catch(err) {}
                             updateSentenceClueUI();
                         });
                         abilitiesContainer.querySelector('.btn-down').addEventListener('click', (e) => {
                             e.stopPropagation();
                             activeSentenceIndex = (activeSentenceIndex + 1) % stats.sentences.length;
-                            try { playUISound('click'); } catch(err) {}
                             updateSentenceClueUI();
                         });
                     }
@@ -354,7 +352,6 @@ function renderActiveStackCard() {
                     `;
                     abilitiesContainer.querySelector('#btn-reveal-clue').addEventListener('click', (e) => {
                         e.stopPropagation();
-                        try { playUISound('click'); } catch(err) {}
                         state.clueRevealed = true;
                         updateSentenceClueUI();
                     });

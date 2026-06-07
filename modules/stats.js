@@ -179,14 +179,12 @@ export async function renderStatistics() {
 
             prevBtn.onclick = () => {
                 state.statsYear--;
-                try { playUISound('click'); } catch(err) {}
                 renderStatistics();
             };
 
             nextBtn.onclick = () => {
                 if (state.statsYear < maxYear) {
                     state.statsYear++;
-                    try { playUISound('click'); } catch(err) {}
                     renderStatistics();
                 }
             };

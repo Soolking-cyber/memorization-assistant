@@ -117,7 +117,6 @@ export async function initScrambleView() {
                 alert(`No cards in the ${selectedDeck.name} deck! Create or fail more cards to unlock this struggle deck.`);
                 return;
             }
-            try { playUISound('click'); } catch(e) {}
             startScrambleSession(selectedKey, selectedDeck.name, cards);
         };
     }
@@ -757,7 +756,6 @@ function endScrambleSession() {
     const btnRetry = document.getElementById('btn-scramble-retry');
     if (btnRetry) {
         btnRetry.onclick = () => {
-            try { playUISound('click'); } catch(e) {}
             startScrambleSession(scrambleState.currentTierKey, scrambleState.currentTierName, scrambleState.cards);
         };
     }
@@ -765,7 +763,6 @@ function endScrambleSession() {
     const btnBackToDecks = document.getElementById('btn-scramble-back-to-decks');
     if (btnBackToDecks) {
         btnBackToDecks.onclick = () => {
-            try { playUISound('click'); } catch(e) {}
             initScrambleView();
         };
     }
@@ -860,7 +857,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const exitBtn = document.getElementById('btn-scramble-exit');
     if (exitBtn) {
         exitBtn.addEventListener('click', () => {
-            try { playUISound('click'); } catch(e) {}
             clearGameTimer();
             scrambleState.active = false;
             switchView('dashboard');

@@ -48,7 +48,6 @@ export function initThemeSystem() {
 export function initNavigation() {
     document.querySelectorAll('[data-view]').forEach(elem => {
         elem.addEventListener('click', (e) => {
-            try { playUISound('click'); } catch(err) {}
             const targetView = e.currentTarget.dataset.view;
             switchView(targetView);
         });

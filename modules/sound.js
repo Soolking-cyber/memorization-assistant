@@ -160,7 +160,7 @@ export function initSoundSystem() {
 
     // Global capture-phase click listener for micro-interaction sounds
     document.addEventListener('click', (e) => {
-        const interactive = e.target.closest('button, .btn, .nav-btn, .header-icon-btn, [role="button"], .user-avatar, .card-type-tab, .node-btn, .toolbar-close-btn, .link-toolbar-btn, .color-swatch');
+        const interactive = e.target.closest('button, .btn, .nav-btn, .header-icon-btn, [role="button"], .user-avatar, .card-type-tab, .node-btn, .toolbar-close-btn, .link-toolbar-btn, .color-swatch, [data-view]');
         if (interactive) {
             if (interactive.id === 'btn-sound-toggle') {
                 return;
