@@ -61,10 +61,7 @@ const G_REGISTRY = {
 };
 
 export function getModulesStorageKey() {
-    if (state.userSession && state.userSession.user) {
-        return `active_modules_${state.userSession.user.id}`;
-    }
-    return 'active_modules_offline';
+    return 'active_modules';
 }
 
 export function loadStoredModules() {
