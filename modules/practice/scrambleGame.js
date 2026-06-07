@@ -3,10 +3,11 @@ import { dbGet } from '../db.js';
 import { applySM2Grade } from '../spacedRepetition.js';
 import { logReviewAttempt } from '../practice.js';
 import { playUISound } from '../sound.js';
-import { calculateCardStats } from '../gamification.js';
+import { calculateCardStats } from '../spacedRepetition.js';
 import { switchView } from '../navigation.js';
 import { ICONS } from '../icons.js';
 import { buildCustomDropdownUI } from '../uiHelpers.js';
+
 
 // Gameplay state
 const scrambleState = {

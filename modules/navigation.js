@@ -5,9 +5,8 @@ import { hideExplanationTooltip } from './canvas.js';
 import { loadData, renderManageView, renderCreateSentencesList, updateCardInDB } from './flashcardCrud.js';
 import { updateDashboard, handleTypeSelectChange } from './dashboard.js';
 import { renderStatistics } from './stats.js';
-import { renderCollectionDeck } from './gamification.js';
 import { buildCustomDropdownUI } from './uiHelpers.js';
-import { initScrambleView, resetScrambleGame } from './practice/scrambleGame.js';
+import { renderSettingsToggles } from './gameManager.js';
 
 
 export function initThemeSystem() {
@@ -57,6 +56,16 @@ export function initNavigation() {
 }
 
 export async function switchView(viewId) {
+    // Block view if corresponding module is disabled
+    const blockedViews = {
+        'scramble': 'scramble',
+        'collection': 'collection'
+    };
+    if (blockedViews[viewId] && (!state.activeModules || !state.activeModules.includes(blockedViews[viewId]))) {
+        switchView('dashboard');
+        return;
+    }
+
     hideExplanationTooltip();
 
     // Clear active Recall Deck timers
@@ -66,7 +75,9 @@ export async function switchView(viewId) {
     }
 
     // Reset active Scramble Game timers & states
-    resetScrambleGame();
+    if (window.resetScrambleGame) {
+        window.resetScrambleGame();
+    }
 
     const fullscreens = document.querySelectorAll('.canvas-container-fullscreen');
     fullscreens.forEach(el => {
@@ -150,10 +161,15 @@ export async function switchView(viewId) {
     } else if (viewId === 'stats') {
         await renderStatistics();
     } else if (viewId === 'collection') {
-        await renderCollectionDeck();
+        if (window.renderCollectionDeck) {
+            await window.renderCollectionDeck();
+        }
     } else if (viewId === 'scramble') {
-        await initScrambleView();
+        if (window.initScrambleView) {
+            await window.initScrambleView();
+        }
     }
+
     if (viewId === 'create') {
         state.draftCreateSentences = [];
         const createSentencesInput = document.getElementById('create-new-sentence');
@@ -298,6 +314,7 @@ export function initProfileMenu() {
                 }
             }
             
+            renderSettingsToggles();
             settingsModal.classList.remove('hidden');
         });
     }

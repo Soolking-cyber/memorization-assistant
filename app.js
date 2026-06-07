@@ -26,9 +26,10 @@ import {
     saveIncorrectExampleSentence,
     initSpellingInputListeners
 } from './modules/practice.js';
-import { handleScrambleKeydown } from './modules/practice/scrambleGame.js';
+import { loadModules } from './modules/gameManager.js';
 import {
     updateDashboard,
+
     handleTypeSelectChange
 } from './modules/dashboard.js';
 import {
@@ -151,6 +152,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initSoundSystem();
     initNavigation();
     initProfileMenu();
+    await loadModules();
     initSyncListeners();
     initGlobalTooltips();
     
@@ -176,7 +178,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('keydown', (e) => {
         const viewScramble = document.getElementById('view-scramble');
         if (viewScramble && !viewScramble.classList.contains('hidden')) {
-            handleScrambleKeydown(e);
+            if (window.handleScrambleKeydown) {
+                window.handleScrambleKeydown(e);
+            }
         }
     });
 

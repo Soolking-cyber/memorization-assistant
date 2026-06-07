@@ -790,10 +790,54 @@ svg.icon-svg path[fill="currentColor"] {
     color: var(--warning) !important;
     width: 14px;
     height: 14px;
+}/* Premium desaturated Duolingo-style sliding switch-toggles */
+.switch-control {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 26px;
 }
 
+.switch-control input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
 
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: var(--border-color);
+    border-radius: 34px;
+    transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
+}
 
+.switch-slider::before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: var(--bg-card);
+    border-radius: 50%;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
 
+.switch-control input:checked + .switch-slider {
+    background-color: var(--accent);
+}
 
+.switch-control input:checked + .switch-slider::before {
+    transform: translateX(20px);
+    background-color: var(--btn-primary-text);
+}
+
+.switch-control input:disabled + .switch-slider {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 

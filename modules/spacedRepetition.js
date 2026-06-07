@@ -156,3 +156,71 @@ export async function applySM2Grade(gradeInt) {
     // Sync to DB silently
     updateCardInDB(card);
 }
+
+export function calculateCardStats(card, logs) {
+    const cardLogs = (logs || []).filter(log => log.cardId === card.id);
+    const attempts = cardLogs.length;
+    const failures = cardLogs.filter(log => log.grade < 2 || log.score < 75).length;
+    
+    const savedSentences = state.exampleSentences[card.id];
+    let sentences = [];
+    
+    if (savedSentences) {
+        if (Array.isArray(savedSentences)) {
+            sentences = savedSentences.filter(s => typeof s === 'string' && s.trim().length > 0);
+        } else if (typeof savedSentences === 'string' && savedSentences.trim().length > 0) {
+            sentences = [savedSentences];
+        }
+    }
+    
+    const scoreVal = card.score !== undefined && card.score !== null ? card.score : 50;
+    
+    let tier = {
+        name: 'Mastered',
+        key: 'common',
+        class: 'tier-common',
+        title: 'Mastered Card'
+    };
+    
+    if (scoreVal <= 20) {
+        tier = {
+            name: 'Critical Focus',
+            key: 'ultrarare',
+            class: 'tier-ultrarare',
+            title: 'Critical Focus Card'
+        };
+    } else if (scoreVal <= 40) {
+        tier = {
+            name: 'High Struggle',
+            key: 'legendary',
+            class: 'tier-legendary',
+            title: 'High Struggle Card'
+        };
+    } else if (scoreVal <= 60) {
+        tier = {
+            name: 'Medium Struggle',
+            key: 'epic',
+            class: 'tier-epic',
+            title: 'Medium Struggle Card'
+        };
+    } else if (scoreVal <= 80) {
+        tier = {
+            name: 'Low Struggle',
+            key: 'rare',
+            class: 'tier-rare',
+            title: 'Low Struggle Card'
+        };
+    }
+    
+    return {
+        attempts,
+        failures,
+        cluesCount: sentences.length,
+        struggleIndex: scoreVal,
+        score: scoreVal,
+        successRate: scoreVal,
+        tier,
+        sentences
+    };
+}
+
