@@ -372,6 +372,101 @@ export function renderCurrentCard() {
         return;
     }
 
+    if (card.type === 'Zettelkasten') {
+        exerciseTitleEl.textContent = "Recall the Reference / Source of this Quote";
+        spellingArea.classList.add('hidden');
+        
+        let quote = '';
+        let tags = [];
+        let links = [];
+        try {
+            const ztData = JSON.parse(card.front);
+            quote = ztData.quote || '';
+            tags = ztData.tags || [];
+            links = ztData.links || [];
+        } catch (e) {
+            quote = card.front;
+        }
+
+        let tagsHtml = '';
+        if (tags.length > 0) {
+            tagsHtml = `
+                <div class="practice-word-types" style="display: flex; gap: 6px; justify-content: center; margin-top: 10px; flex-wrap: wrap;">
+                    ${tags.map(t => `<span class="word-type-badge">${t}</span>`).join('')}
+                </div>
+            `;
+        }
+
+        let linksHtml = '';
+        if (links.length > 0) {
+            const linkTexts = links.map(l => {
+                const targetCard = state.cards.find(c => c.id === l.targetId);
+                let targetTitle = 'Unknown Card';
+                if (targetCard) {
+                    try {
+                        const targetData = JSON.parse(targetCard.front);
+                        targetTitle = targetData.quote ? (targetData.quote.substring(0, 30) + '...') : targetCard.back;
+                    } catch (e) {
+                        targetTitle = targetCard.back;
+                    }
+                }
+                return `<span style="background: rgba(var(--accent-rgb, 100, 108, 255), 0.15); border: 1px solid var(--accent); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;">→ <em style="color:var(--text-secondary);">${l.label || 'connects to'}</em> <strong>${targetTitle}</strong></span>`;
+            }).join(' ');
+            linksHtml = `<div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:12px;">${linkTexts}</div>`;
+        }
+
+        frontEl.innerHTML = `
+            <div class="practice-explanation-only" style="font-size: 1.35rem; font-weight: 500; font-style: italic; color: var(--text-primary); max-width: 100%; line-height: 1.6; word-break: normal; overflow-wrap: break-word; text-align: center; margin: auto 0; padding: 20px; border-left: 4px solid var(--accent); background: rgba(255,255,255,0.03); border-radius: 4px;">
+                "${quote.replace(/\n/g, '<br>')}"
+                ${tagsHtml}
+                ${linksHtml}
+            </div>
+        `;
+        
+        backEl.innerHTML = `
+            <div class="practice-answer-container">
+                <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 4px; letter-spacing: 1px;">Source / Reference:</div>
+                <div class="practice-answer-word" style="font-size: 1.2rem; font-weight: 700; color: var(--accent);">
+                    ${card.back.replace(/\n/g, '<br>')}
+                </div>
+            </div>
+        `;
+
+        const frontImg = document.getElementById('practice-front-img');
+        const backImg = document.getElementById('practice-back-img');
+        if (frontImg) {
+            if (card.image_front_url) {
+                frontImg.src = card.image_front_url;
+                frontImg.classList.remove('hidden');
+            } else {
+                frontImg.src = '';
+                frontImg.classList.add('hidden');
+            }
+        }
+        if (backImg) {
+            if (card.image_back_url) {
+                backImg.src = card.image_back_url;
+                backImg.classList.remove('hidden');
+            } else {
+                backImg.src = '';
+                backImg.classList.add('hidden');
+            }
+        }
+
+        document.querySelector('.card-front').classList.remove('hidden');
+        document.querySelector('.card-back').classList.add('hidden');
+        
+        document.getElementById('typing-area').classList.remove('hidden');
+        document.getElementById('practice-input').classList.remove('hidden');
+        document.getElementById('evaluation-area').classList.add('hidden');
+        
+        setTimeout(() => {
+            const typingInput = document.getElementById('practice-input');
+            if (typingInput) typingInput.focus();
+        }, 100);
+        return;
+    }
+
     const savedSentences = state.exampleSentences[card.id];
     let sentences = [];
     if (savedSentences) {
@@ -835,7 +930,7 @@ export async function evaluateAnswer() {
     gradeSpan.style.color = gradeColor;
     
     const sentenceContainer = document.getElementById('incorrect-sentence-container');
-    if (score < 75 && !(isMap || card.type === 'Memory Map' || card.type === 'Image Card')) {
+    if (score < 75 && !(isMap || card.type === 'Memory Map' || card.type === 'Image Card' || card.type === 'Zettelkasten')) {
         sentenceContainer.classList.remove('hidden');
         document.getElementById('incorrect-sentence-input').value = '';
         document.getElementById('incorrect-sentence-input').placeholder = `e.g. We are running ${card.back} on gas.`;

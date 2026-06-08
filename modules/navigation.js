@@ -167,6 +167,10 @@ export async function switchView(viewId) {
         if (window.initScrambleView) {
             await window.initScrambleView();
         }
+    } else if (viewId === 'zettelkasten') {
+        if (window.initZettelkastenView) {
+            window.initZettelkastenView();
+        }
     }
 
     if (viewId === 'create') {
@@ -176,6 +180,10 @@ export async function switchView(viewId) {
         const createError = document.getElementById('create-sentence-error');
         if (createError) createError.style.display = 'none';
         renderCreateSentencesList();
+        
+        state.createZettelLinks = [];
+        if (window.renderZettelLinksList) window.renderZettelLinksList(false);
+        if (window.populateZettelLinkDropdown) window.populateZettelLinkDropdown(false);
         
         const cardTypeSelect = document.getElementById('card-type');
         if (cardTypeSelect) {

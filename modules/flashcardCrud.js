@@ -154,6 +154,33 @@ export function renderManageView() {
             } catch (e) {
                 displayFront = cleanFront;
             }
+        } else if (card.type === 'Zettelkasten' || cleanFront.includes('"mode":"zettelkasten"')) {
+            try {
+                const ztData = JSON.parse(cleanFront);
+                displayFront = `<strong style="color:var(--accent);">[Zettelkasten Quote]</strong> "${ztData.quote.replace(/\n/g, '<br>')}"`;
+                if (ztData.tags && ztData.tags.length > 0) {
+                    const tagBadges = ztData.tags.map(t => `<span class="word-type-badge">${t}</span>`).join('');
+                    displayFront += ` <div class="word-types-container" style="margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap;">${tagBadges}</div>`;
+                }
+                if (ztData.links && ztData.links.length > 0) {
+                    const linkTexts = ztData.links.map(l => {
+                        const targetCard = state.cards.find(c => c.id === l.targetId);
+                        let targetTitle = 'Unknown Card';
+                        if (targetCard) {
+                            try {
+                                const targetData = JSON.parse(targetCard.front);
+                                targetTitle = targetData.quote ? (targetData.quote.substring(0, 30) + '...') : targetCard.back;
+                            } catch (e) {
+                                targetTitle = targetCard.back;
+                            }
+                        }
+                        return `→ <em style="color:var(--text-secondary);">${l.label || 'connects to'}</em> <strong>${targetTitle}</strong>`;
+                    }).join(', ');
+                    displayFront += ` <div style="font-size:0.8rem; margin-top: 6px; color:var(--text-secondary); line-height: 1.4;">Links: ${linkTexts}</div>`;
+                }
+            } catch (e) {
+                displayFront = cleanFront;
+            }
         } else if (card.type === 'Image Card') {
             displayFront = `<strong style="color:var(--accent);">[Image Card]</strong> ${cleanFront.replace(/\n/g, '<br>')}`;
         } else {

@@ -67,6 +67,25 @@ export async function handleCreateCard(e) {
         };
         frontText = JSON.stringify(mapData);
         backText = 'Memory Map';
+    } else if (activeType === 'Zettelkasten') {
+        const quote = document.getElementById('card-zettel-quote').value.trim();
+        const reference = document.getElementById('card-zettel-reference').value.trim();
+        const tagsInput = document.getElementById('card-zettel-tags').value.trim();
+        
+        if (!quote || !reference) {
+            await window.alert("Please enter both a Quote and a Reference.");
+            return;
+        }
+        
+        const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(Boolean) : [];
+        const ztData = {
+            mode: 'zettelkasten',
+            quote: quote,
+            tags: tags,
+            links: state.createZettelLinks || []
+        };
+        frontText = JSON.stringify(ztData);
+        backText = reference;
     } else {
         frontText = document.getElementById('card-front').value.trim();
         backText = document.getElementById('card-back').value.trim();
@@ -205,6 +224,16 @@ export async function handleCreateCard(e) {
     state.createMapLinks = [];
     renderEditorNodes('create-map-nodes-container', state.createMapNodes, state.createMapLinks, 'create-map-svg', 'create-arrowhead');
     
+    // Clear Zettelkasten states
+    const zQuote = document.getElementById('card-zettel-quote');
+    if (zQuote) zQuote.value = '';
+    const zRef = document.getElementById('card-zettel-reference');
+    if (zRef) zRef.value = '';
+    const zTags = document.getElementById('card-zettel-tags');
+    if (zTags) zTags.value = '';
+    state.createZettelLinks = [];
+    renderZettelLinksList(false);
+    
     btn.innerHTML = "Memory Uploaded! " + ICONS.check;
     btn.style.background = "var(--accent)";
     btn.style.borderColor = "var(--accent)";
@@ -270,11 +299,15 @@ export function openEditView(cardId) {
 
     const vocabFields = document.getElementById('edit-vocab-fields');
     const mapFields = document.getElementById('edit-map-fields');
+    const zettelkastenFields = document.getElementById('edit-zettelkasten-fields');
     
     let isMap = false;
+    let isZettel = false;
     try {
         if (card.front.startsWith('{"mode":"memory_map"')) {
             isMap = true;
+        } else if (card.front.includes('"mode":"zettelkasten"')) {
+            isZettel = true;
         }
     } catch (e) {}
     
@@ -282,6 +315,7 @@ export function openEditView(cardId) {
         document.getElementById('edit-card-type').value = 'Memory Map';
         vocabFields.classList.add('hidden');
         mapFields.classList.remove('hidden');
+        if (zettelkastenFields) zettelkastenFields.classList.add('hidden');
         
         let mapData = { title: '', nodes: [], links: [] };
         try {
@@ -297,9 +331,30 @@ export function openEditView(cardId) {
         setTimeout(() => {
             renderEditorNodes('edit-map-nodes-container', state.editMapNodes, state.editMapLinks, 'edit-map-svg', 'edit-arrowhead', true);
         }, 100);
+    } else if (isZettel || card.type === 'Zettelkasten') {
+        document.getElementById('edit-card-type').value = 'Zettelkasten';
+        vocabFields.classList.add('hidden');
+        mapFields.classList.add('hidden');
+        if (zettelkastenFields) zettelkastenFields.classList.remove('hidden');
+        
+        let ztData = { quote: '', tags: [], links: [] };
+        try {
+            ztData = JSON.parse(card.front);
+        } catch (e) {
+            console.error("Error parsing zettelkasten front text:", e);
+        }
+        
+        document.getElementById('edit-card-zettel-quote').value = ztData.quote || '';
+        document.getElementById('edit-card-zettel-reference').value = card.back || '';
+        document.getElementById('edit-card-zettel-tags').value = ztData.tags ? ztData.tags.join(', ') : '';
+        state.editZettelLinks = ztData.links || [];
+        
+        renderZettelLinksList(true);
+        populateZettelLinkDropdown(true, card.id);
     } else {
         vocabFields.classList.remove('hidden');
         mapFields.classList.add('hidden');
+        if (zettelkastenFields) zettelkastenFields.classList.add('hidden');
         
         updateFormLabelsAndPlaceholders(true, card.type);
         
@@ -372,6 +427,27 @@ export async function handleEditCardSubmit(e) {
         };
         frontText = JSON.stringify(mapData);
         backText = 'Memory Map';
+    } else if (typeText === 'Zettelkasten') {
+        const quote = document.getElementById('edit-card-zettel-quote').value.trim();
+        const reference = document.getElementById('edit-card-zettel-reference').value.trim();
+        const tagsInput = document.getElementById('edit-card-zettel-tags').value.trim();
+        
+        if (!quote || !reference) {
+            await window.alert("Please enter both a Quote and a Reference.");
+            btn.textContent = oldText;
+            btn.disabled = false;
+            return;
+        }
+        
+        const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(Boolean) : [];
+        const ztData = {
+            mode: 'zettelkasten',
+            quote: quote,
+            tags: tags,
+            links: state.editZettelLinks || []
+        };
+        frontText = JSON.stringify(ztData);
+        backText = reference;
     } else {
         frontText = document.getElementById('edit-card-front').value.trim();
         backText = document.getElementById('edit-card-back').value.trim();
@@ -537,3 +613,143 @@ export async function handleEditCardSubmit(e) {
         btn.disabled = false;
     }
 }
+
+export function populateZettelLinkDropdown(isEdit, currentCardId = null) {
+    const select = document.getElementById(isEdit ? 'edit-zettel-link-target' : 'create-zettel-link-target');
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">-- Select Quote to Connect --</option>';
+    
+    state.cards.forEach(card => {
+        if (card.type === 'Zettelkasten') {
+            if (isEdit && card.id === currentCardId) return;
+            
+            let quote = '';
+            try {
+                const data = JSON.parse(card.front);
+                quote = data.quote || card.front;
+            } catch (e) {
+                quote = card.front;
+            }
+            
+            const opt = document.createElement('option');
+            opt.value = card.id;
+            const displayTitle = quote.length > 50 ? quote.substring(0, 50) + '...' : quote;
+            opt.textContent = `"${displayTitle}" [${card.back}]`;
+            select.appendChild(opt);
+        }
+    });
+    
+    buildCustomDropdownUI(isEdit ? 'edit-zettel-link-target' : 'create-zettel-link-target');
+}
+
+export function renderZettelLinksList(isEdit) {
+    const listContainer = document.getElementById(isEdit ? 'edit-zettel-links-list' : 'create-zettel-links-list');
+    if (!listContainer) return;
+    
+    listContainer.innerHTML = '';
+    const links = isEdit ? state.editZettelLinks : state.createZettelLinks;
+    
+    if (links.length === 0) {
+        listContainer.innerHTML = '<span style="font-size:0.8rem; color:var(--text-secondary);">No connections added yet.</span>';
+        return;
+    }
+    
+    links.forEach((link, index) => {
+        const targetCard = state.cards.find(c => c.id === link.targetId);
+        let targetText = 'Unknown Card';
+        if (targetCard) {
+            try {
+                const data = JSON.parse(targetCard.front);
+                targetText = data.quote || targetCard.front;
+            } catch (e) {
+                targetText = targetCard.front;
+            }
+        }
+        
+        const truncatedText = targetText.length > 60 ? targetText.substring(0, 60) + '...' : targetText;
+        
+        const item = document.createElement('div');
+        item.className = 'zettel-link-item';
+        item.innerHTML = `
+            <span class="zettel-link-text">"${truncatedText}"</span>
+            <span class="zettel-link-label-badge">${link.label || 'connects to'}</span>
+            <button type="button" class="btn-icon" data-index="${index}" style="color:var(--danger); cursor:pointer; background:none; border:none; padding:0; display:inline-flex; align-items:center;" title="Remove connection">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        `;
+        
+        item.querySelector('button').addEventListener('click', () => {
+            links.splice(index, 1);
+            renderZettelLinksList(isEdit);
+        });
+        
+        listContainer.appendChild(item);
+    });
+}
+
+export function initZettelkastenFormListeners() {
+    const btnCreateAdd = document.getElementById('btn-create-add-zettel-link');
+    if (btnCreateAdd) {
+        btnCreateAdd.onclick = () => {
+            const targetSelect = document.getElementById('create-zettel-link-target');
+            const labelInput = document.getElementById('create-zettel-link-label');
+            const targetId = targetSelect.value;
+            const label = labelInput.value.trim();
+            
+            if (!targetId) {
+                window.alert("Please select a target card to connect to.");
+                return;
+            }
+            
+            if (state.createZettelLinks.some(l => l.targetId === targetId)) {
+                window.alert("This connection already exists.");
+                return;
+            }
+            
+            state.createZettelLinks.push({ targetId, label });
+            renderZettelLinksList(false);
+            
+            targetSelect.value = '';
+            labelInput.value = '';
+            buildCustomDropdownUI('create-zettel-link-target');
+        };
+    }
+    
+    const btnEditAdd = document.getElementById('btn-edit-add-zettel-link');
+    if (btnEditAdd) {
+        btnEditAdd.onclick = () => {
+            const targetSelect = document.getElementById('edit-zettel-link-target');
+            const labelInput = document.getElementById('edit-zettel-link-label');
+            const targetId = targetSelect.value;
+            const label = labelInput.value.trim();
+            const editCardId = document.getElementById('edit-card-id').value;
+            
+            if (!targetId) {
+                window.alert("Please select a target card to connect to.");
+                return;
+            }
+            
+            if (targetId === editCardId) {
+                window.alert("A card cannot connect to itself.");
+                return;
+            }
+            
+            if (state.editZettelLinks.some(l => l.targetId === targetId)) {
+                window.alert("This connection already exists.");
+                return;
+            }
+            
+            state.editZettelLinks.push({ targetId, label });
+            renderZettelLinksList(true);
+            
+            targetSelect.value = '';
+            labelInput.value = '';
+            buildCustomDropdownUI('edit-zettel-link-target');
+        };
+    }
+}
+
+window.populateZettelLinkDropdown = populateZettelLinkDropdown;
+window.renderZettelLinksList = renderZettelLinksList;
+window.initZettelkastenFormListeners = initZettelkastenFormListeners;

@@ -30,6 +30,7 @@ export function updateTypeDatalists() {
     types.add('Vocabulary');
     types.add('Memory Map');
     types.add('Image Card');
+    types.add('Zettelkasten');
     types.add('Unknown');
     
     let migrated = false;
@@ -253,11 +254,13 @@ export async function handleTypeSelectChange(e) {
     const isEdit = e.target.id === 'edit-card-type';
     const vocabFields = document.getElementById(isEdit ? 'edit-vocab-fields' : 'create-vocab-fields');
     const mapFields = document.getElementById(isEdit ? 'edit-map-fields' : 'create-map-fields');
+    const zettelkastenFields = document.getElementById(isEdit ? 'edit-zettelkasten-fields' : 'create-zettelkasten-fields');
     
     if (vocabFields && mapFields) {
         if (val === 'Memory Map') {
             vocabFields.classList.add('hidden');
             mapFields.classList.remove('hidden');
+            if (zettelkastenFields) zettelkastenFields.classList.add('hidden');
             
             // For Edit mode, if it's already rendered, we need to trigger links redraw
             if (isEdit) {
@@ -269,9 +272,19 @@ export async function handleTypeSelectChange(e) {
                     renderEditorNodes('create-map-nodes-container', state.createMapNodes, state.createMapLinks, 'create-map-svg', 'create-arrowhead');
                 }, 50);
             }
+        } else if (val === 'Zettelkasten') {
+            vocabFields.classList.add('hidden');
+            mapFields.classList.add('hidden');
+            if (zettelkastenFields) zettelkastenFields.classList.remove('hidden');
+            
+            // Populate the dropdown list of other Zettelkasten cards to link to
+            if (window.populateZettelLinkDropdown) {
+                window.populateZettelLinkDropdown(isEdit);
+            }
         } else {
             vocabFields.classList.remove('hidden');
             mapFields.classList.add('hidden');
+            if (zettelkastenFields) zettelkastenFields.classList.add('hidden');
             updateFormLabelsAndPlaceholders(isEdit, val);
         }
     }

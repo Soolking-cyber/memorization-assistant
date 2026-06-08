@@ -40,6 +40,8 @@ import {
     renderEditorNodes
 } from './modules/canvas.js';
 import { toggleFullscreen, buildCustomDropdownUI, initGlobalTooltips } from './modules/uiHelpers.js';
+import { initZettelkastenFormListeners } from './modules/card/cardCreator.js';
+import './modules/zettelkasten.js';
 
 // Bind necessary functions to window for DOM/inline event listeners
 window.switchView = switchView;
@@ -395,6 +397,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     });
+
+    // Initialize Zettelkasten form link handlers
+    initZettelkastenFormListeners();
 
     if (supabase) {
         checkAuth();

@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="css/canvas.css?v=12">
     <link rel="stylesheet" href="css/gamification.css?v=12">
     <link rel="stylesheet" href="css/scramble.css?v=12">
+    <link rel="stylesheet" href="css/zettelkasten.css?v=12">
     <script type="module" src="app.js?v=10" defer></script>
     <link rel="icon" type="image/png" href="/favicon.png?v=9">
     <link rel="icon" href="/favicon.ico?v=9" sizes="any">
@@ -114,6 +115,12 @@
                         </svg>
                     </span>
                     <span class="nav-text">Scramble</span>
+                </button>
+                <button class="nav-btn" data-view="zettelkasten" title="View interactive Obsidian-style network graph of your quotes & connections">
+                    <span class="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><circle cx="18" cy="6" r="3"></circle><line x1="6" y1="9" x2="15" y2="15"></line><line x1="9" y1="6" x2="15" y2="6"></line></svg>
+                    </span>
+                    <span class="nav-text">Graph View</span>
                 </button>
                 <button class="nav-btn" data-view="stats" title="Track memorization progress, streaks & history">
                     <span class="nav-icon">
@@ -270,6 +277,35 @@ Sum of all cards' memory strength scores (max 100 per card).">
                             </div>
                         </div>
 
+                        <!-- Zettelkasten Fields -->
+                        <div id="create-zettelkasten-fields" class="hidden">
+                            <div class="input-group">
+                                <label for="card-zettel-quote">Quote (Front)</label>
+                                <textarea id="card-zettel-quote" placeholder="e.g. Science is what you know, philosophy is what you don't know."></textarea>
+                            </div>
+                            <div class="input-group">
+                                <label for="card-zettel-reference">Exact Source / Reference (Back)</label>
+                                <input type="text" id="card-zettel-reference" class="input-field" placeholder="e.g. Bertrand Russell, Outline of Philosophy (1927)">
+                            </div>
+                            <div class="input-group">
+                                <label for="card-zettel-tags">Tags (Comma-separated)</label>
+                                <input type="text" id="card-zettel-tags" class="input-field" placeholder="e.g. philosophy, science, knowledge">
+                            </div>
+                            <div class="input-group" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
+                                <label>Connected Thoughts / Ideas</label>
+                                <div id="create-zettel-links-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
+                                    <!-- Drafted links will render here -->
+                                </div>
+                                <div class="input-row" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <select id="create-zettel-link-target" style="flex: 2; min-width: 180px;">
+                                        <option value="">-- Select Quote to Connect --</option>
+                                    </select>
+                                    <input type="text" id="create-zettel-link-label" class="input-field" placeholder="e.g. supports, refutes" style="flex: 1; min-width: 120px; margin: 0;">
+                                    <button type="button" id="btn-create-add-zettel-link" class="btn" style="height: 42px;">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Memory Map Fields -->
                         <div id="create-map-fields" class="hidden">
                             <div class="input-group">
@@ -381,6 +417,35 @@ Sum of all cards' memory strength scores (max 100 per card).">
                                     <button type="button" id="btn-edit-add-sentence" class="btn">+ Add</button>
                                 </div>
                                 <span id="edit-sentence-error" style="color: var(--danger); font-size: 0.8rem; margin-top: 6px; display: none;"></span>
+                            </div>
+                        </div>
+
+                        <!-- Zettelkasten Fields for Edit -->
+                        <div id="edit-zettelkasten-fields" class="hidden">
+                            <div class="input-group">
+                                <label for="edit-card-zettel-quote">Quote (Front)</label>
+                                <textarea id="edit-card-zettel-quote" placeholder="e.g. Science is what you know, philosophy is what you don't know."></textarea>
+                            </div>
+                            <div class="input-group">
+                                <label for="edit-card-zettel-reference">Exact Source / Reference (Back)</label>
+                                <input type="text" id="edit-card-zettel-reference" class="input-field" placeholder="e.g. Bertrand Russell, Outline of Philosophy (1927)">
+                            </div>
+                            <div class="input-group">
+                                <label for="edit-card-zettel-tags">Tags (Comma-separated)</label>
+                                <input type="text" id="edit-card-zettel-tags" class="input-field" placeholder="e.g. philosophy, science, knowledge">
+                            </div>
+                            <div class="input-group" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
+                                <label>Connected Thoughts / Ideas</label>
+                                <div id="edit-zettel-links-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
+                                    <!-- Saved links will render here -->
+                                </div>
+                                <div class="input-row" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <select id="edit-zettel-link-target" style="flex: 2; min-width: 180px;">
+                                        <option value="">-- Select Quote to Connect --</option>
+                                    </select>
+                                    <input type="text" id="edit-zettel-link-label" class="input-field" placeholder="e.g. supports, refutes" style="flex: 1; min-width: 120px; margin: 0;">
+                                    <button type="button" id="btn-edit-add-zettel-link" class="btn" style="height: 42px;">Connect</button>
+                                </div>
                             </div>
                         </div>
 
@@ -737,6 +802,46 @@ Sum of all cards' memory strength scores (max 100 per card).">
                         </div>
                     </div>
 
+                </div>
+            </section>
+
+            <!-- Zettelkasten Graph View -->
+            <section id="view-zettelkasten" class="view hidden">
+                <div class="glass graph-view-container">
+                    <!-- Top toolbar -->
+                    <div class="graph-toolbar">
+                        <span style="font-size: 1.15rem; font-weight: 800; color: var(--accent); margin-right: auto; display: flex; align-items: center; gap: 8px; font-family: 'Outfit', sans-serif;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="22" height="22">
+                                <circle cx="18" cy="18" r="3"></circle>
+                                <circle cx="6" cy="6" r="3"></circle>
+                                <circle cx="18" cy="6" r="3"></circle>
+                                <line x1="6" y1="9" x2="15" y2="15"></line>
+                                <line x1="9" y1="6" x2="15" y2="6"></line>
+                            </svg>
+                            Zettelkasten Graph
+                        </span>
+                        <!-- Search filter -->
+                        <input type="text" id="graph-search" class="input-field" placeholder="Search quotes, references or tags..." style="max-width: 250px; margin: 0; padding: 6px 12px; font-size: 0.85rem; height: 32px; border-radius: 8px;">
+                        <!-- Zoom controls -->
+                        <button type="button" class="btn" id="btn-graph-zoom-in" title="Zoom In">+</button>
+                        <button type="button" class="btn" id="btn-graph-zoom-out" title="Zoom Out">−</button>
+                        <button type="button" class="btn" id="btn-graph-zoom-reset" title="Reset Zoom">Reset</button>
+                    </div>
+                    
+                    <!-- Filter panel -->
+                    <div id="graph-filter-panel">
+                        <strong class="graph-filter-title">Filter by Tag</strong>
+                        <div id="graph-tags-list">
+                            <!-- Populate tags dynamically -->
+                        </div>
+                        <button type="button" class="btn text-btn" id="btn-clear-graph-filters" style="font-size: 0.75rem; color: var(--text-secondary); text-align: left; padding: 0; background: none; border: none; cursor: pointer; outline: none; margin-top: 4px;">Clear Filter</button>
+                    </div>
+
+                    <!-- Canvas -->
+                    <canvas id="zettelkasten-canvas" style="flex-grow: 1; background: transparent; cursor: grab; outline: none;"></canvas>
+
+                    <!-- Node Hover Details tooltip -->
+                    <div id="graph-tooltip"></div>
                 </div>
             </section>
 

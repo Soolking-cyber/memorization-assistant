@@ -3,6 +3,7 @@ customTypes = customTypes.filter(t => t !== 'vocabulary' && t !== 'mixed');
 if (!customTypes.includes('Vocabulary')) customTypes.push('Vocabulary');
 if (!customTypes.includes('Memory Map')) customTypes.push('Memory Map');
 if (!customTypes.includes('Image Card')) customTypes.push('Image Card');
+if (!customTypes.includes('Zettelkasten')) customTypes.push('Zettelkasten');
 if (!customTypes.includes('Unknown')) customTypes.push('Unknown');
 let activeModules = JSON.parse(localStorage.getItem('active_modules')) || ['scramble', 'collection'];
 if (!Array.isArray(activeModules)) activeModules = ['scramble', 'collection'];
@@ -22,6 +23,10 @@ export const state = {
     activeCategoryTab: 'mixed',
     draftCreateSentences: [],
     editSentences: [],
+    
+    // Zettelkasten
+    createZettelLinks: [],
+    editZettelLinks: [],
     
     // Memory Map
     createMapNodes: [],
