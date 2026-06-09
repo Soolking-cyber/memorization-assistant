@@ -255,6 +255,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (file.size > limit) {
                     window.alert(`Existing upload cleared: ${id.includes('front') ? 'Front' : 'Back'} image exceeds the new ${limitLabel} size limit for ${cardType} cards.\nSelected file: ${(file.size / 1024).toFixed(1)} KB.`);
                     el.value = ''; // clear input selection
+                    updateFileNameDisplay(el);
                 }
             }
         });
@@ -283,8 +284,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    const updateFileNameDisplay = (inputEl) => {
+        const nameEl = document.getElementById(`${inputEl.id}-name`);
+        if (nameEl) {
+            nameEl.textContent = inputEl.files && inputEl.files[0] ? inputEl.files[0].name : 'No file chosen';
+        }
+    };
+
     // Image Upload Size Filter & Verification
     const validateImageSizeOnChange = (e) => {
+        updateFileNameDisplay(e.target);
         const file = e.target.files[0];
         if (!file) return;
         
@@ -299,12 +308,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (file.size > limit) {
             window.alert(`Upload failed: Image exceeds ${limitLabel} size limit for ${cardType} cards.\nSelected file: ${(file.size / 1024).toFixed(1)} KB.`);
             e.target.value = ''; // clear input selection
+            updateFileNameDisplay(e.target);
         }
     };
 
     ['card-front-image', 'card-back-image', 'edit-card-front-image', 'edit-card-back-image'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.addEventListener('change', validateImageSizeOnChange);
+        if (el) {
+            el.addEventListener('change', validateImageSizeOnChange);
+            updateFileNameDisplay(el);
+        }
     });
 
     initSpellingInputListeners();

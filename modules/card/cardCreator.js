@@ -205,10 +205,16 @@ export async function handleCreateCard(e) {
     if (backEl) backEl.value = '';
     
     const frontImgEl = document.getElementById('card-front-image');
-    if (frontImgEl) frontImgEl.value = '';
+    if (frontImgEl) {
+        frontImgEl.value = '';
+        frontImgEl.dispatchEvent(new Event('change'));
+    }
     
     const backImgEl = document.getElementById('card-back-image');
-    if (backImgEl) backImgEl.value = '';
+    if (backImgEl) {
+        backImgEl.value = '';
+        backImgEl.dispatchEvent(new Event('change'));
+    }
 
     const newSentenceEl = document.getElementById('create-new-sentence');
     if (newSentenceEl) newSentenceEl.value = '';
@@ -261,7 +267,10 @@ export function openEditView(cardId) {
             state.editFrontImageDeleted = true;
             document.getElementById('edit-front-img-preview').classList.add('hidden');
             const fileInput = document.getElementById('edit-card-front-image');
-            if (fileInput) fileInput.value = '';
+            if (fileInput) {
+                fileInput.value = '';
+                fileInput.dispatchEvent(new Event('change'));
+            }
         };
     }
 
@@ -271,15 +280,26 @@ export function openEditView(cardId) {
             state.editBackImageDeleted = true;
             document.getElementById('edit-back-img-preview').classList.add('hidden');
             const fileInput = document.getElementById('edit-card-back-image');
-            if (fileInput) fileInput.value = '';
+            if (fileInput) {
+                fileInput.value = '';
+                fileInput.dispatchEvent(new Event('change'));
+            }
         };
     }
 
     document.getElementById('edit-card-id').value = card.id;
     document.getElementById('edit-card-type').value = card.type || 'mixed';
     
-    document.getElementById('edit-card-front-image').value = '';
-    document.getElementById('edit-card-back-image').value = '';
+    const editFrontImgInput = document.getElementById('edit-card-front-image');
+    if (editFrontImgInput) {
+        editFrontImgInput.value = '';
+        editFrontImgInput.dispatchEvent(new Event('change'));
+    }
+    const editBackImgInput = document.getElementById('edit-card-back-image');
+    if (editBackImgInput) {
+        editBackImgInput.value = '';
+        editBackImgInput.dispatchEvent(new Event('change'));
+    }
 
     const frontPreviewDiv = document.getElementById('edit-front-img-preview');
     if (card.image_front_url) {
