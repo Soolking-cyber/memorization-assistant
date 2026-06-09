@@ -1,4 +1,5 @@
 import { state, isVocabularyType } from '../state.js';
+import { validateExampleSentence } from '../practice.js';
 import { supabase } from '../supabaseClient.js';
 import { ICONS } from '../icons.js';
 import { renderEditorNodes } from '../canvas.js';
