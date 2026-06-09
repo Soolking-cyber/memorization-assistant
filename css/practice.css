@@ -179,7 +179,7 @@ input.letter-box:focus {
         flex-direction: column;
         flex: 1;
     }
-    .practice-layout-map .card-face {
+    .practice-layout-map .card-face:not(.hidden) {
         height: 100%;
         display: flex;
         flex-direction: column;
@@ -566,7 +566,7 @@ body.dark-theme .heatmap-tooltip-activity {
     min-height: 0 !important;
 }
 
-.practice-layout-map .card-face {
+.practice-layout-map .card-face:not(.hidden) {
     height: 100% !important;
     display: flex !important;
     flex-direction: column !important;
