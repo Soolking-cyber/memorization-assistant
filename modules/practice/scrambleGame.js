@@ -32,10 +32,13 @@ const scrambleState = {
     currentTierName: ''
 };
 
+let scrambleListenersBound = false;
+
 /**
  * Initializes and renders the scramble difficulty selection decks.
  */
 export async function initScrambleView() {
+    bindScrambleListeners();
     scrambleState.active = false;
     clearGameTimer();
 
@@ -827,8 +830,10 @@ window.initScrambleView = initScrambleView;
 window.resetScrambleGame = resetScrambleGame;
 window.handleScrambleKeydown = handleScrambleKeydown;
 
-// Bind Action Check Click event
-document.addEventListener('DOMContentLoaded', () => {
+function bindScrambleListeners() {
+    if (scrambleListenersBound) return;
+    scrambleListenersBound = true;
+
     const actionBtn = document.getElementById('btn-scramble-action');
     if (actionBtn) {
         actionBtn.addEventListener('click', () => {
@@ -852,7 +857,7 @@ document.addEventListener('DOMContentLoaded', () => {
             switchView('dashboard');
         });
     }
-});
+}
 
 function updateScrambleScoreBadge(card) {
     const score = card.score !== undefined && card.score !== null ? card.score : 39;
