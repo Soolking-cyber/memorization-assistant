@@ -17,6 +17,7 @@ function getDB() {
         request.onsuccess = (event) => resolve(event.target.result);
         request.onerror = (event) => {
             console.error("IndexedDB open error:", event.target.error);
+            dbPromise = null; // Reset promise so a future call can try again
             reject(event.target.error);
         };
     });
@@ -26,7 +27,7 @@ function getDB() {
 export async function dbGet(key) {
     try {
         const db = await getDB();
-        return new Promise((resolve, reject) => {
+        return await new Promise((resolve, reject) => {
             const transaction = db.transaction([STORE_NAME], 'readonly');
             const store = transaction.objectStore(STORE_NAME);
             const request = store.get(key);
@@ -47,7 +48,7 @@ export async function dbGet(key) {
 export async function dbSet(key, val) {
     try {
         const db = await getDB();
-        return new Promise((resolve, reject) => {
+        return await new Promise((resolve, reject) => {
             const transaction = db.transaction([STORE_NAME], 'readwrite');
             const store = transaction.objectStore(STORE_NAME);
             const request = store.put(val, key);
@@ -67,7 +68,7 @@ export async function dbSet(key, val) {
 export async function dbDelete(key) {
     try {
         const db = await getDB();
-        return new Promise((resolve, reject) => {
+        return await new Promise((resolve, reject) => {
             const transaction = db.transaction([STORE_NAME], 'readwrite');
             const store = transaction.objectStore(STORE_NAME);
             const request = store.delete(key);
