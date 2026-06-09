@@ -2,6 +2,7 @@ import { state } from './state.js';
 import { updateDashboard } from './dashboard.js';
 import { switchView } from './navigation.js';
 import { supabase } from './supabaseClient.js';
+import { safeJsonParse } from './utils.js';
 
 
 // Game module registry
@@ -68,10 +69,14 @@ export function getModulesStorageKey() {
 
 export function loadStoredModules() {
     const key = getModulesStorageKey();
-    let stored = JSON.parse(localStorage.getItem(key));
+    let stored = safeJsonParse(localStorage.getItem(key));
     if (!stored || !Array.isArray(stored)) {
         stored = ['scramble', 'collection'];
-        localStorage.setItem(key, JSON.stringify(stored));
+        try {
+            localStorage.setItem(key, JSON.stringify(stored));
+        } catch (e) {
+            console.warn('localStorage write failed:', e);
+        }
     }
     state.activeModules = stored;
 }
