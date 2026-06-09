@@ -127,20 +127,19 @@ export function renderCurrentCard() {
         
         const activeCard = document.getElementById('active-card');
         if (activeCard) {
-            const isMobile = window.innerWidth <= 768;
-            activeCard.style.height = isMobile ? '460px' : '';
-            activeCard.style.minHeight = isMobile ? '360px' : '480px';
-            activeCard.style.maxHeight = isMobile ? 'none' : '850px';
+            activeCard.style.height = '100%';
+            activeCard.style.minHeight = '0';
+            activeCard.style.maxHeight = 'none';
             const cardFront = activeCard.querySelector('.card-front');
             if (cardFront) {
                 cardFront.style.padding = '0';
-                cardFront.style.height = '';
+                cardFront.style.height = '100%';
                 cardFront.style.overflow = 'hidden';
             }
             const cardBack = activeCard.querySelector('.card-back');
             if (cardBack) {
                 cardBack.style.padding = '0';
-                cardBack.style.height = '';
+                cardBack.style.height = '100%';
                 cardBack.style.overflow = 'hidden';
             }
         }

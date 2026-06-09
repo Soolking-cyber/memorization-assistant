@@ -165,12 +165,7 @@
     font-weight: 700;
 }
 
-/* Controls style adjustment */
-.graph-zoom-controls {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-}
+
 .graph-toolbar .btn {
     height: 32px;
     padding: 0 12px;
@@ -189,10 +184,10 @@
         height: calc(100vh - 180px);
     }
 
-    /* Stack toolbar into grid: Row 1 = Title & Buttons, Row 2 = Search */
+    /* Stack toolbar into grid: Row 1 = Title, Row 2 = Search */
     .graph-toolbar {
         display: grid !important;
-        grid-template-columns: 1fr auto !important;
+        grid-template-columns: 1fr !important;
         gap: 10px !important;
         padding: 10px 12px !important;
     }
@@ -204,16 +199,8 @@
         font-size: 1rem !important;
     }
     
-    .graph-zoom-controls {
-        grid-column: 2 !important;
-        grid-row: 1 !important;
-        display: flex !important;
-        gap: 6px !important;
-        align-items: center !important;
-    }
-    
     #graph-search {
-        grid-column: 1 / span 2 !important;
+        grid-column: 1 !important;
         grid-row: 2 !important;
         width: 100% !important;
         max-width: 100% !important;

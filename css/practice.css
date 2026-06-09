@@ -505,6 +505,71 @@ body.dark-theme .heatmap-tooltip-activity {
     width: 100% !important;
 }
 
+/* ==========================================
+   Memory Map Viewport Full-Screen Styling
+   ========================================== */
+#view-practice.practice-layout-map {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: calc(100vh - 120px) !important;
+    height: calc(100dvh - 120px) !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+}
 
+@media (max-width: 768px) {
+    #view-practice.practice-layout-map {
+        height: calc(100vh - 180px) !important;
+        height: calc(100dvh - 180px) !important;
+    }
+}
 
+.practice-layout-map > .form-container {
+    height: 100% !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+}
 
+@media (max-width: 768px) {
+    .practice-layout-map > .form-container {
+        padding: 8px !important;
+    }
+}
+
+.practice-layout-map .practice-workspace {
+    display: grid !important;
+    grid-template-rows: 1fr auto !important;
+    gap: 12px !important;
+    width: 100% !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+}
+
+.practice-layout-map .flashcard-container {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+}
+
+.practice-layout-map .flashcard {
+    margin-bottom: 0 !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+}
+
+.practice-layout-map .card-face {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+}

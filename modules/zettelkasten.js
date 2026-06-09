@@ -169,6 +169,7 @@ function initUIControls() {
     if (btnZoomIn) {
         btnZoomIn.onclick = () => {
             zoom = Math.min(3.0, zoom + 0.1);
+            updateZoomLabel();
         };
     }
     
@@ -176,6 +177,7 @@ function initUIControls() {
     if (btnZoomOut) {
         btnZoomOut.onclick = () => {
             zoom = Math.max(0.2, zoom - 0.1);
+            updateZoomLabel();
         };
     }
     
@@ -195,8 +197,16 @@ function initUIControls() {
     }
 }
 
+function updateZoomLabel() {
+    const label = document.getElementById('graph-zoom-label');
+    if (label) {
+        label.textContent = `${Math.round(zoom * 100)}%`;
+    }
+}
+
 function resetZoom() {
     zoom = 1.0;
+    updateZoomLabel();
     if (canvas) {
         pan = {
             x: canvas.width / 2 - (canvas.width / 2) * zoom,
@@ -278,6 +288,7 @@ function initCanvasListeners() {
         pan.x = mouseX - (mouseX - pan.x) * (nextZoom / zoom);
         pan.y = mouseY - (mouseY - pan.y) * (nextZoom / zoom);
         zoom = nextZoom;
+        updateZoomLabel();
     };
     
     canvas.ondblclick = (e) => {
