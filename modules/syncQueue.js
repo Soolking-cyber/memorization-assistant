@@ -3,6 +3,8 @@ import { supabase } from './supabaseClient.js';
 import { dbGet, dbSet } from './db.js';
 
 let isSyncing = false;
+let listenersInitialized = false;
+let syncIntervalId = null;
 
 export function updateSyncIndicator(status, count = 0) {
     const syncInd = document.getElementById('sync-indicator');
@@ -201,8 +203,9 @@ export async function processSyncQueue() {
             }
         }
 
-        // Keep remaining failed items in the queue
-        const remainingQueue = [...failedItems, ...queue.slice(completedCount + failedItems.length)];
+        // Keep remaining failed items in the queue by reading the latest queue and slicing off the completed ones
+        const latestQueue = await dbGet('offline_sync_queue') || [];
+        const remainingQueue = latestQueue.slice(completedCount);
         await dbSet('offline_sync_queue', remainingQueue);
 
         if (completedCount > 0) {
@@ -222,6 +225,9 @@ export async function processSyncQueue() {
 }
 
 export function initSyncListeners() {
+    if (listenersInitialized) return;
+    listenersInitialized = true;
+
     window.addEventListener('online', () => {
         console.log("[Offline Sync] Connection back online. Flushing queue...");
         processSyncQueue();
@@ -244,6 +250,7 @@ export function initSyncListeners() {
         });
     }
 
+    if (syncIntervalId) clearInterval(syncIntervalId);
     // Periodic sweep every 20 seconds
-    setInterval(processSyncQueue, 20000);
+    syncIntervalId = setInterval(processSyncQueue, 20000);
 }
