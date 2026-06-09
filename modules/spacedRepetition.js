@@ -47,8 +47,11 @@ export function getCategoryTuning(cardType, logs) {
 // FSRS v4 Default Parameters (Weights)
 const w = [0.4, 0.6, 2.4, 5.8, 4.93, 0.94, 0.86, 0.01, 1.49, 0.14, 0.94, 2.18, 0.05, 0.34, 1.26, 0.29, 2.61];
 
-export async function applySM2Grade(gradeInt) {
-    const cardId = state.reviewQueue[state.currentReviewIndex].id;
+export async function applySM2Grade(cardId, gradeInt) {
+    if (!cardId) {
+        console.warn("applySM2Grade called without cardId");
+        return;
+    }
     const cardIndexInGlobal = state.cards.findIndex(c => c.id === cardId);
     if (cardIndexInGlobal === -1) return;
     

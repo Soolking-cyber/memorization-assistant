@@ -906,7 +906,7 @@ export async function evaluateAnswer() {
         playUISound('fail');
     }
 
-    applySM2Grade(gradeInt);
+    applySM2Grade(card.id, gradeInt);
     logReviewAttempt(card.id, gradeInt, score);
     updatePracticeScoreBadges(card);
 

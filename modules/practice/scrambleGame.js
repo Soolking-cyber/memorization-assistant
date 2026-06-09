@@ -475,12 +475,6 @@ function checkSpelling() {
     const feedbackBox = document.getElementById('scramble-feedback-box');
     const actionBtn = document.getElementById('btn-scramble-action');
 
-    // Handle SM-2 alignment safely
-    const origQueue = state.reviewQueue;
-    const origIndex = state.currentReviewIndex;
-    state.reviewQueue = scrambleState.cards;
-    state.currentReviewIndex = scrambleState.currentIndex;
-
     if (success) {
         scrambleState.totalCorrect++;
         scrambleState.streak++;
@@ -515,7 +509,7 @@ function checkSpelling() {
         const oldScore = card.score !== undefined && card.score !== null ? card.score : 50;
 
         // SM-2 sync
-        applySM2Grade(3);
+        applySM2Grade(card.id, 3);
         logReviewAttempt(card.id, 3, 100);
         updateScrambleScoreBadge(card);
 
@@ -578,7 +572,7 @@ function checkSpelling() {
         const oldScore = card.score !== undefined && card.score !== null ? card.score : 50;
 
         // SM-2 sync
-        applySM2Grade(0);
+        applySM2Grade(card.id, 0);
         logReviewAttempt(card.id, 0, 0);
         updateScrambleScoreBadge(card);
 
@@ -601,10 +595,6 @@ function checkSpelling() {
         const streakVal = document.getElementById('scramble-streak-val');
         if (streakVal) streakVal.textContent = '0x';
     }
-
-    // Restore original practice session states
-    state.reviewQueue = origQueue;
-    state.currentReviewIndex = origIndex;
 
     // Toggle button mode to proceed
     if (actionBtn) {
@@ -658,15 +648,9 @@ function handleWordTimeout() {
     const oldScore = card.score !== undefined && card.score !== null ? card.score : 50;
 
     // Log SM-2 failure
-    const origQueue = state.reviewQueue;
-    const origIndex = state.currentReviewIndex;
-    state.reviewQueue = scrambleState.cards;
-    state.currentReviewIndex = scrambleState.currentIndex;
-    applySM2Grade(0);
+    applySM2Grade(card.id, 0);
     logReviewAttempt(card.id, 0, 0);
     updateScrambleScoreBadge(card);
-    state.reviewQueue = origQueue;
-    state.currentReviewIndex = origIndex;
 
     const newScore = card.score !== undefined && card.score !== null ? card.score : 50;
     const diff = newScore - oldScore;
