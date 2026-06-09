@@ -2,6 +2,7 @@ import { state } from './state.js';
 import { supabase } from './supabaseClient.js';
 import { ICONS } from './icons.js';
 import { buildCustomDropdownUI } from './uiHelpers.js';
+import { escapeHtml } from './utils.js';
 import { renderCategoryTabs, renderCategoryCards } from './stats.js';
 import { updateFormLabelsAndPlaceholders } from './flashcardCrud.js';
 import { renderEditorNodes } from './canvas.js';
@@ -13,15 +14,28 @@ export function renderTypeTags() {
     
     const tagHtml = state.customTypes.map(t => {
         const displayType = t === 'mixed' ? 'All Types (Mixed)' : t;
+        const safeDisplay = escapeHtml(displayType);
+        const safeT = escapeHtml(t);
         if (t === 'mixed' || t === 'Vocabulary' || t === 'Memory Map') {
-            return `<span style="display: inline-flex; align-items: center; padding: 4px 10px; background: rgba(0,0,0,0.05); border-radius: 12px; font-size: 0.85rem; border: 1px solid var(--border-color);">${displayType}</span>`;
+            return `<span style="display: inline-flex; align-items: center; padding: 4px 10px; background: rgba(0,0,0,0.05); border-radius: 12px; font-size: 0.85rem; border: 1px solid var(--border-color);">${safeDisplay}</span>`;
         }
-        return `<span style="display: inline-flex; align-items: center; padding: 4px 10px; background: rgba(0,0,0,0.05); border-radius: 12px; font-size: 0.85rem; border: 1px solid var(--border-color);">${displayType} <button type="button" onclick="removeType('${t}')" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; margin-left:6px; padding:0; display:inline-flex; align-items:center;">${ICONS.closeSmall}</button></span>`;
+        return `<span style="display: inline-flex; align-items: center; padding: 4px 10px; background: rgba(0,0,0,0.05); border-radius: 12px; font-size: 0.85rem; border: 1px solid var(--border-color);">${safeDisplay} <button type="button" class="remove-type-btn" data-type="${safeT}" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; margin-left:6px; padding:0; display:inline-flex; align-items:center;">${ICONS.closeSmall}</button></span>`;
     }).join('');
     
     if (createContainer) createContainer.innerHTML = tagHtml;
     if (editContainer) editContainer.innerHTML = tagHtml;
     if (settingsContainer) settingsContainer.innerHTML = tagHtml;
+    
+    // Bind remove buttons via event delegation (safe — no inline onclick)
+    [createContainer, editContainer, settingsContainer].forEach(container => {
+        if (!container) return;
+        container.querySelectorAll('.remove-type-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const typeToRemove = btn.dataset.type;
+                if (typeToRemove && window.removeType) window.removeType(typeToRemove);
+            });
+        });
+    });
 }
 
 export function updateTypeDatalists() {

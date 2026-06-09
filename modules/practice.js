@@ -6,6 +6,7 @@ import { applySM2Grade } from './spacedRepetition.js';
 import { queueTransaction } from './syncQueue.js';
 import { dbGet, dbSet } from './db.js';
 import { ICONS } from './icons.js';
+import { escapeHtml } from './utils.js';
 
 import {
     blankOutWordInSentence,
@@ -182,7 +183,7 @@ export function renderCurrentCard() {
         frontEl.innerHTML = `
             <div class="practice-header-outside" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-secondary); border-bottom: 2px solid var(--border-color); padding: 12px 16px; text-align: center; width: 100%; box-sizing: border-box; flex-shrink: 0; z-index: 10; position: relative;">
                 <span style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-secondary); margin-bottom: 2px;">Recall the Memory Map</span>
-                <span style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">${mapData ? mapData.title : 'Recall this Memory Map'}</span>
+                <span style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">${mapData ? escapeHtml(mapData.title) : 'Recall this Memory Map'}</span>
             </div>
             
             <div id="practice-map-canvas-container" style="position: relative; width: 100%; background: transparent; border: none; overflow: hidden; box-shadow: none; user-select: none; flex-grow: 1; z-index: 1;">
@@ -219,7 +220,7 @@ export function renderCurrentCard() {
             initPracticeCanvasControls(mapData);
         }
         
-        backEl.innerHTML = `<strong style="color:var(--accent);">Memory Map Title:</strong> ${mapData ? mapData.title : ''}`;
+        backEl.innerHTML = `<strong style="color:var(--accent);">Memory Map Title:</strong> ${mapData ? escapeHtml(mapData.title) : ''}`;
         
         const frontImg = document.getElementById('practice-front-img');
         if (frontImg) frontImg.classList.add('hidden');
@@ -297,7 +298,7 @@ export function renderCurrentCard() {
                             Recall the Steps in Sequence Order
                         </div>
                         <div class="image-card-clue-title">
-                            ${card.front}
+                            ${escapeHtml(card.front)}
                         </div>
                     </div>
                     <div class="image-card-frame">
@@ -322,12 +323,12 @@ export function renderCurrentCard() {
             }
             frontEl.innerHTML = `
                 <div class="practice-explanation-only" style="font-size: 1.45rem; font-weight: 700; color: var(--text-primary); max-width: 100%; line-height: 1.5; word-break: normal; overflow-wrap: break-word; text-align: center; margin: auto 0;">
-                    ${card.front.replace(/\n/g, '<br>')}
+                    ${escapeHtml(card.front).replace(/\n/g, '<br>')}
                 </div>
             `;
         }
         
-        backEl.innerHTML = `<strong style="color:var(--accent);">Target sequence:</strong> ${card.back}`;
+        backEl.innerHTML = `<strong style="color:var(--accent);">Target sequence:</strong> ${escapeHtml(card.back)}`;
         
         const steps = parseSequencingSteps(card.back);
         if (seqContainer && steps.length > 0) {
@@ -392,7 +393,7 @@ export function renderCurrentCard() {
         if (tags.length > 0) {
             tagsHtml = `
                 <div class="practice-word-types" style="display: flex; gap: 6px; justify-content: center; margin-top: 10px; flex-wrap: wrap;">
-                    ${tags.map(t => `<span class="word-type-badge">${t}</span>`).join('')}
+                    ${tags.map(t => `<span class="word-type-badge">${escapeHtml(t)}</span>`).join('')}
                 </div>
             `;
         }
@@ -410,14 +411,14 @@ export function renderCurrentCard() {
                         targetTitle = targetCard.back;
                     }
                 }
-                return `<span style="background: rgba(var(--accent-rgb, 100, 108, 255), 0.15); border: 1px solid var(--accent); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;">→ <em style="color:var(--text-secondary);">${l.label || 'connects to'}</em> <strong>${targetTitle}</strong></span>`;
+                return `<span style="background: rgba(var(--accent-rgb, 100, 108, 255), 0.15); border: 1px solid var(--accent); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;">→ <em style="color:var(--text-secondary);">${escapeHtml(l.label || 'connects to')}</em> <strong>${escapeHtml(targetTitle)}</strong></span>`;
             }).join(' ');
             linksHtml = `<div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:12px;">${linkTexts}</div>`;
         }
 
         frontEl.innerHTML = `
             <div class="practice-explanation-only" style="font-size: 1.35rem; font-weight: 500; font-style: italic; color: var(--text-primary); max-width: 100%; line-height: 1.6; word-break: normal; overflow-wrap: break-word; text-align: center; margin: auto 0; padding: 20px; border-left: 4px solid var(--accent); background: rgba(255,255,255,0.03); border-radius: 4px;">
-                "${quote.replace(/\n/g, '<br>')}"
+                "${escapeHtml(quote).replace(/\n/g, '<br>')}"
                 ${tagsHtml}
                 ${linksHtml}
             </div>
@@ -427,7 +428,7 @@ export function renderCurrentCard() {
             <div class="practice-answer-container">
                 <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 4px; letter-spacing: 1px;">Source / Reference:</div>
                 <div class="practice-answer-word" style="font-size: 1.2rem; font-weight: 700; color: var(--accent);">
-                    ${card.back.replace(/\n/g, '<br>')}
+                    ${escapeHtml(card.back).replace(/\n/g, '<br>')}
                 </div>
             </div>
         `;
@@ -496,7 +497,7 @@ export function renderCurrentCard() {
         if (wordTypes.length > 0) {
             wordTypesHtml = `
                 <div class="practice-word-types" style="display: flex; gap: 6px; justify-content: center; margin-top: 6px; flex-wrap: wrap;">
-                    ${wordTypes.map(t => `<span class="word-type-badge">${t}</span>`).join('')}
+                    ${wordTypes.map(t => `<span class="word-type-badge">${escapeHtml(t)}</span>`).join('')}
                 </div>
             `;
         }
@@ -521,7 +522,7 @@ export function renderCurrentCard() {
         frontEl.innerHTML = `
             <div class="practice-prompt-container" style="display: flex; flex-direction: column; gap: 16px; width: 100%; justify-content: center; align-items: center; text-align: center; margin: auto 0;">
                 <div class="practice-explanation" style="font-size: 1.15rem; font-weight: 600; color: var(--text-secondary); max-width: 100%; line-height: 1.5; word-break: normal; overflow-wrap: break-word;">
-                    ${explanationHtml}
+                    ${escapeHtml(explanationHtml).replace(/\n/g, '<br>')}
                     ${wordTypesHtml}
                 </div>
                 <div class="practice-divider" style="width: 60px; height: 2px; background: var(--bg-tertiary); margin: 4px 0;"></div>
@@ -538,14 +539,14 @@ export function renderCurrentCard() {
         if (wordTypes.length > 0) {
             wordTypesHtml = `
                 <div class="practice-word-types" style="display: flex; gap: 6px; justify-content: center; margin-top: 10px; flex-wrap: wrap;">
-                    ${wordTypes.map(t => `<span class="word-type-badge">${t}</span>`).join('')}
+                    ${wordTypes.map(t => `<span class="word-type-badge">${escapeHtml(t)}</span>`).join('')}
                 </div>
             `;
         }
 
         frontEl.innerHTML = `
             <div class="practice-explanation-only" style="font-size: 1.45rem; font-weight: 700; color: var(--text-primary); max-width: 100%; line-height: 1.5; word-break: normal; overflow-wrap: break-word; text-align: center; margin: auto 0;">
-                ${explanationHtml}
+                ${escapeHtml(explanationHtml).replace(/\n/g, '<br>')}
                 ${wordTypesHtml}
             </div>
         `;
@@ -561,12 +562,11 @@ export function renderCurrentCard() {
     let backHtml = `
         <div class="practice-answer-container">
             <div class="practice-answer-word">
-                ${card.back.replace(/\n/g, '<br>')}
+                ${escapeHtml(card.back).replace(/\n/g, '<br>')}
             </div>
     `;
     if (isVocabularyType(card.type) && wordTypes.length > 0) {
-        const badgesHtml = wordTypes.map(t => `<span class="word-type-badge">${t}</span>`).join('');
-        backHtml += `
+        const badgesHtml = wordTypes.map(t => `<span class="word-type-badge">${escapeHtml(t)}</span>`).join('');        backHtml += `
             <div class="word-types-container">
                 ${badgesHtml}
             </div>

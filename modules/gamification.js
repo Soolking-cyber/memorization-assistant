@@ -7,6 +7,7 @@ import { applySM2Grade, calculateCardStats } from './spacedRepetition.js';
 import { logReviewAttempt } from './practice.js';
 import { playUISound } from './sound.js';
 import { ICONS } from './icons.js';
+import { escapeHtml } from './utils.js';
 
 
 /**
@@ -232,11 +233,11 @@ function renderActiveStackCard() {
         const stats = calculateCardStats(card, logs);
         const titleText = getCardTitle(card);
         
-        let illustrationContent = `<div class="illustration-text" style="font-size: 1.15rem; font-weight: 800; line-height: 1.55; overflow-y: auto; max-height: 100%; text-align: center; padding: 16px 20px; font-family: 'Outfit', sans-serif; color: var(--text-primary);">${titleText}</div>`;
+        let illustrationContent = `<div class="illustration-text" style="font-size: 1.15rem; font-weight: 800; line-height: 1.55; overflow-y: auto; max-height: 100%; text-align: center; padding: 16px 20px; font-family: 'Outfit', sans-serif; color: var(--text-primary);">${escapeHtml(titleText)}</div>`;
         if (card.type === 'Image Card' && card.image_front_url) {
             illustrationContent = `
                 <img class="illustration-img" src="${card.image_front_url}" alt="Memory Art" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                <div class="illustration-text" style="display: none; font-size: 1.15rem; font-weight: 800; line-height: 1.55; overflow-y: auto; max-height: 100%; text-align: center; padding: 16px 20px; font-family: 'Outfit', sans-serif; color: var(--text-primary); align-items: center; justify-content: center; height: 100%; width: 100%; box-sizing: border-box;">${titleText}</div>
+                <div class="illustration-text" style="display: none; font-size: 1.15rem; font-weight: 800; line-height: 1.55; overflow-y: auto; max-height: 100%; text-align: center; padding: 16px 20px; font-family: 'Outfit', sans-serif; color: var(--text-primary); align-items: center; justify-content: center; height: 100%; width: 100%; box-sizing: border-box;">${escapeHtml(titleText)}</div>
             `;
         }
         
@@ -247,9 +248,9 @@ function renderActiveStackCard() {
             <div class="study-pokemon-card study-pokemon-card-layout ${stats.tier.class} card-slide-in">
                 <div class="card-header">
                     <div class="card-title-area">
-                        <span class="card-rarity-badge">${stats.tier.name}</span>
+                        <span class="card-rarity-badge">${escapeHtml(stats.tier.name)}</span>
                     </div>
-                    <span class="card-type-indicator">${card.type || 'Unknown'}</span>
+                    <span class="card-type-indicator">${escapeHtml(card.type || 'Unknown')}</span>
                 </div>
                 
                 <div class="card-illustration">
@@ -614,7 +615,7 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
                 RECALL FAILED
             </div>
             <div>Correct Spelling:</div>
-            <div class="feedback-correct-val">${card.back}</div>
+            <div class="feedback-correct-val">${escapeHtml(card.back)}</div>
         `;
         
         // Show custom interactive context clue-attachment form if guess failed
@@ -631,7 +632,7 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
                         <span>Attach Context Clue</span>
                     </div>
                     <span style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
-                        Add an example sentence containing the target word <strong>"${card.back}"</strong> to see it in context.
+                        Add an example sentence containing the target word <strong>"${escapeHtml(card.back)}"</strong> to see it in context.
                     </span>
                     <div style="display: flex; gap: 8px; width: 100%; margin-top: 4px;">
                         <input type="text" id="deck-attach-sentence-input" class="input-field" placeholder="e.g. He showed high affinity for the task." style="flex: 1; padding: 8px 12px; font-size: 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.1); color: var(--text-primary); outline: none;">

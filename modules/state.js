@@ -1,13 +1,16 @@
-let customTypes = JSON.parse(localStorage.getItem('customTypes')) || ['Vocabulary', 'Memory Map', 'Image Card', 'Unknown'];
-customTypes = customTypes.filter(t => t !== 'vocabulary' && t !== 'mixed');
+import { safeJsonParse } from './utils.js';
+
+let customTypes = safeJsonParse(localStorage.getItem('customTypes'), ['Vocabulary', 'Memory Map', 'Image Card', 'Unknown']);
+if (!Array.isArray(customTypes)) customTypes = ['Vocabulary', 'Memory Map', 'Image Card', 'Unknown'];
+customTypes = customTypes.filter(t => typeof t === 'string' && t !== 'vocabulary' && t !== 'mixed');
 if (!customTypes.includes('Vocabulary')) customTypes.push('Vocabulary');
 if (!customTypes.includes('Memory Map')) customTypes.push('Memory Map');
 if (!customTypes.includes('Image Card')) customTypes.push('Image Card');
 if (!customTypes.includes('Zettelkasten')) customTypes.push('Zettelkasten');
 if (!customTypes.includes('Unknown')) customTypes.push('Unknown');
-let activeModules = JSON.parse(localStorage.getItem('active_modules')) || ['scramble', 'collection'];
+let activeModules = safeJsonParse(localStorage.getItem('active_modules'), ['scramble', 'collection']);
 if (!Array.isArray(activeModules)) activeModules = ['scramble', 'collection'];
-localStorage.setItem('active_modules', JSON.stringify(activeModules));
+try { localStorage.setItem('active_modules', JSON.stringify(activeModules)); } catch (e) { console.warn('localStorage write failed:', e); }
 
 export const state = {
     cards: [],

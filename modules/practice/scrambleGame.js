@@ -7,6 +7,7 @@ import { calculateCardStats } from '../spacedRepetition.js';
 import { switchView } from '../navigation.js';
 import { ICONS } from '../icons.js';
 import { buildCustomDropdownUI } from '../uiHelpers.js';
+import { escapeHtml } from '../utils.js';
 
 
 // Gameplay state
@@ -570,7 +571,7 @@ function checkSpelling() {
                     Recall Failed
                 </div>
                 <div style="font-size: 0.8rem; margin-top: 2px;">Correct word:</div>
-                <div class="scramble-feedback-correct">${card.back.toUpperCase()}</div>
+                <div class="scramble-feedback-correct">${escapeHtml(card.back.toUpperCase())}</div>
             `;
         }
 
@@ -650,7 +651,7 @@ function handleWordTimeout() {
                 ${ICONS.heartBreak} Time Expired!
             </div>
             <div style="font-size: 0.8rem; margin-top: 2px;">Correct spelling was:</div>
-            <div class="scramble-feedback-correct">${card.back.toUpperCase()}</div>
+            <div class="scramble-feedback-correct">${escapeHtml(card.back.toUpperCase())}</div>
         `;
     }
 

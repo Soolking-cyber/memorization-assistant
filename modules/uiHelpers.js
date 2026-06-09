@@ -1,4 +1,5 @@
 import { playUISound } from './sound.js';
+import { escapeHtml } from './utils.js';
 
 export const fontSizeMap = {
     small: { keyword: '0.7rem', exp: '0.65rem' },
@@ -15,7 +16,7 @@ export function showAlert(message) {
         modal.innerHTML = `
             <div class="custom-modal-content glass animate-pop-in">
                 <div class="custom-modal-body">
-                    <p>${message}</p>
+                    <p>${escapeHtml(message)}</p>
                 </div>
                 <div class="custom-modal-footer">
                     <button class="btn primary modal-ok-btn" style="min-width: 100px;">OK</button>
@@ -58,7 +59,7 @@ export function showConfirm(message) {
         modal.innerHTML = `
             <div class="custom-modal-content glass animate-pop-in">
                 <div class="custom-modal-body">
-                    <p>${message}</p>
+                    <p>${escapeHtml(message)}</p>
                 </div>
                 <div class="custom-modal-footer" style="display: flex; gap: 12px; justify-content: center; width: 100%;">
                     <button class="btn modal-cancel-btn" style="flex: 1; background: var(--bg-secondary); color: var(--text-primary); border: 2px solid var(--border-color);">Cancel</button>
@@ -107,8 +108,8 @@ export function showPrompt(message, defaultValue = '') {
         modal.innerHTML = `
             <div class="custom-modal-content glass animate-pop-in">
                 <div class="custom-modal-body">
-                    <p style="margin-bottom: 12px; font-weight: 700;">${message}</p>
-                    <input type="text" class="custom-modal-prompt-input" value="${defaultValue}" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; box-sizing: border-box; outline: none; transition: border-color 0.15s ease;">
+                    <p style="margin-bottom: 12px; font-weight: 700;">${escapeHtml(message)}</p>
+                    <input type="text" class="custom-modal-prompt-input" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; box-sizing: border-box; outline: none; transition: border-color 0.15s ease;">
                 </div>
                 <div class="custom-modal-footer" style="display: flex; gap: 12px; justify-content: center; width: 100%; margin-top: 16px;">
                     <button class="btn modal-cancel-btn" style="flex: 1; background: var(--bg-secondary); color: var(--text-primary); border: 2px solid var(--border-color);">Cancel</button>
@@ -119,6 +120,8 @@ export function showPrompt(message, defaultValue = '') {
         document.body.appendChild(modal);
         
         const inputEl = modal.querySelector('.custom-modal-prompt-input');
+        // Set value via DOM property (not attribute) to prevent attribute injection XSS
+        if (inputEl) inputEl.value = defaultValue ?? '';
         
         setTimeout(() => {
             if (inputEl) {

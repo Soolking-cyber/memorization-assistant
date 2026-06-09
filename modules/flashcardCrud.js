@@ -3,6 +3,7 @@ import { supabase } from './supabaseClient.js';
 import { ICONS } from './icons.js';
 import { dbSet } from './db.js';
 import { getSelectedTypes } from './dashboard.js';
+import { escapeHtml } from './utils.js';
 
 import {
     handleCreateAddSentence,
@@ -112,8 +113,18 @@ export function renderManageView() {
         const cardEl = document.createElement('div');
         cardEl.className = 'glass manage-card';
         
-        let frontImgHtml = card.image_front_url ? `<img src="${card.image_front_url}" class="manage-card-img" alt="Front" onerror="this.style.display='none';">` : '';
-        let backImgHtml = card.image_back_url ? `<img src="${card.image_back_url}" class="manage-card-img" alt="Back" onerror="this.style.display='none';">` : '';
+        // Validate image URLs — only allow https: or data: protocols
+        const safeImgUrl = (url) => {
+            if (!url) return null;
+            try {
+                const p = new URL(url);
+                return ['https:', 'data:'].includes(p.protocol) ? escapeHtml(url) : null;
+            } catch { return null; }
+        };
+        const frontImgSrc = safeImgUrl(card.image_front_url);
+        const backImgSrc = safeImgUrl(card.image_back_url);
+        let frontImgHtml = frontImgSrc ? `<img src="${frontImgSrc}" class="manage-card-img" alt="Front" onerror="this.style.display='none';">` : '';
+        let backImgHtml = backImgSrc ? `<img src="${backImgSrc}" class="manage-card-img" alt="Back" onerror="this.style.display='none';">` : '';
 
         const savedSentences = state.exampleSentences[card.id];
         let sentencesArray = [];
@@ -129,9 +140,9 @@ export function renderManageView() {
                 <div class="manage-sentences-list" style="margin-top: 12px; display: flex; flex-direction: column; gap: 6px;">
                     <strong style="font-size: 0.8rem; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px;">Saved Clues:</strong>
                     ${sentencesArray.map((s, idx) => `
-                        <div class="manage-sentence-item" data-card-id="${card.id}" data-index="${idx}" data-tooltip="Double-click to edit clue" style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 8px; font-size: 0.85rem;">
-                            <span class="manage-sentence-text" style="flex: 1; margin-right: 8px; line-height: 1.4;">${s}</span>
-                            <button type="button" class="delete-sentence-bank-btn" data-card-id="${card.id}" data-index="${idx}" style="background:none; border:none; color:var(--danger); cursor:pointer; padding:0 4px; display:inline-flex; align-items:center;" title="Delete Clue">${ICONS.trash}</button>
+                        <div class="manage-sentence-item" data-card-id="${escapeHtml(card.id)}" data-index="${idx}" data-tooltip="Double-click to edit clue" style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 8px; font-size: 0.85rem;">
+                            <span class="manage-sentence-text" style="flex: 1; margin-right: 8px; line-height: 1.4;">${escapeHtml(s)}</span>
+                            <button type="button" class="delete-sentence-bank-btn" data-card-id="${escapeHtml(card.id)}" data-index="${idx}" style="background:none; border:none; color:var(--danger); cursor:pointer; padding:0 4px; display:inline-flex; align-items:center;" title="Delete Clue">${ICONS.trash}</button>
                         </div>
                     `).join('')}
                 </div>
@@ -150,16 +161,16 @@ export function renderManageView() {
         if (cleanFront.startsWith('{"mode":"memory_map"')) {
             try {
                 const mapData = JSON.parse(cleanFront);
-                displayFront = `<strong style="color:var(--accent);">[Memory Map]</strong> ${mapData.title} (${mapData.nodes.length} nodes, ${mapData.links.length} connections)`;
+                displayFront = `<strong style="color:var(--accent);">[Memory Map]</strong> ${escapeHtml(mapData.title)} (${mapData.nodes.length} nodes, ${mapData.links.length} connections)`;
             } catch (e) {
-                displayFront = cleanFront;
+                displayFront = escapeHtml(cleanFront);
             }
         } else if (card.type === 'Zettelkasten' || cleanFront.includes('"mode":"zettelkasten"')) {
             try {
                 const ztData = JSON.parse(cleanFront);
-                displayFront = `<strong style="color:var(--accent);">[Zettelkasten Quote]</strong> "${ztData.quote.replace(/\n/g, '<br>')}"`;
+                displayFront = `<strong style="color:var(--accent);">[Zettelkasten Quote]</strong> "${escapeHtml(ztData.quote).replace(/\n/g, '<br>')}"`;
                 if (ztData.tags && ztData.tags.length > 0) {
-                    const tagBadges = ztData.tags.map(t => `<span class="word-type-badge">${t}</span>`).join('');
+                    const tagBadges = ztData.tags.map(t => `<span class="word-type-badge">${escapeHtml(t)}</span>`).join('');
                     displayFront += ` <div class="word-types-container" style="margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap;">${tagBadges}</div>`;
                 }
                 if (ztData.links && ztData.links.length > 0) {
@@ -174,21 +185,21 @@ export function renderManageView() {
                                 targetTitle = targetCard.back;
                             }
                         }
-                        return `→ <em style="color:var(--text-secondary);">${l.label || 'connects to'}</em> <strong>${targetTitle}</strong>`;
+                        return `→ <em style="color:var(--text-secondary);">${escapeHtml(l.label || 'connects to')}</em> <strong>${escapeHtml(targetTitle)}</strong>`;
                     }).join(', ');
                     displayFront += ` <div style="font-size:0.8rem; margin-top: 6px; color:var(--text-secondary); line-height: 1.4;">Links: ${linkTexts}</div>`;
                 }
             } catch (e) {
-                displayFront = cleanFront;
+                displayFront = escapeHtml(cleanFront);
             }
         } else if (card.type === 'Image Card') {
-            displayFront = `<strong style="color:var(--accent);">[Image Card]</strong> ${cleanFront.replace(/\n/g, '<br>')}`;
+            displayFront = `<strong style="color:var(--accent);">[Image Card]</strong> ${escapeHtml(cleanFront).replace(/\n/g, '<br>')}`;
         } else {
-            displayFront = cleanFront.replace(/\n/g, '<br>');
+            displayFront = escapeHtml(cleanFront).replace(/\n/g, '<br>');
         }
 
         if (wordTypes.length > 0) {
-            const badgesHtml = wordTypes.map(t => `<span class="word-type-badge">${t}</span>`).join('');
+            const badgesHtml = wordTypes.map(t => `<span class="word-type-badge">${escapeHtml(t)}</span>`).join('');
             displayFront += ` <div class="word-types-container" style="margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap;">${badgesHtml}</div>`;
         }
 
@@ -201,13 +212,13 @@ export function renderManageView() {
             <input type="checkbox" class="card-checkbox" data-id="${card.id}" style="display: none;">
             <div class="manage-card-content" style="flex: 1;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
-                    <span class="type-tag" style="margin: 0;">${card.type === 'mixed' ? 'All Types' : (card.type || 'All Types')}</span>
+                    <span class="type-tag" style="margin: 0;">${escapeHtml(card.type === 'mixed' ? 'All Types' : (card.type || 'All Types'))}</span>
                     <span class="card-score-badge" data-tooltip="${scoreTooltip}">
                         ${ICONS.zap} ${score}%
                     </span>
                 </div>
                 <strong>Front:</strong> <br> ${displayFront} ${frontImgHtml} <br><br>
-                <strong>Back:</strong> <br> ${card.back.replace(/\n/g, '<br>')} ${backImgHtml}
+                <strong>Back:</strong> <br> ${escapeHtml(card.back).replace(/\n/g, '<br>')} ${backImgHtml}
                 ${sentencesHtml}
             </div>
             <div style="margin-left: auto; display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: flex-start; padding-top: 16px;">
