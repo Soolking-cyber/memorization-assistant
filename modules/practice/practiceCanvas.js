@@ -176,6 +176,11 @@ export function initPracticeCanvasControls(mapData) {
             adjustPracticeViewportCentering(viewportWidth, viewportHeight);
         }
     }, 120);
+
+    // Centering again after slide-up animation (400ms transition) completes
+    setTimeout(() => {
+        adjustPracticeViewportCentering();
+    }, 500);
     
     const btnPracticeZoomIn = document.getElementById('btn-practice-zoom-in');
     if (btnPracticeZoomIn) btnPracticeZoomIn.addEventListener('click', () => setPracticeMapZoom(state.practiceMapZoom + 0.1));

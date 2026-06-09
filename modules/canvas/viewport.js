@@ -402,3 +402,11 @@ export function initMapCanvasListeners() {
         });
     }
 }
+
+// Register global window resize listener to keep practice map viewport centered
+window.addEventListener('resize', () => {
+    const viewport = document.getElementById('practice-map-viewport');
+    if (viewport && viewport.offsetParent !== null) {
+        adjustPracticeViewportCentering();
+    }
+});
