@@ -166,6 +166,11 @@
 }
 
 /* Controls style adjustment */
+.graph-zoom-controls {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
 .graph-toolbar .btn {
     height: 32px;
     padding: 0 12px;
@@ -175,4 +180,96 @@
     font-size: 0.8rem;
     font-weight: 600;
     margin: 0;
+}
+
+@media (max-width: 768px) {
+    /* Limit container height so it doesn't overflow behind the bottom nav bar */
+    .graph-view-container {
+        height: calc(100dvh - 180px);
+        height: calc(100vh - 180px);
+    }
+
+    /* Stack toolbar into grid: Row 1 = Title & Buttons, Row 2 = Search */
+    .graph-toolbar {
+        display: grid !important;
+        grid-template-columns: 1fr auto !important;
+        gap: 10px !important;
+        padding: 10px 12px !important;
+    }
+    
+    .graph-toolbar > span {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        margin-right: 0 !important;
+        font-size: 1rem !important;
+    }
+    
+    .graph-zoom-controls {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        display: flex !important;
+        gap: 6px !important;
+        align-items: center !important;
+    }
+    
+    #graph-search {
+        grid-column: 1 / span 2 !important;
+        grid-row: 2 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* Redesign Filter Tag Panel as a bottom horizontal-scrolling panel */
+    #graph-filter-panel {
+        top: auto !important;
+        bottom: 12px !important;
+        left: 12px !important;
+        right: 12px !important;
+        width: auto !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 12px !important;
+        padding: 8px 12px !important;
+        border-radius: 10px !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+    }
+    
+    .graph-filter-title {
+        border-bottom: none !important;
+        padding-bottom: 0 !important;
+        white-space: nowrap !important;
+        font-size: 0.75rem !important;
+    }
+    
+    #graph-tags-list {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        max-height: none !important;
+        flex-grow: 1 !important;
+        gap: 6px !important;
+        padding: 4px 0 !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Hide horizontal scrollbar in webkit browsers */
+    #graph-tags-list::-webkit-scrollbar {
+        display: none !important;
+    }
+    
+    #btn-clear-graph-filters {
+        margin-top: 0 !important;
+        white-space: nowrap !important;
+        font-size: 0.75rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Adjust node tooltip on mobile to be slightly smaller and fit screens */
+    #graph-tooltip {
+        max-width: 250px !important;
+        padding: 8px 12px !important;
+        font-size: 0.75rem !important;
+    }
 }
