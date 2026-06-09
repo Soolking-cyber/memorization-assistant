@@ -837,6 +837,11 @@ export function handleScrambleKeydown(e) {
     }
 }
 
+// Expose functions to window for navigation.js and app.js interop
+window.initScrambleView = initScrambleView;
+window.resetScrambleGame = resetScrambleGame;
+window.handleScrambleKeydown = handleScrambleKeydown;
+
 // Bind Action Check Click event
 document.addEventListener('DOMContentLoaded', () => {
     const actionBtn = document.getElementById('btn-scramble-action');

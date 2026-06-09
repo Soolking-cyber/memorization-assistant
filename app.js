@@ -42,6 +42,7 @@ import {
 import { toggleFullscreen, buildCustomDropdownUI, initGlobalTooltips } from './modules/uiHelpers.js';
 import { initZettelkastenFormListeners } from './modules/card/cardCreator.js';
 import './modules/zettelkasten.js';
+import './modules/practice/scrambleGame.js';
 
 // Bind necessary functions to window for DOM/inline event listeners
 window.switchView = switchView;
