@@ -549,8 +549,8 @@ function draw() {
         ctx.shadowColor = isHovered ? 'var(--accent)' : 'rgba(100, 108, 255, 0.5)';
         
         // Outer border
-        ctx.fillStyle = isHovered ? 'var(--accent)' : (isNeighbor ? 'rgba(100, 108, 255, 0.8)' : 'rgba(30, 30, 40, 0.9)');
-        ctx.strokeStyle = isHovered ? '#fff' : (isNeighbor ? 'var(--accent)' : 'rgba(100, 108, 255, 0.6)');
+        ctx.fillStyle = isHovered ? 'var(--accent)' : (isNeighbor ? 'rgba(100, 108, 255, 0.8)' : 'var(--bg-secondary)');
+        ctx.strokeStyle = isHovered ? 'var(--bg-card)' : (isNeighbor ? 'var(--accent)' : 'rgba(100, 108, 255, 0.6)');
         ctx.lineWidth = isHovered ? 2.5 : 1.5;
         
         ctx.beginPath();
@@ -632,7 +632,7 @@ function drawLinkLabel(ctx, x1, y1, x2, y2, label, opacity) {
     
     // Draw background block for label text
     const textWidth = ctx.measureText(label).width;
-    ctx.fillStyle = 'rgba(15, 15, 20, 0.8)';
+    ctx.fillStyle = 'var(--bg-card)';
     ctx.fillRect(-textWidth/2 - 4, -9, textWidth + 8, 10);
     
     ctx.fillStyle = 'var(--text-secondary)';
