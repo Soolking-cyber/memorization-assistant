@@ -247,38 +247,67 @@ Sum of all cards' memory strength scores (max 100 per card).">
 
                         <!-- Vocabulary Form Fields -->
                         <div id="create-vocab-fields">
-                            <div class="input-group">
-                                <label for="card-front">Concept (Front)</label>
-                                <textarea id="card-front" placeholder="What is the powerhouse of the cell?"></textarea>
-                                <div class="file-input-container">
-                                    <input type="file" id="card-front-image" class="file-input-hidden" accept="image/*">
-                                    <label for="card-front-image" class="file-input-button">Add Image</label>
-                                    <span id="card-front-image-name" class="file-input-name">No file chosen</span>
+                            <!-- Standard Fields (shown for Mixed/Image Card/etc.) -->
+                            <div id="create-standard-fields">
+                                <div class="input-group">
+                                    <label for="card-front">Concept (Front)</label>
+                                    <textarea id="card-front" placeholder="What is the powerhouse of the cell?"></textarea>
+                                    <div class="file-input-container">
+                                        <input type="file" id="card-front-image" class="file-input-hidden" accept="image/*">
+                                        <label for="card-front-image" class="file-input-button">Add Image</label>
+                                        <span id="card-front-image-name" class="file-input-name">No file chosen</span>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label for="card-back">Recall (Back / Target Word)</label>
+                                    <textarea id="card-back" placeholder="Mitochondria"></textarea>
+                                    <div class="file-input-container">
+                                        <input type="file" id="card-back-image" class="file-input-hidden" accept="image/*">
+                                        <label for="card-back-image" class="file-input-button">Add Image</label>
+                                        <span id="card-back-image-name" class="file-input-name">No file chosen</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="input-group">
-                                <label for="card-back">Recall (Back / Target Word)</label>
-                                <textarea id="card-back" placeholder="Mitochondria"></textarea>
-                                <div class="file-input-container">
-                                    <input type="file" id="card-back-image" class="file-input-hidden" accept="image/*">
-                                    <label for="card-back-image" class="file-input-button">Add Image</label>
-                                    <span id="card-back-image-name" class="file-input-name">No file chosen</span>
+
+                            <!-- Vocabulary Specific Fields (shown for Vocabulary card types) -->
+                            <div id="create-vocabulary-fields" class="hidden">
+                                <div class="input-group">
+                                    <label>Word & Type</label>
+                                    <div class="input-row" style="display: flex; gap: 12px; align-items: center; width: 100%;">
+                                        <input type="text" id="vocab-word" class="input-field" placeholder="Type word here..." style="flex: 2;">
+                                        <select id="vocab-type" style="flex: 1; min-height: 48px;">
+                                            <option value="">Select Type</option>
+                                            <option value="Noun">Noun</option>
+                                            <option value="Verb">Verb</option>
+                                            <option value="Adjective">Adjective</option>
+                                            <option value="Adverb">Adverb</option>
+                                            <option value="Pronoun">Pronoun</option>
+                                            <option value="Preposition">Preposition</option>
+                                            <option value="Conjunction">Conjunction</option>
+                                            <option value="Interjection">Interjection</option>
+                                            <option value="Phrase">Phrase</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label for="vocab-meaning">Description / Meaning</label>
+                                    <textarea id="vocab-meaning" placeholder="Meaning of the word..."></textarea>
+                                    <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+                                        <button type="button" id="btn-vocab-add-meaning" class="btn secondary" style="min-height: 38px; font-size: 0.9rem;" title="Fetch definition from dictionary">Add Meaning</button>
+                                    </div>
+                                    <div class="file-input-container">
+                                        <input type="file" id="vocab-front-image" class="file-input-hidden" accept="image/*">
+                                        <label for="vocab-front-image" class="file-input-button">Add Front Image</label>
+                                        <span id="vocab-front-image-name" class="file-input-name">No file chosen</span>
+                                    </div>
+                                    <div class="file-input-container">
+                                        <input type="file" id="vocab-back-image" class="file-input-hidden" accept="image/*">
+                                        <label for="vocab-back-image" class="file-input-button">Add Back Image</label>
+                                        <span id="vocab-back-image-name" class="file-input-name">No file chosen</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div id="create-word-types-group" class="input-group hidden">
-                                <label for="vocab-word-types">Word Type(s) (Optional)</label>
-                                <select id="vocab-word-types" multiple>
-                                    <option value="Noun">Noun</option>
-                                    <option value="Verb">Verb</option>
-                                    <option value="Adjective">Adjective</option>
-                                    <option value="Adverb">Adverb</option>
-                                    <option value="Pronoun">Pronoun</option>
-                                    <option value="Preposition">Preposition</option>
-                                    <option value="Conjunction">Conjunction</option>
-                                    <option value="Interjection">Interjection</option>
-                                    <option value="Phrase">Phrase</option>
-                                </select>
-                            </div>
+
                             <div id="create-vocab-sentences-group" class="input-group" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
                                 <label>Example Sentences (Vocabulary Memory Clues)</label>
                                 <div id="create-sentences-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
@@ -388,48 +417,89 @@ Sum of all cards' memory strength scores (max 100 per card).">
 
                         <!-- Vocabulary Form Fields for Edit -->
                         <div id="edit-vocab-fields">
-                            <div class="input-group">
-                                <label for="edit-card-front">Concept (Front)</label>
-                                <textarea id="edit-card-front" placeholder="What is the powerhouse of the cell?"></textarea>
-                                <div id="edit-front-img-preview" class="hidden" style="margin-top: 10px; margin-bottom: 10px; position: relative; display: inline-block;">
-                                    <img src="" style="max-height: 100px; border-radius: 4px; display: block;" alt="Current Front Image">
-                                    <button type="button" id="btn-delete-edit-front-img" style="position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; background: var(--danger); color: white; border: none; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); line-height: 1;" title="Delete Image">×</button>
+                            <!-- Standard Fields (shown for Mixed/Image Card/etc.) -->
+                            <div id="edit-standard-fields">
+                                <div class="input-group">
+                                    <label for="edit-card-front">Concept (Front)</label>
+                                    <textarea id="edit-card-front" placeholder="What is the powerhouse of the cell?"></textarea>
+                                    <div id="edit-front-img-preview" class="hidden" style="margin-top: 10px; margin-bottom: 10px; position: relative; display: inline-block;">
+                                        <img src="" style="max-height: 100px; border-radius: 4px; display: block;" alt="Current Front Image">
+                                        <button type="button" id="btn-delete-edit-front-img" style="position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; background: var(--danger); color: white; border: none; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); line-height: 1;" title="Delete Image">×</button>
+                                    </div>
+                                    <div class="file-input-container">
+                                        <input type="file" id="edit-card-front-image" class="file-input-hidden" accept="image/*">
+                                        <label for="edit-card-front-image" class="file-input-button">Choose File</label>
+                                        <span id="edit-card-front-image-name" class="file-input-name">No file chosen</span>
+                                    </div>
+                                    <small style="color: var(--text-secondary);">Select a new image to replace the current one.</small>
                                 </div>
-                                <div class="file-input-container">
-                                    <input type="file" id="edit-card-front-image" class="file-input-hidden" accept="image/*">
-                                    <label for="edit-card-front-image" class="file-input-button">Choose File</label>
-                                    <span id="edit-card-front-image-name" class="file-input-name">No file chosen</span>
+                                <div class="input-group">
+                                    <label for="edit-card-back">Recall (Back / Target Word)</label>
+                                    <textarea id="edit-card-back" placeholder="Mitochondria"></textarea>
+                                    <div id="edit-back-img-preview" class="hidden" style="margin-top: 10px; margin-bottom: 10px; position: relative; display: inline-block;">
+                                        <img src="" style="max-height: 100px; border-radius: 4px; display: block;" alt="Current Back Image">
+                                        <button type="button" id="btn-delete-edit-back-img" style="position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; background: var(--danger); color: white; border: none; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); line-height: 1;" title="Delete Image">×</button>
+                                    </div>
+                                    <div class="file-input-container">
+                                        <input type="file" id="edit-card-back-image" class="file-input-hidden" accept="image/*">
+                                        <label for="edit-card-back-image" class="file-input-button">Choose File</label>
+                                        <span id="edit-card-back-image-name" class="file-input-name">No file chosen</span>
+                                    </div>
+                                    <small style="color: var(--text-secondary);">Select a new image to replace the current one.</small>
                                 </div>
-                                <small style="color: var(--text-secondary);">Select a new image to replace the current one.</small>
                             </div>
-                            <div class="input-group">
-                                <label for="edit-card-back">Recall (Back / Target Word)</label>
-                                <textarea id="edit-card-back" placeholder="Mitochondria"></textarea>
-                                <div id="edit-back-img-preview" class="hidden" style="margin-top: 10px; margin-bottom: 10px; position: relative; display: inline-block;">
-                                    <img src="" style="max-height: 100px; border-radius: 4px; display: block;" alt="Current Back Image">
-                                    <button type="button" id="btn-delete-edit-back-img" style="position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; background: var(--danger); color: white; border: none; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); line-height: 1;" title="Delete Image">×</button>
+
+                            <!-- Vocabulary Specific Fields for Edit (shown for Vocabulary card types) -->
+                            <div id="edit-vocabulary-fields" class="hidden">
+                                <div class="input-group">
+                                    <label>Word & Type</label>
+                                    <div class="input-row" style="display: flex; gap: 12px; align-items: center; width: 100%;">
+                                        <input type="text" id="edit-vocab-word" class="input-field" placeholder="Type word here..." style="flex: 2;">
+                                        <select id="edit-vocab-type" style="flex: 1; min-height: 48px;">
+                                            <option value="">Select Type</option>
+                                            <option value="Noun">Noun</option>
+                                            <option value="Verb">Verb</option>
+                                            <option value="Adjective">Adjective</option>
+                                            <option value="Adverb">Adverb</option>
+                                            <option value="Pronoun">Pronoun</option>
+                                            <option value="Preposition">Preposition</option>
+                                            <option value="Conjunction">Conjunction</option>
+                                            <option value="Interjection">Interjection</option>
+                                            <option value="Phrase">Phrase</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="file-input-container">
-                                    <input type="file" id="edit-card-back-image" class="file-input-hidden" accept="image/*">
-                                    <label for="edit-card-back-image" class="file-input-button">Choose File</label>
-                                    <span id="edit-card-back-image-name" class="file-input-name">No file chosen</span>
+                                <div class="input-group">
+                                    <label for="edit-vocab-meaning">Description / Meaning</label>
+                                    <textarea id="edit-vocab-meaning" placeholder="Meaning of the word..."></textarea>
+                                    <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+                                        <button type="button" id="btn-edit-vocab-add-meaning" class="btn secondary" style="min-height: 38px; font-size: 0.9rem;" title="Fetch definition from dictionary">Add Meaning</button>
+                                    </div>
+                                    
+                                    <!-- Edit Vocab Front Image Preview and Upload -->
+                                    <div id="edit-vocab-front-img-preview" class="hidden" style="margin-top: 10px; margin-bottom: 10px; position: relative; display: inline-block;">
+                                        <img src="" style="max-height: 100px; border-radius: 4px; display: block;" alt="Current Front Image">
+                                        <button type="button" id="btn-delete-edit-vocab-front-img" style="position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; background: var(--danger); color: white; border: none; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); line-height: 1;" title="Delete Image">×</button>
+                                    </div>
+                                    <div class="file-input-container">
+                                        <input type="file" id="edit-vocab-front-image" class="file-input-hidden" accept="image/*">
+                                        <label for="edit-vocab-front-image" class="file-input-button">Choose Front File</label>
+                                        <span id="edit-vocab-front-image-name" class="file-input-name">No file chosen</span>
+                                    </div>
+                                    
+                                    <!-- Edit Vocab Back Image Preview and Upload -->
+                                    <div id="edit-vocab-back-img-preview" class="hidden" style="margin-top: 10px; margin-bottom: 10px; position: relative; display: inline-block;">
+                                        <img src="" style="max-height: 100px; border-radius: 4px; display: block;" alt="Current Back Image">
+                                        <button type="button" id="btn-delete-edit-vocab-back-img" style="position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; background: var(--danger); color: white; border: none; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); line-height: 1;" title="Delete Image">×</button>
+                                    </div>
+                                    <div class="file-input-container">
+                                        <input type="file" id="edit-vocab-back-image" class="file-input-hidden" accept="image/*">
+                                        <label for="edit-vocab-back-image" class="file-input-button">Choose Back File</label>
+                                        <span id="edit-vocab-back-image-name" class="file-input-name">No file chosen</span>
+                                    </div>
                                 </div>
-                                <small style="color: var(--text-secondary);">Select a new image to replace the current one.</small>
                             </div>
-                            <div id="edit-word-types-group" class="input-group hidden">
-                                <label for="edit-vocab-word-types">Word Type(s) (Optional)</label>
-                                <select id="edit-vocab-word-types" multiple>
-                                    <option value="Noun">Noun</option>
-                                    <option value="Verb">Verb</option>
-                                    <option value="Adjective">Adjective</option>
-                                    <option value="Adverb">Adverb</option>
-                                    <option value="Pronoun">Pronoun</option>
-                                    <option value="Preposition">Preposition</option>
-                                    <option value="Conjunction">Conjunction</option>
-                                    <option value="Interjection">Interjection</option>
-                                    <option value="Phrase">Phrase</option>
-                                </select>
-                            </div>
+
                             <div id="edit-vocab-sentences-group" class="input-group" style="border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px;">
                                 <label>Example Sentences (Vocabulary Memory Clues)</label>
                                 <div id="edit-sentences-list" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">

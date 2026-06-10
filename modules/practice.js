@@ -6,7 +6,7 @@ import { applySM2Grade } from './spacedRepetition.js';
 import { queueTransaction } from './syncQueue.js';
 import { dbGet, dbSet } from './db.js';
 import { ICONS } from './icons.js';
-import { escapeHtml } from './utils.js';
+import { escapeHtml, parseVocabularyCard } from './utils.js';
 
 import {
     blankOutWordInSentence,
@@ -476,16 +476,13 @@ export function renderCurrentCard() {
             sentences = [savedSentences];
         }
     }
-    const targetWord = card.back.trim();
+    const isVocab = isVocabularyType(card.type);
+    const parsed = isVocab ? parseVocabularyCard(card) : null;
+    const targetWord = isVocab ? parsed.targetWord : card.back.trim();
     const isSingleWord = !targetWord.includes(' ') && targetWord.length > 0;
     
-    let cleanFront = card.front;
-    let wordTypes = [];
-    if (isVocabularyType(card.type) && card.front.includes('|||')) {
-        const parts = card.front.split('|||');
-        cleanFront = parts[0].trim();
-        wordTypes = parts[1].split(',').map(t => t.trim()).filter(Boolean);
-    }
+    let cleanFront = isVocab ? parsed.definition : card.front;
+    let wordTypes = isVocab ? parsed.wordTypes : [];
     
     if (sentences.length > 0) {
         exerciseTitleEl.textContent = "Complete the sentences with the correct word";
@@ -561,11 +558,19 @@ export function renderCurrentCard() {
     let backHtml = `
         <div class="practice-answer-container">
             <div class="practice-answer-word">
-                ${escapeHtml(card.back).replace(/\n/g, '<br>')}
+                ${escapeHtml(isVocab ? targetWord : card.back).replace(/\n/g, '<br>')}
             </div>
     `;
+    if (isVocab) {
+        backHtml += `
+            <div class="practice-answer-definition" style="font-size: 1rem; color: var(--text-secondary); margin-top: 8px;">
+                ${escapeHtml(cleanFront).replace(/\n/g, '<br>')}
+            </div>
+        `;
+    }
     if (isVocabularyType(card.type) && wordTypes.length > 0) {
-        const badgesHtml = wordTypes.map(t => `<span class="word-type-badge">${escapeHtml(t)}</span>`).join('');        backHtml += `
+        const badgesHtml = wordTypes.map(t => `<span class="word-type-badge">${escapeHtml(t)}</span>`).join('');
+        backHtml += `
             <div class="word-types-container">
                 ${badgesHtml}
             </div>
@@ -577,7 +582,6 @@ export function renderCurrentCard() {
     const frontImg = document.getElementById('practice-front-img');
     const backImg = document.getElementById('practice-back-img');
 
-    const isVocab = isVocabularyType(card.type);
     const imageUrl = card.image_front_url || card.image_back_url;
 
     if (isVocab && imageUrl) {
@@ -838,6 +842,10 @@ export async function evaluateAnswer() {
         score = nonRootNodesCount > 0 ? Math.round(totalScore / nonRootNodesCount) : 100;
         typed = 'memory-map-attempt';
     } else {
+        const isVocab = isVocabularyType(card.type);
+        const parsed = isVocab ? parseVocabularyCard(card) : null;
+        const targetWord = isVocab ? parsed.targetWord : card.back.trim();
+
         if (spellingInputs.length > 0) {
             const enteredCount = Array.from(spellingInputs).filter(i => i.value.trim().length > 0).length;
             if (enteredCount > 0) {
@@ -845,12 +853,12 @@ export async function evaluateAnswer() {
             }
             
             if (sentences.length > 0) {
-                const targetWords = getTargetWordsForSentences(card.back.trim(), sentences);
+                const targetWords = getTargetWordsForSentences(targetWord, sentences);
                 const typedWords = getTypedAnswersForSentences(targetWords, sentences.length);
                 let allCorrect = true;
                 let totalScore = 0;
                 typedWords.forEach((word, idx) => {
-                    const expectedWord = targetWords[idx] || card.back.trim();
+                    const expectedWord = targetWords[idx] || targetWord;
                     const matchScore = calculateMatchPercentage(word, expectedWord);
                     if (matchScore < 100) {
                         allCorrect = false;
@@ -867,12 +875,12 @@ export async function evaluateAnswer() {
                 
                 typed = typedWords.join(' | ');
             } else {
-                typed = getTypedSpellingAnswer(card.back.trim()).trim();
-                score = calculateMatchPercentage(typed, card.back);
+                typed = getTypedSpellingAnswer(targetWord).trim();
+                score = calculateMatchPercentage(typed, targetWord);
             }
         } else {
             typed = document.getElementById('practice-input').value.trim();
-            score = calculateMatchPercentage(typed, card.back);
+            score = calculateMatchPercentage(typed, targetWord);
         }
     }
 

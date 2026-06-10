@@ -40,7 +40,7 @@ import {
     renderEditorNodes
 } from './modules/canvas.js';
 import { toggleFullscreen, buildCustomDropdownUI, initGlobalTooltips } from './modules/uiHelpers.js';
-import { initZettelkastenFormListeners } from './modules/card/cardCreator.js';
+import { initZettelkastenFormListeners, initVocabFormListeners } from './modules/card/cardCreator.js';
 import './modules/zettelkasten.js';
 import './modules/practice/scrambleGame.js';
 
@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    ['card-front-image', 'card-back-image', 'edit-card-front-image', 'edit-card-back-image'].forEach(id => {
+    ['card-front-image', 'card-back-image', 'edit-card-front-image', 'edit-card-back-image', 'vocab-front-image', 'vocab-back-image', 'edit-vocab-front-image', 'edit-vocab-back-image'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
             el.addEventListener('change', validateImageSizeOnChange);
@@ -414,6 +414,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize Zettelkasten form link handlers
     initZettelkastenFormListeners();
+    // Initialize Vocabulary form listeners (dictionary API fetch)
+    initVocabFormListeners();
 
     if (supabase) {
         checkAuth();

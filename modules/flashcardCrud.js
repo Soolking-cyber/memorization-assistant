@@ -3,7 +3,7 @@ import { supabase } from './supabaseClient.js';
 import { ICONS } from './icons.js';
 import { dbSet } from './db.js';
 import { getSelectedTypes } from './dashboard.js';
-import { escapeHtml } from './utils.js';
+import { escapeHtml, parseVocabularyCard } from './utils.js';
 
 import {
     handleCreateAddSentence,
@@ -149,16 +149,16 @@ export function renderManageView() {
             `;
         }
 
+        const isVocab = isVocabularyType(card.type);
+        const parsed = isVocab ? parseVocabularyCard(card) : null;
         let displayFront = '';
-        let cleanFront = card.front;
-        let wordTypes = [];
-        if (isVocabularyType(card.type) && card.front.includes('|||')) {
-            const parts = card.front.split('|||');
-            cleanFront = parts[0].trim();
-            wordTypes = parts[1].split(',').map(t => t.trim()).filter(Boolean);
-        }
+        let cleanFront = isVocab ? parsed.definition : card.front;
+        let wordTypes = isVocab ? parsed.wordTypes : [];
+        let displayBack = isVocab ? parsed.definition : card.back;
 
-        if (cleanFront.startsWith('{"mode":"memory_map"')) {
+        if (isVocab) {
+            displayFront = escapeHtml(parsed.targetWord);
+        } else if (cleanFront.startsWith('{"mode":"memory_map"')) {
             try {
                 const mapData = JSON.parse(cleanFront);
                 displayFront = `<strong style="color:var(--accent);">[Memory Map]</strong> ${escapeHtml(mapData.title)} (${mapData.nodes.length} nodes, ${mapData.links.length} connections)`;
@@ -218,7 +218,7 @@ export function renderManageView() {
                     </span>
                 </div>
                 <strong>Front:</strong> <br> ${displayFront} ${frontImgHtml} <br><br>
-                <strong>Back:</strong> <br> ${escapeHtml(card.back).replace(/\n/g, '<br>')} ${backImgHtml}
+                <strong>Back:</strong> <br> ${escapeHtml(displayBack).replace(/\n/g, '<br>')} ${backImgHtml}
                 ${sentencesHtml}
             </div>
             <div style="margin-left: auto; display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: flex-start; padding-top: 16px;">

@@ -9,6 +9,7 @@ import { buildCustomDropdownUI } from '../uiHelpers.js';
 import { renderEditSentencesList, renderCreateSentencesList } from './sentenceBuilder.js';
 import { loadData } from './syncEngine.js';
 import { renderManageView } from '../flashcardCrud.js';
+import { parseVocabularyCard } from '../utils.js';
 
 export function updateFormLabelsAndPlaceholders(isEdit, type) {
     const labelFront = document.querySelector(`label[for="${isEdit ? 'edit-card-front' : 'card-front'}"]`);
@@ -17,26 +18,32 @@ export function updateFormLabelsAndPlaceholders(isEdit, type) {
     const textareaBack = document.getElementById(isEdit ? 'edit-card-back' : 'card-back');
     const sentencesGroup = document.getElementById(isEdit ? 'edit-vocab-sentences-group' : 'create-vocab-sentences-group');
 
-    if (type === 'Image Card') {
-        if (labelFront) labelFront.textContent = "Concept Prompt (Front)";
-        if (textareaFront) textareaFront.placeholder = "e.g. Tie a shoe sequence / Krebs cycle stages";
-        if (labelBack) labelBack.textContent = "Numbered Sequence Steps (Back)";
-        if (textareaBack) textareaBack.placeholder = "Type each step on a new line, numbered, e.g.:\n1. Make a loop\n2. Swoop and pull\n3. Tie tight";
-        if (sentencesGroup) sentencesGroup.classList.add('hidden');
-    } else {
-        if (labelFront) labelFront.textContent = "Concept (Front)";
-        if (textareaFront) textareaFront.placeholder = "What is the powerhouse of the cell?";
-        if (labelBack) labelBack.textContent = "Recall (Back / Target Word)";
-        if (textareaBack) textareaBack.placeholder = "Mitochondria";
-        if (sentencesGroup) sentencesGroup.classList.remove('hidden');
-    }
+    const standardGroup = document.getElementById(isEdit ? 'edit-standard-fields' : 'create-standard-fields');
+    const vocabularyGroup = document.getElementById(isEdit ? 'edit-vocabulary-fields' : 'create-vocabulary-fields');
 
-    const wordTypesGroup = document.getElementById(isEdit ? 'edit-word-types-group' : 'create-word-types-group');
-    if (wordTypesGroup) {
-        if (isVocabularyType(type)) {
-            wordTypesGroup.classList.remove('hidden');
+    if (isVocabularyType(type)) {
+        if (standardGroup) standardGroup.classList.add('hidden');
+        if (vocabularyGroup) vocabularyGroup.classList.remove('hidden');
+        if (sentencesGroup) sentencesGroup.classList.remove('hidden');
+        
+        // Ensure custom dropdown is built
+        buildCustomDropdownUI(isEdit ? 'edit-vocab-type' : 'vocab-type');
+    } else {
+        if (standardGroup) standardGroup.classList.remove('hidden');
+        if (vocabularyGroup) vocabularyGroup.classList.add('hidden');
+        
+        if (type === 'Image Card') {
+            if (labelFront) labelFront.textContent = "Concept Prompt (Front)";
+            if (textareaFront) textareaFront.placeholder = "e.g. Tie a shoe sequence / Krebs cycle stages";
+            if (labelBack) labelBack.textContent = "Numbered Sequence Steps (Back)";
+            if (textareaBack) textareaBack.placeholder = "Type each step on a new line, numbered, e.g.:\n1. Make a loop\n2. Swoop and pull\n3. Tie tight";
+            if (sentencesGroup) sentencesGroup.classList.add('hidden');
         } else {
-            wordTypesGroup.classList.add('hidden');
+            if (labelFront) labelFront.textContent = "Concept (Front)";
+            if (textareaFront) textareaFront.placeholder = "What is the powerhouse of the cell?";
+            if (labelBack) labelBack.textContent = "Recall (Back / Target Word)";
+            if (textareaBack) textareaBack.placeholder = "Mitochondria";
+            if (sentencesGroup) sentencesGroup.classList.remove('hidden');
         }
     }
 }
@@ -87,18 +94,23 @@ export async function handleCreateCard(e) {
         };
         frontText = JSON.stringify(ztData);
         backText = reference;
+    } else if (isVocabularyType(activeType)) {
+        const word = document.getElementById('vocab-word').value.trim();
+        const meaning = document.getElementById('vocab-meaning').value.trim();
+        if (!word || !meaning) {
+            await window.alert("Please fill in both the Word and Description/Meaning.");
+            return;
+        }
+        const wordType = document.getElementById('vocab-type').value.trim();
+        frontText = word;
+        if (wordType) {
+            frontText = `${frontText} ||| ${wordType}`;
+        }
+        backText = meaning;
     } else {
         frontText = document.getElementById('card-front').value.trim();
         backText = document.getElementById('card-back').value.trim();
         if (!frontText || !backText) return;
-
-        if (isVocabularyType(activeType)) {
-            const select = document.getElementById('vocab-word-types');
-            const wordTypes = select && select.selectedValues ? select.selectedValues : [];
-            if (wordTypes.length > 0) {
-                frontText = `${frontText} ||| ${wordTypes.join(', ')}`;
-            }
-        }
     }
 
     const btn = document.querySelector('#create-card-form button[type="submit"]');
@@ -124,8 +136,12 @@ export async function handleCreateCard(e) {
         return publicUrlData.publicUrl;
     };
 
-    const frontImageFile = document.getElementById('card-front-image').files[0];
-    const backImageFile = document.getElementById('card-back-image').files[0];
+    const frontImageFile = isVocabularyType(activeType)
+        ? (document.getElementById('vocab-front-image') ? document.getElementById('vocab-front-image').files[0] : null)
+        : (document.getElementById('card-front-image') ? document.getElementById('card-front-image').files[0] : null);
+    const backImageFile = isVocabularyType(activeType)
+        ? (document.getElementById('vocab-back-image') ? document.getElementById('vocab-back-image').files[0] : null)
+        : (document.getElementById('card-back-image') ? document.getElementById('card-back-image').files[0] : null);
 
     const createLimit = (activeType === 'Image Card') ? 1024 * 1024 : 500 * 1024;
     const createLimitLabel = (activeType === 'Image Card') ? '1 MB' : '500 KB';
@@ -190,12 +206,25 @@ export async function handleCreateCard(e) {
     }
     updateFormLabelsAndPlaceholders(false, 'mixed');
 
-    // Clear word types selection
-    const createWordTypesSelect = document.getElementById('vocab-word-types');
-    if (createWordTypesSelect) {
-        createWordTypesSelect.selectedValues = [];
-        [...createWordTypesSelect.options].forEach(o => o.selected = false);
-        buildCustomDropdownUI('vocab-word-types');
+    // Clear vocab fields
+    const vocabWord = document.getElementById('vocab-word');
+    if (vocabWord) vocabWord.value = '';
+    const vocabMeaning = document.getElementById('vocab-meaning');
+    if (vocabMeaning) vocabMeaning.value = '';
+    const vocabType = document.getElementById('vocab-type');
+    if (vocabType) {
+        vocabType.value = '';
+        buildCustomDropdownUI('vocab-type');
+    }
+    const vocabFrontImg = document.getElementById('vocab-front-image');
+    if (vocabFrontImg) {
+        vocabFrontImg.value = '';
+        vocabFrontImg.dispatchEvent(new Event('change'));
+    }
+    const vocabBackImg = document.getElementById('vocab-back-image');
+    if (vocabBackImg) {
+        vocabBackImg.value = '';
+        vocabBackImg.dispatchEvent(new Event('change'));
     }
 
     // Clear standard text areas and file inputs
@@ -288,6 +317,32 @@ export function openEditView(cardId) {
         };
     }
 
+    const btnDeleteVocabFrontImg = document.getElementById('btn-delete-edit-vocab-front-img');
+    if (btnDeleteVocabFrontImg) {
+        btnDeleteVocabFrontImg.onclick = () => {
+            state.editFrontImageDeleted = true;
+            document.getElementById('edit-vocab-front-img-preview').classList.add('hidden');
+            const fileInput = document.getElementById('edit-vocab-front-image');
+            if (fileInput) {
+                fileInput.value = '';
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        };
+    }
+
+    const btnDeleteVocabBackImg = document.getElementById('btn-delete-edit-vocab-back-img');
+    if (btnDeleteVocabBackImg) {
+        btnDeleteVocabBackImg.onclick = () => {
+            state.editBackImageDeleted = true;
+            document.getElementById('edit-vocab-back-img-preview').classList.add('hidden');
+            const fileInput = document.getElementById('edit-vocab-back-image');
+            if (fileInput) {
+                fileInput.value = '';
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        };
+    }
+
     document.getElementById('edit-card-id').value = card.id;
     document.getElementById('edit-card-type').value = card.type || 'mixed';
     
@@ -301,21 +356,15 @@ export function openEditView(cardId) {
         editBackImgInput.value = '';
         editBackImgInput.dispatchEvent(new Event('change'));
     }
-
-    const frontPreviewDiv = document.getElementById('edit-front-img-preview');
-    if (card.image_front_url) {
-        frontPreviewDiv.classList.remove('hidden');
-        frontPreviewDiv.querySelector('img').src = card.image_front_url;
-    } else {
-        frontPreviewDiv.classList.add('hidden');
+    const editVocabFrontImgInput = document.getElementById('edit-vocab-front-image');
+    if (editVocabFrontImgInput) {
+        editVocabFrontImgInput.value = '';
+        editVocabFrontImgInput.dispatchEvent(new Event('change'));
     }
-
-    const backPreviewDiv = document.getElementById('edit-back-img-preview');
-    if (card.image_back_url) {
-        backPreviewDiv.classList.remove('hidden');
-        backPreviewDiv.querySelector('img').src = card.image_back_url;
-    } else {
-        backPreviewDiv.classList.add('hidden');
+    const editVocabBackImgInput = document.getElementById('edit-vocab-back-image');
+    if (editVocabBackImgInput) {
+        editVocabBackImgInput.value = '';
+        editVocabBackImgInput.dispatchEvent(new Event('change'));
     }
 
     const vocabFields = document.getElementById('edit-vocab-fields');
@@ -377,27 +426,66 @@ export function openEditView(cardId) {
         mapFields.classList.add('hidden');
         if (zettelkastenFields) zettelkastenFields.classList.add('hidden');
         
+        const isVocab = isVocabularyType(card.type);
+        const editStandardFields = document.getElementById('edit-standard-fields');
+        const editVocabFields = document.getElementById('edit-vocabulary-fields');
+        
+        if (isVocab) {
+            if (editStandardFields) editStandardFields.classList.add('hidden');
+            if (editVocabFields) editVocabFields.classList.remove('hidden');
+            
+            const parsed = parseVocabularyCard(card);
+            
+            document.getElementById('edit-vocab-word').value = parsed.targetWord;
+            document.getElementById('edit-vocab-meaning').value = parsed.definition;
+            
+            const typeSelect = document.getElementById('edit-vocab-type');
+            if (typeSelect) {
+                const wordType = parsed.wordTypes[0] || '';
+                typeSelect.value = wordType;
+                buildCustomDropdownUI('edit-vocab-type');
+            }
+            
+            const frontPreviewDiv = document.getElementById('edit-vocab-front-img-preview');
+            if (card.image_front_url) {
+                frontPreviewDiv.classList.remove('hidden');
+                frontPreviewDiv.querySelector('img').src = card.image_front_url;
+            } else {
+                frontPreviewDiv.classList.add('hidden');
+            }
+
+            const backPreviewDiv = document.getElementById('edit-vocab-back-img-preview');
+            if (card.image_back_url) {
+                backPreviewDiv.classList.remove('hidden');
+                backPreviewDiv.querySelector('img').src = card.image_back_url;
+            } else {
+                backPreviewDiv.classList.add('hidden');
+            }
+        } else {
+            if (editStandardFields) editStandardFields.classList.remove('hidden');
+            if (editVocabFields) editVocabFields.classList.add('hidden');
+            
+            document.getElementById('edit-card-front').value = card.front;
+            document.getElementById('edit-card-back').value = card.back;
+            
+            const frontPreviewDiv = document.getElementById('edit-front-img-preview');
+            if (card.image_front_url) {
+                frontPreviewDiv.classList.remove('hidden');
+                frontPreviewDiv.querySelector('img').src = card.image_front_url;
+            } else {
+                frontPreviewDiv.classList.add('hidden');
+            }
+
+            const backPreviewDiv = document.getElementById('edit-back-img-preview');
+            if (card.image_back_url) {
+                backPreviewDiv.classList.remove('hidden');
+                backPreviewDiv.querySelector('img').src = card.image_back_url;
+            } else {
+                backPreviewDiv.classList.add('hidden');
+            }
+        }
+        
         updateFormLabelsAndPlaceholders(true, card.type);
-        
-        let cleanFront = card.front;
-        let wordTypes = [];
-        if (isVocabularyType(card.type) && card.front.includes('|||')) {
-            const parts = card.front.split('|||');
-            cleanFront = parts[0].trim();
-            wordTypes = parts[1].split(',').map(t => t.trim()).filter(Boolean);
-        }
-        
-        document.getElementById('edit-card-front').value = cleanFront;
-        document.getElementById('edit-card-back').value = card.back;
-        
-        const select = document.getElementById('edit-vocab-word-types');
-        if (select) {
-            select.selectedValues = [...wordTypes];
-            [...select.options].forEach(opt => {
-                opt.selected = wordTypes.includes(opt.value);
-            });
-            buildCustomDropdownUI('edit-vocab-word-types');
-        }
         
         const savedSentences = state.exampleSentences[card.id];
         if (Array.isArray(savedSentences)) {
@@ -426,6 +514,13 @@ export async function handleEditCardSubmit(e) {
     const cardId = document.getElementById('edit-card-id').value;
     const typeText = document.getElementById('edit-card-type').value.trim() || 'mixed';
     
+    const btn = document.querySelector('#edit-card-form button[type="submit"]');
+    const oldText = btn ? btn.textContent : 'Save Changes';
+    if (btn) {
+        btn.textContent = "Saving Changes...";
+        btn.disabled = true;
+    }
+    
     let frontText = '';
     let backText = '';
     
@@ -433,10 +528,18 @@ export async function handleEditCardSubmit(e) {
         const title = document.getElementById('edit-map-title').value.trim();
         if (!title) {
             await window.alert("Please enter a Memory Map Title.");
+            if (btn) {
+                btn.textContent = oldText;
+                btn.disabled = false;
+            }
             return;
         }
         if (state.editMapNodes.length === 0) {
             await window.alert("Please add at least one card to your Memory Map.");
+            if (btn) {
+                btn.textContent = oldText;
+                btn.disabled = false;
+            }
             return;
         }
         
@@ -455,8 +558,10 @@ export async function handleEditCardSubmit(e) {
         
         if (!quote || !reference) {
             await window.alert("Please enter both a Quote and a Reference.");
-            btn.textContent = oldText;
-            btn.disabled = false;
+            if (btn) {
+                btn.textContent = oldText;
+                btn.disabled = false;
+            }
             return;
         }
         
@@ -469,45 +574,70 @@ export async function handleEditCardSubmit(e) {
         };
         frontText = JSON.stringify(ztData);
         backText = reference;
+    } else if (isVocabularyType(typeText)) {
+        const word = document.getElementById('edit-vocab-word').value.trim();
+        const meaning = document.getElementById('edit-vocab-meaning').value.trim();
+        if (!word || !meaning) {
+            await window.alert("Please fill in both the Word and Description/Meaning.");
+            if (btn) {
+                btn.textContent = oldText;
+                btn.disabled = false;
+            }
+            return;
+        }
+        const wordType = document.getElementById('edit-vocab-type').value.trim();
+        frontText = word;
+        if (wordType) {
+            frontText = `${frontText} ||| ${wordType}`;
+        }
+        backText = meaning;
     } else {
         frontText = document.getElementById('edit-card-front').value.trim();
         backText = document.getElementById('edit-card-back').value.trim();
-        if (isVocabularyType(typeText)) {
-            const select = document.getElementById('edit-vocab-word-types');
-            const wordTypes = select && select.selectedValues ? select.selectedValues : [];
-            if (wordTypes.length > 0) {
-                frontText = `${frontText} ||| ${wordTypes.join(', ')}`;
-            }
-        }
     }
     
-    if (!frontText || !backText || !cardId) return;
+    if (!frontText || !backText || !cardId) {
+        if (btn) {
+            btn.textContent = oldText;
+            btn.disabled = false;
+        }
+        return;
+    }
 
     const cardIndex = state.cards.findIndex(c => c.id === cardId);
-    if (cardIndex === -1) return;
+    if (cardIndex === -1) {
+        if (btn) {
+            btn.textContent = oldText;
+            btn.disabled = false;
+        }
+        return;
+    }
     const existingCard = state.cards[cardIndex];
 
-    const btn = document.querySelector('#edit-card-form button[type="submit"]');
-    const oldText = btn.textContent;
-    btn.textContent = "Saving Changes...";
-    btn.disabled = true;
-
-    const frontImageFile = document.getElementById('edit-card-front-image') ? document.getElementById('edit-card-front-image').files[0] : null;
-    const backImageFile = document.getElementById('edit-card-back-image') ? document.getElementById('edit-card-back-image').files[0] : null;
+    const frontImageFile = isVocabularyType(typeText)
+        ? (document.getElementById('edit-vocab-front-image') ? document.getElementById('edit-vocab-front-image').files[0] : null)
+        : (document.getElementById('edit-card-front-image') ? document.getElementById('edit-card-front-image').files[0] : null);
+    const backImageFile = isVocabularyType(typeText)
+        ? (document.getElementById('edit-vocab-back-image') ? document.getElementById('edit-vocab-back-image').files[0] : null)
+        : (document.getElementById('edit-card-back-image') ? document.getElementById('edit-card-back-image').files[0] : null);
 
     const editLimit = (typeText === 'Image Card') ? 1024 * 1024 : 500 * 1024;
     const editLimitLabel = (typeText === 'Image Card') ? '1 MB' : '500 KB';
 
     if (frontImageFile && frontImageFile.size > editLimit) {
         await window.alert(`Front image exceeds ${editLimitLabel} limit for ${typeText} cards! Selected file: ${(frontImageFile.size / 1024).toFixed(1)} KB.`);
-        btn.textContent = oldText;
-        btn.disabled = false;
+        if (btn) {
+            btn.textContent = oldText;
+            btn.disabled = false;
+        }
         return;
     }
     if (backImageFile && backImageFile.size > editLimit) {
         await window.alert(`Back image exceeds ${editLimitLabel} limit for ${typeText} cards! Selected file: ${(backImageFile.size / 1024).toFixed(1)} KB.`);
-        btn.textContent = oldText;
-        btn.disabled = false;
+        if (btn) {
+            btn.textContent = oldText;
+            btn.disabled = false;
+        }
         return;
     }
 
@@ -774,3 +904,121 @@ export function initZettelkastenFormListeners() {
 window.populateZettelLinkDropdown = populateZettelLinkDropdown;
 window.renderZettelLinksList = renderZettelLinksList;
 window.initZettelkastenFormListeners = initZettelkastenFormListeners;
+
+export async function fetchDictionaryDefinition(word) {
+    if (!word || word.trim() === '') {
+        await window.alert("Please type a word first!");
+        return null;
+    }
+    
+    try {
+        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word.trim())}`);
+        if (!response.ok) {
+            throw new Error(`Word not found or API error (status: ${response.status})`);
+        }
+        
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+            const firstEntry = data[0];
+            const meanings = firstEntry.meanings;
+            if (Array.isArray(meanings) && meanings.length > 0) {
+                let definitionText = '';
+                meanings.forEach((meaning, idx) => {
+                    const pos = meaning.partOfSpeech || 'definition';
+                    if (meaning.definitions && meaning.definitions.length > 0) {
+                        const def = meaning.definitions[0].definition;
+                        definitionText += `(${pos}) ${def}\n`;
+                    }
+                });
+                
+                return {
+                    definition: definitionText.trim(),
+                    partOfSpeech: meanings[0].partOfSpeech || ''
+                };
+            }
+        }
+        throw new Error("No definitions found in the response.");
+    } catch (err) {
+        console.error("Dictionary API Error:", err);
+        await window.alert(`Could not fetch meaning: ${err.message}`);
+        return null;
+    }
+}
+
+export function initVocabFormListeners() {
+    const btnCreateAddMeaning = document.getElementById('btn-vocab-add-meaning');
+    if (btnCreateAddMeaning) {
+        btnCreateAddMeaning.onclick = async () => {
+            const wordInput = document.getElementById('vocab-word');
+            const word = wordInput ? wordInput.value.trim() : '';
+            
+            const btnText = btnCreateAddMeaning.textContent;
+            btnCreateAddMeaning.textContent = "Fetching...";
+            btnCreateAddMeaning.disabled = true;
+            
+            const res = await fetchDictionaryDefinition(word);
+            
+            btnCreateAddMeaning.textContent = btnText;
+            btnCreateAddMeaning.disabled = false;
+            
+            if (res) {
+                const meaningTextarea = document.getElementById('vocab-meaning');
+                if (meaningTextarea) {
+                    meaningTextarea.value = res.definition;
+                }
+                
+                // Auto-select type
+                if (res.partOfSpeech) {
+                    const vocabTypeSelect = document.getElementById('vocab-type');
+                    if (vocabTypeSelect) {
+                        const matchingOption = [...vocabTypeSelect.options].find(
+                            opt => opt.value.toLowerCase() === res.partOfSpeech.toLowerCase()
+                        );
+                        if (matchingOption) {
+                            vocabTypeSelect.value = matchingOption.value;
+                            buildCustomDropdownUI('vocab-type');
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    const btnEditAddMeaning = document.getElementById('btn-edit-vocab-add-meaning');
+    if (btnEditAddMeaning) {
+        btnEditAddMeaning.onclick = async () => {
+            const wordInput = document.getElementById('edit-vocab-word');
+            const word = wordInput ? wordInput.value.trim() : '';
+            
+            const btnText = btnEditAddMeaning.textContent;
+            btnEditAddMeaning.textContent = "Fetching...";
+            btnEditAddMeaning.disabled = true;
+            
+            const res = await fetchDictionaryDefinition(word);
+            
+            btnEditAddMeaning.textContent = btnText;
+            btnEditAddMeaning.disabled = false;
+            
+            if (res) {
+                const meaningTextarea = document.getElementById('edit-vocab-meaning');
+                if (meaningTextarea) {
+                    meaningTextarea.value = res.definition;
+                }
+                
+                // Auto-select type
+                if (res.partOfSpeech) {
+                    const vocabTypeSelect = document.getElementById('edit-vocab-type');
+                    if (vocabTypeSelect) {
+                        const matchingOption = [...vocabTypeSelect.options].find(
+                            opt => opt.value.toLowerCase() === res.partOfSpeech.toLowerCase()
+                        );
+                        if (matchingOption) {
+                            vocabTypeSelect.value = matchingOption.value;
+                            buildCustomDropdownUI('edit-vocab-type');
+                        }
+                    }
+                }
+            }
+        };
+    }
+}
