@@ -208,7 +208,7 @@ export function buildCustomDropdownUI(selectId) {
     
     select.style.display = 'none';
     
-    const isMultiSelect = selectId === 'practice-type-select' || selectId === 'manage-type-select' || selectId === 'vocab-word-types' || selectId === 'edit-vocab-word-types';
+    const isMultiSelect = selectId === 'practice-type-select' || selectId === 'manage-type-select' || selectId === 'vocab-word-types' || selectId === 'edit-vocab-word-types' || selectId === 'vocab-type' || selectId === 'edit-vocab-type';
     
     let customWrapper = document.getElementById(`custom-dropdown-${selectId}`);
     if (!customWrapper) {
@@ -225,7 +225,7 @@ export function buildCustomDropdownUI(selectId) {
     }
     
     if (isMultiSelect && !select.selectedValues) {
-        if (selectId === 'vocab-word-types' || selectId === 'edit-vocab-word-types') {
+        if (selectId === 'vocab-word-types' || selectId === 'edit-vocab-word-types' || selectId === 'vocab-type' || selectId === 'edit-vocab-type') {
             select.selectedValues = [];
         } else {
             const options = [...select.options].map(o => o.value).filter(v => v !== 'add_new');
@@ -243,7 +243,7 @@ export function buildCustomDropdownUI(selectId) {
     triggerText.className = 'custom-dropdown-text';
     
     if (isMultiSelect) {
-        if (selectId === 'vocab-word-types' || selectId === 'edit-vocab-word-types') {
+        if (selectId === 'vocab-word-types' || selectId === 'edit-vocab-word-types' || selectId === 'vocab-type' || selectId === 'edit-vocab-type') {
             if (select.selectedValues.length === 0) {
                 triggerText.textContent = 'Select Word Type(s)';
             } else if (select.selectedValues.length <= 2) {
@@ -316,7 +316,7 @@ export function buildCustomDropdownUI(selectId) {
                 e.stopPropagation();
                 playUISound('click');
                 
-                if (selectId === 'vocab-word-types' || selectId === 'edit-vocab-word-types') {
+                if (selectId === 'vocab-word-types' || selectId === 'edit-vocab-word-types' || selectId === 'vocab-type' || selectId === 'edit-vocab-type') {
                     const isChecked = select.selectedValues.includes(opt.value);
                     if (isChecked) {
                         select.selectedValues = select.selectedValues.filter(v => v !== opt.value);

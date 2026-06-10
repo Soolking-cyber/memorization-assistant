@@ -101,7 +101,9 @@ export async function handleCreateCard(e) {
             await window.alert("Please fill in both the Word and Description/Meaning.");
             return;
         }
-        const wordType = document.getElementById('vocab-type').value.trim();
+        const selectEl = document.getElementById('vocab-type');
+        const selectedTypes = (selectEl.selectedValues || []).filter(Boolean);
+        const wordType = selectedTypes.join(', ');
         frontText = word;
         if (wordType) {
             frontText = `${frontText} ||| ${wordType}`;
@@ -213,6 +215,10 @@ export async function handleCreateCard(e) {
     if (vocabMeaning) vocabMeaning.value = '';
     const vocabType = document.getElementById('vocab-type');
     if (vocabType) {
+        vocabType.selectedValues = [];
+        [...vocabType.options].forEach(o => {
+            o.selected = false;
+        });
         vocabType.value = '';
         buildCustomDropdownUI('vocab-type');
     }
@@ -441,8 +447,10 @@ export function openEditView(cardId) {
             
             const typeSelect = document.getElementById('edit-vocab-type');
             if (typeSelect) {
-                const wordType = parsed.wordTypes[0] || '';
-                typeSelect.value = wordType;
+                typeSelect.selectedValues = [...parsed.wordTypes];
+                [...typeSelect.options].forEach(o => {
+                    o.selected = typeSelect.selectedValues.includes(o.value);
+                });
                 buildCustomDropdownUI('edit-vocab-type');
             }
             
@@ -585,7 +593,9 @@ export async function handleEditCardSubmit(e) {
             }
             return;
         }
-        const wordType = document.getElementById('edit-vocab-type').value.trim();
+        const typeSelect = document.getElementById('edit-vocab-type');
+        const selectedTypes = (typeSelect.selectedValues || []).filter(Boolean);
+        const wordType = selectedTypes.join(', ');
         frontText = word;
         if (wordType) {
             frontText = `${frontText} ||| ${wordType}`;
@@ -911,35 +921,42 @@ export async function fetchDictionaryDefinition(word) {
         return null;
     }
     
+    if (!supabase) {
+        await window.alert("Database connection is not initialized.");
+        return null;
+    }
+
     try {
-        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word.trim())}`);
-        if (!response.ok) {
-            throw new Error(`Word not found or API error (status: ${response.status})`);
+        const { data, error } = await supabase
+            .from('dictionary')
+            .select('part_of_speech, definition')
+            .eq('word', word.trim().toLowerCase());
+            
+        if (error) {
+            throw error;
+        }
+
+        if (data && data.length > 0) {
+            let definitionText = '';
+            const partsOfSpeech = [];
+            
+            data.forEach((item, idx) => {
+                const pos = item.part_of_speech || 'definition';
+                if (pos && !partsOfSpeech.includes(pos)) {
+                    partsOfSpeech.push(pos);
+                }
+                definitionText += `(${pos}) ${item.definition}\n\n`;
+            });
+            
+            return {
+                definition: definitionText.trim(),
+                partsOfSpeech: partsOfSpeech
+            };
         }
         
-        const data = await response.json();
-        if (Array.isArray(data) && data.length > 0) {
-            const firstEntry = data[0];
-            const meanings = firstEntry.meanings;
-            if (Array.isArray(meanings) && meanings.length > 0) {
-                let definitionText = '';
-                meanings.forEach((meaning, idx) => {
-                    const pos = meaning.partOfSpeech || 'definition';
-                    if (meaning.definitions && meaning.definitions.length > 0) {
-                        const def = meaning.definitions[0].definition;
-                        definitionText += `(${pos}) ${def}\n`;
-                    }
-                });
-                
-                return {
-                    definition: definitionText.trim(),
-                    partOfSpeech: meanings[0].partOfSpeech || ''
-                };
-            }
-        }
-        throw new Error("No definitions found in the response.");
+        throw new Error(`Word "${word}" not found in database.`);
     } catch (err) {
-        console.error("Dictionary API Error:", err);
+        console.error("Dictionary Database Error:", err);
         await window.alert(`Could not fetch meaning: ${err.message}`);
         return null;
     }
@@ -967,17 +984,23 @@ export function initVocabFormListeners() {
                     meaningTextarea.value = res.definition;
                 }
                 
-                // Auto-select type
-                if (res.partOfSpeech) {
+                // Auto-select type(s)
+                if (res.partsOfSpeech && res.partsOfSpeech.length > 0) {
                     const vocabTypeSelect = document.getElementById('vocab-type');
                     if (vocabTypeSelect) {
-                        const matchingOption = [...vocabTypeSelect.options].find(
-                            opt => opt.value.toLowerCase() === res.partOfSpeech.toLowerCase()
-                        );
-                        if (matchingOption) {
-                            vocabTypeSelect.value = matchingOption.value;
-                            buildCustomDropdownUI('vocab-type');
-                        }
+                        vocabTypeSelect.selectedValues = [];
+                        res.partsOfSpeech.forEach(pos => {
+                            const matchingOption = [...vocabTypeSelect.options].find(
+                                opt => opt.value.toLowerCase() === pos.toLowerCase()
+                            );
+                            if (matchingOption && !vocabTypeSelect.selectedValues.includes(matchingOption.value)) {
+                                vocabTypeSelect.selectedValues.push(matchingOption.value);
+                            }
+                        });
+                        [...vocabTypeSelect.options].forEach(o => {
+                            o.selected = vocabTypeSelect.selectedValues.includes(o.value);
+                        });
+                        buildCustomDropdownUI('vocab-type');
                     }
                 }
             }
@@ -1005,17 +1028,23 @@ export function initVocabFormListeners() {
                     meaningTextarea.value = res.definition;
                 }
                 
-                // Auto-select type
-                if (res.partOfSpeech) {
+                // Auto-select type(s)
+                if (res.partsOfSpeech && res.partsOfSpeech.length > 0) {
                     const vocabTypeSelect = document.getElementById('edit-vocab-type');
                     if (vocabTypeSelect) {
-                        const matchingOption = [...vocabTypeSelect.options].find(
-                            opt => opt.value.toLowerCase() === res.partOfSpeech.toLowerCase()
-                        );
-                        if (matchingOption) {
-                            vocabTypeSelect.value = matchingOption.value;
-                            buildCustomDropdownUI('edit-vocab-type');
-                        }
+                        vocabTypeSelect.selectedValues = [];
+                        res.partsOfSpeech.forEach(pos => {
+                            const matchingOption = [...vocabTypeSelect.options].find(
+                                opt => opt.value.toLowerCase() === pos.toLowerCase()
+                            );
+                            if (matchingOption && !vocabTypeSelect.selectedValues.includes(matchingOption.value)) {
+                                vocabTypeSelect.selectedValues.push(matchingOption.value);
+                            }
+                        });
+                        [...vocabTypeSelect.options].forEach(o => {
+                            o.selected = vocabTypeSelect.selectedValues.includes(o.value);
+                        });
+                        buildCustomDropdownUI('edit-vocab-type');
                     }
                 }
             }
