@@ -73,18 +73,36 @@ export function proceedToNextCard() {
     }, 300);
 }
 
+function triggerFireworks() {
+    const duration = 5 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1100 };
+
+    function randomInRange(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+            return clearInterval(interval);
+        }
+
+        const particleCount = 50 * (timeLeft / duration);
+        if (typeof window.confetti === 'function') {
+            window.confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+            window.confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+        }
+    }, 250);
+}
+
 export async function finishSession() {
     playUISound('complete');
     try {
-        if (typeof window.confetti === 'function') {
-            window.confetti({
-                particleCount: 150,
-                spread: 80,
-                origin: { y: 0.6 }
-            });
-        }
+        triggerFireworks();
     } catch (err) {
-        console.warn("Confetti call failed:", err);
+        console.warn("Fireworks call failed:", err);
     }
 
     if (state.userSession && supabase) {
@@ -106,7 +124,51 @@ export async function finishSession() {
         }
     } else {
         const completedMsg = document.getElementById('practice-completed');
-        completedMsg.innerHTML = `<h2>Session Complete</h2><p style="color: var(--text-secondary); margin-bottom: 24px;">Your brain is getting stronger.</p><button class="btn primary" id="btn-finish-practice">Back to Dashboard</button>`;
+        const count = state.reviewQueue ? state.reviewQueue.length : 0;
+        
+        completedMsg.innerHTML = `
+            <style>
+            @keyframes float {
+                0% { transform: translateY(0px); }
+                50% { transform: translateY(-8px); }
+                100% { transform: translateY(0px); }
+            }
+            #btn-finish-practice:hover svg {
+                transform: translateX(4px);
+            }
+            </style>
+            <div class="session-complete-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; max-width: 420px; margin: 0 auto;">
+                <div class="trophy-glow-container" style="position: relative; margin-bottom: 24px; animation: float 3s ease-in-out infinite;">
+                    <div class="trophy-glow-bg" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90px; height: 90px; background: radial-gradient(circle, rgba(245, 158, 11, 0.2) 0%, transparent 70%); filter: blur(10px); border-radius: 50%;"></div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent, #f59e0b)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width: 72px; height: 72px; position: relative; z-index: 2; filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.5));">
+                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                        <path d="M4 22h16"></path>
+                        <path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34"></path>
+                        <path d="M12 2a5 5 0 0 0-5 5v5a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5z"></path>
+                    </svg>
+                </div>
+                
+                <h2 style="font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 8px 0; background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.7) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Session Complete!</h2>
+                <p style="color: var(--text-secondary); font-size: 1.05rem; line-height: 1.4; margin: 0 0 32px 0;">Your brain is getting stronger.</p>
+                
+                <div class="session-stats-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; width: 100%; margin-bottom: 36px; padding: 16px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 16px; backdrop-filter: blur(10px);">
+                    <div class="stat-item" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px;">
+                        <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 4px;">Reviewed</span>
+                        <span style="font-size: 1.5rem; font-weight: 700; color: #fff;">${count}</span>
+                    </div>
+                    <div class="stat-item" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; border-left: 1px solid rgba(255, 255, 255, 0.08);">
+                        <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 4px;">Brain Power</span>
+                        <span style="font-size: 1.5rem; font-weight: 700; color: var(--success, #22c55e);">+${count * 5} XP</span>
+                    </div>
+                </div>
+                
+                <button class="btn primary full-width" id="btn-finish-practice" style="min-height: 48px; font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; border-radius: 12px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25); transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                    Back to Dashboard
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16" style="transition: transform 0.2s;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+            </div>
+        `;
         document.getElementById('btn-finish-practice').addEventListener('click', () => switchView('dashboard'));
         completedMsg.classList.remove('hidden');
     }
