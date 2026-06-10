@@ -918,9 +918,45 @@ window.initZettelkastenFormListeners = initZettelkastenFormListeners;
 
 function removeWordFromDefinition(definition, word) {
     if (!definition || !word) return definition;
-    const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp('\\b' + escaped + '(s|ed|ing|ly|es)?\\b', 'gi');
-    return definition.replace(regex, '___');
+    
+    const cleanWord = word.trim().toLowerCase();
+    
+    // Helper to get stem of the target word by stripping common suffixes
+    function getStem(w) {
+        const suffixes = [
+            'atiousness', 'ativeness', 'fulness', 'lessness', 'iveness', 'abilities', 'ability', 'ibility', 
+            'grouping', 'ization', 'isation', 'ational', 'iteness', 'iveness', 'ments', 'ment', 'nesses', 'ness', 
+            'tions', 'sions', 'tion', 'sion', 'ances', 'ences', 'ance', 'ence', 'ships', 'ship', 'hoods', 'hood', 
+            'ables', 'ibles', 'able', 'ible', 'als', 'ials', 'al', 'ial', 'ives', 'atives', 'itives', 'ive', 'ative', 'itive', 
+            'ous', 'ious', 'uous', 'eous', 'fuls', 'ful', 'less', 'ish', 'ists', 'isms', 'ist', 'ism', 'ities', 'ity', 'ties', 'ty', 
+            'izes', 'ises', 'ize', 'ise', 'ates', 'ate', 'ifies', 'ify', 'ests', 'est', 'ings', 'ing', 'eds', 'ed', 'lys', 'ly', 
+            'es', 'ers', 'er', 'or', 's', 'y', 'e', 'd'
+        ];
+        
+        // Sort suffixes descending by length
+        suffixes.sort((a, b) => b.length - a.length);
+        
+        for (const suffix of suffixes) {
+            if (w.endsWith(suffix) && (w.length - suffix.length) >= 4) {
+                return w.slice(0, -suffix.length);
+            }
+        }
+        return w;
+    }
+    
+    const stem = getStem(cleanWord);
+    
+    // Mask any word in the definition that starts with the target word's stem
+    const escapedStem = stem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp('\\b' + escapedStem + '[a-zA-Z]*\\b', 'gi');
+    
+    // Exact word fallback just in case
+    const escapedWord = cleanWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const exactRegex = new RegExp('\\b' + escapedWord + '(s|ed|ing|ly|es)?\\b', 'gi');
+    
+    let result = definition.replace(regex, '___');
+    result = result.replace(exactRegex, '___');
+    return result;
 }
 
 export async function fetchDictionaryDefinition(word) {
