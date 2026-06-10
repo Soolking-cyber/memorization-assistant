@@ -76,7 +76,7 @@ export function proceedToNextCard() {
 function triggerFireworks() {
     const duration = 5 * 1000;
     const animationEnd = Date.now() + duration;
-    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1100 };
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 999999 };
 
     function randomInRange(min, max) {
         return Math.random() * (max - min) + min;
