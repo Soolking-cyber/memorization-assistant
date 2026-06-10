@@ -929,6 +929,75 @@ export async function fetchDictionaryDefinition(word) {
         return null;
     }
     
+    const cleanWord = word.trim().toLowerCase();
+
+    // 1. Try Free Dictionary API
+    try {
+        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanWord)}`);
+        if (response.ok) {
+            const data = await response.json();
+            if (Array.isArray(data) && data.length > 0) {
+                const partsOfSpeech = [];
+                const posGroups = {};
+                
+                data.forEach(entry => {
+                    if (entry.meanings) {
+                        entry.meanings.forEach(meaning => {
+                            const pos = meaning.partOfSpeech || 'definition';
+                            const normalizedPos = pos.charAt(0).toUpperCase() + pos.slice(1).toLowerCase();
+                            
+                            if (normalizedPos && !partsOfSpeech.includes(normalizedPos)) {
+                                partsOfSpeech.push(normalizedPos);
+                            }
+                            
+                            if (!posGroups[normalizedPos]) {
+                                posGroups[normalizedPos] = [];
+                            }
+                            
+                            if (meaning.definitions) {
+                                meaning.definitions.forEach(defObj => {
+                                    if (defObj.definition) {
+                                        const cleanDef = removeWordFromDefinition(defObj.definition, word.trim());
+                                        if (!posGroups[normalizedPos].includes(cleanDef)) {
+                                            posGroups[normalizedPos].push(cleanDef);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+                
+                let definitionText = '';
+                Object.keys(posGroups).forEach(pos => {
+                    const defs = posGroups[pos];
+                    if (defs.length > 1) {
+                        definitionText += `(${pos})\n`;
+                        defs.forEach((def, index) => {
+                            definitionText += `${index + 1}. ${def}\n`;
+                        });
+                        definitionText += `\n`;
+                    } else if (defs.length === 1) {
+                        definitionText += `(${pos}) ${defs[0]}\n\n`;
+                    }
+                });
+                
+                if (definitionText.trim().length > 0) {
+                    console.log(`Successfully fetched definition for "${cleanWord}" from Free Dictionary API`);
+                    return {
+                        definition: definitionText.trim(),
+                        partsOfSpeech: partsOfSpeech
+                    };
+                }
+            }
+        } else {
+            console.warn(`Free Dictionary API returned status ${response.status} for word "${cleanWord}"`);
+        }
+    } catch (apiErr) {
+        console.warn("Failed to fetch from Free Dictionary API, falling back to local database dictionary:", apiErr);
+    }
+
+    // 2. Fallback to Supabase Database Dictionary
     if (!supabase) {
         await window.alert("Database connection is not initialized.");
         return null;
@@ -938,7 +1007,7 @@ export async function fetchDictionaryDefinition(word) {
         const { data, error } = await supabase
             .from('dictionary')
             .select('part_of_speech, definition')
-            .eq('word', word.trim().toLowerCase());
+            .eq('word', cleanWord);
             
         if (error) {
             throw error;
@@ -950,22 +1019,24 @@ export async function fetchDictionaryDefinition(word) {
             
             data.forEach((item, idx) => {
                 const pos = item.part_of_speech || 'definition';
-                if (pos && !partsOfSpeech.includes(pos)) {
-                    partsOfSpeech.push(pos);
+                const normalizedPos = pos.charAt(0).toUpperCase() + pos.slice(1).toLowerCase();
+                if (normalizedPos && !partsOfSpeech.includes(normalizedPos)) {
+                    partsOfSpeech.push(normalizedPos);
                 }
                 const cleanDef = removeWordFromDefinition(item.definition, word.trim());
-                definitionText += `(${pos}) ${cleanDef}\n\n`;
+                definitionText += `(${normalizedPos}) ${cleanDef}\n\n`;
             });
             
+            console.log(`Successfully fetched definition for "${cleanWord}" from Supabase database dictionary fallback`);
             return {
                 definition: definitionText.trim(),
                 partsOfSpeech: partsOfSpeech
             };
         }
         
-        throw new Error(`Word "${word}" not found in database.`);
+        throw new Error(`Word "${word}" not found in online API or local dictionary database.`);
     } catch (err) {
-        console.error("Dictionary Database Error:", err);
+        console.error("Dictionary Fetch Error:", err);
         await window.alert(`Could not fetch meaning: ${err.message}`);
         return null;
     }
