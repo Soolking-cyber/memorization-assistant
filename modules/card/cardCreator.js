@@ -915,6 +915,13 @@ window.populateZettelLinkDropdown = populateZettelLinkDropdown;
 window.renderZettelLinksList = renderZettelLinksList;
 window.initZettelkastenFormListeners = initZettelkastenFormListeners;
 
+function removeWordFromDefinition(definition, word) {
+    if (!definition || !word) return definition;
+    const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp('\\b' + escaped + '(s|ed|ing|ly|es)?\\b', 'gi');
+    return definition.replace(regex, '___');
+}
+
 export async function fetchDictionaryDefinition(word) {
     if (!word || word.trim() === '') {
         await window.alert("Please type a word first!");
@@ -945,7 +952,8 @@ export async function fetchDictionaryDefinition(word) {
                 if (pos && !partsOfSpeech.includes(pos)) {
                     partsOfSpeech.push(pos);
                 }
-                definitionText += `(${pos}) ${item.definition}\n\n`;
+                const cleanDef = removeWordFromDefinition(item.definition, word.trim());
+                definitionText += `(${pos}) ${cleanDef}\n\n`;
             });
             
             return {
