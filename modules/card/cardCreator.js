@@ -203,10 +203,11 @@ export async function handleCreateCard(e) {
     // Reset forms and selections
     const selectEl = document.getElementById('card-type');
     if (selectEl) {
-        selectEl.value = 'mixed';
+        const nextType = [...selectEl.options].some(o => o.value === activeType) ? activeType : 'Vocabulary';
+        selectEl.value = nextType;
         buildCustomDropdownUI('card-type');
+        selectEl.dispatchEvent(new Event('change', { bubbles: true }));
     }
-    updateFormLabelsAndPlaceholders(false, 'mixed');
 
     // Clear vocab fields
     const vocabWord = document.getElementById('vocab-word');
