@@ -73,36 +73,19 @@ export function proceedToNextCard() {
     }, 300);
 }
 
-function triggerFireworks() {
-    const duration = 5 * 1000;
-    const animationEnd = Date.now() + duration;
-    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 999999 };
-
-    function randomInRange(min, max) {
-        return Math.random() * (max - min) + min;
-    }
-
-    const interval = setInterval(function() {
-        const timeLeft = animationEnd - Date.now();
-
-        if (timeLeft <= 0) {
-            return clearInterval(interval);
-        }
-
-        const particleCount = 50 * (timeLeft / duration);
-        if (typeof window.confetti === 'function') {
-            window.confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
-            window.confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
-        }
-    }, 250);
-}
-
 export async function finishSession() {
     playUISound('complete');
     try {
-        triggerFireworks();
+        if (typeof window.confetti === 'function') {
+            window.confetti({
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.6 },
+                zIndex: 999999
+            });
+        }
     } catch (err) {
-        console.warn("Fireworks call failed:", err);
+        console.warn("Confetti call failed:", err);
     }
 
     if (state.userSession && supabase) {
@@ -124,7 +107,6 @@ export async function finishSession() {
         }
     } else {
         const completedMsg = document.getElementById('practice-completed');
-        const count = state.reviewQueue ? state.reviewQueue.length : 0;
         
         completedMsg.innerHTML = `
             <style>
@@ -149,19 +131,8 @@ export async function finishSession() {
                     </svg>
                 </div>
                 
-                <h2 style="font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 8px 0; background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.7) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Session Complete!</h2>
-                <p style="color: var(--text-secondary); font-size: 1.05rem; line-height: 1.4; margin: 0 0 32px 0;">Your brain is getting stronger.</p>
-                
-                <div class="session-stats-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; width: 100%; margin-bottom: 36px; padding: 16px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 16px; backdrop-filter: blur(10px);">
-                    <div class="stat-item" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px;">
-                        <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 4px;">Reviewed</span>
-                        <span style="font-size: 1.5rem; font-weight: 700; color: #fff;">${count}</span>
-                    </div>
-                    <div class="stat-item" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; border-left: 1px solid rgba(255, 255, 255, 0.08);">
-                        <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 4px;">Brain Power</span>
-                        <span style="font-size: 1.5rem; font-weight: 700; color: var(--success, #22c55e);">+${count * 5} XP</span>
-                    </div>
-                </div>
+                <h2 style="font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 8px 0; background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.7) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Practice Complete!</h2>
+                <p style="color: var(--text-secondary); font-size: 1.05rem; line-height: 1.4; margin: 0 0 24px 0;">Congratulations! You have successfully completed your practice session.</p>
                 
                 <button class="btn primary full-width" id="btn-finish-practice" style="min-height: 48px; font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; border-radius: 12px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25); transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
                     Back to Dashboard
