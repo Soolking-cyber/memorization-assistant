@@ -78,9 +78,17 @@ export async function finishSession() {
     try {
         if (typeof window.confetti === 'function') {
             window.confetti({
-                particleCount: 150,
-                spread: 80,
-                origin: { y: 0.6 },
+                particleCount: 100,
+                spread: 60,
+                origin: { x: 0.05, y: 0.7 },
+                angle: 60,
+                zIndex: 999999
+            });
+            window.confetti({
+                particleCount: 100,
+                spread: 60,
+                origin: { x: 0.95, y: 0.7 },
+                angle: 120,
                 zIndex: 999999
             });
         }
