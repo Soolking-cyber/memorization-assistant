@@ -150,22 +150,46 @@ export async function toggleModule(modId, active) {
 }
 
 export function updateModuleUI() {
+    let anyGameActive = false;
+    
     for (const modId in G_REGISTRY) {
         const mod = G_REGISTRY[modId];
         const isActive = state.activeModules.includes(modId);
         
-        // Hide/show sidebar nav button
-        const navBtn = document.querySelector(`.nav-btn[data-view="${mod.navViewId}"]`);
-        if (navBtn) {
+        if (isActive) {
+            anyGameActive = true;
+        }
+        
+        // Show/hide game card in the Games view
+        const gameCard = document.querySelector(`.game-card[data-game-id="${modId}"]`);
+        if (gameCard) {
             if (isActive) {
-                navBtn.style.display = '';
+                gameCard.style.display = '';
             } else {
-                navBtn.style.display = 'none';
+                gameCard.style.display = 'none';
                 
-                // If we are currently on the disabled view, redirect to dashboard
-                if (navBtn.classList.contains('active')) {
-                    switchView('dashboard');
+                // If currently on the disabled view, redirect to games
+                const viewEl = document.getElementById(`view-${modId}`);
+                if (viewEl && !viewEl.classList.contains('hidden')) {
+                    switchView('games');
                 }
+            }
+        }
+    }
+    
+    // Show/hide the main "Games" nav button
+    const gamesNavBtn = document.querySelector(`.nav-btn[data-view="games"]`);
+    if (gamesNavBtn) {
+        if (anyGameActive) {
+            gamesNavBtn.style.display = '';
+        } else {
+            gamesNavBtn.style.display = 'none';
+            
+            // If currently on a games-related view (games, scramble, collection) and all are disabled, redirect to dashboard
+            const currentActiveBtn = document.querySelector('.nav-btn.active');
+            const currentView = currentActiveBtn ? currentActiveBtn.dataset.view : '';
+            if (['games', 'scramble', 'collection'].includes(currentView)) {
+                switchView('dashboard');
             }
         }
     }

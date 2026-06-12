@@ -6,7 +6,7 @@ import { loadData, renderManageView, renderCreateSentencesList, updateCardInDB }
 import { updateDashboard, handleTypeSelectChange } from './dashboard.js';
 import { renderStatistics, initStatsView } from './stats.js';
 import { buildCustomDropdownUI } from './uiHelpers.js';
-import { renderSettingsToggles } from './gameManager.js';
+import { renderSettingsToggles, updateModuleUI } from './gameManager.js';
 
 
 export function initThemeSystem() {
@@ -64,8 +64,16 @@ export async function switchView(viewId) {
         'collection': 'collection'
     };
     if (blockedViews[viewId] && (!state.activeModules || !state.activeModules.includes(blockedViews[viewId]))) {
-        switchView('dashboard');
+        switchView('games');
         return;
+    }
+
+    if (viewId === 'games') {
+        const hasAnyActiveGame = state.activeModules && (state.activeModules.includes('scramble') || state.activeModules.includes('collection'));
+        if (!hasAnyActiveGame) {
+            switchView('dashboard');
+            return;
+        }
     }
 
     hideExplanationTooltip();
@@ -173,6 +181,10 @@ export async function switchView(viewId) {
     } else if (viewId === 'scramble') {
         if (window.initScrambleView) {
             await window.initScrambleView();
+        }
+    } else if (viewId === 'games') {
+        if (typeof updateModuleUI === 'function') {
+            updateModuleUI();
         }
     }
 

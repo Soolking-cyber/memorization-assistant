@@ -858,3 +858,24 @@ svg.icon-svg path[fill="currentColor"] {
     cursor: not-allowed;
 }
 
+/* Premium Game Card Component */
+.game-card {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.game-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent) !important;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    background: var(--bg-secondary) !important;
+}
+
+.game-card:hover .game-card-icon {
+    transform: scale(1.05);
+}
+
+.game-card-icon {
+    transition: transform 0.3s ease;
+}
+
+
