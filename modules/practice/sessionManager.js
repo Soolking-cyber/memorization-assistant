@@ -75,26 +75,6 @@ export function proceedToNextCard() {
 
 export async function finishSession() {
     playUISound('complete');
-    try {
-        if (typeof window.confetti === 'function') {
-            window.confetti({
-                particleCount: 100,
-                spread: 60,
-                origin: { x: 0.05, y: 0.7 },
-                angle: 60,
-                zIndex: 999999
-            });
-            window.confetti({
-                particleCount: 100,
-                spread: 60,
-                origin: { x: 0.95, y: 0.7 },
-                angle: 120,
-                zIndex: 999999
-            });
-        }
-    } catch (err) {
-        console.warn("Confetti call failed:", err);
-    }
 
     if (state.userSession && supabase) {
         await loadData();
