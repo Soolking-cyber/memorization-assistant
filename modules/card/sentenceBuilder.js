@@ -51,9 +51,16 @@ export function renderCreateSentencesList() {
         row.style.fontSize = '0.9rem';
         
         row.innerHTML = `
-            <span style="flex: 1; margin-right: 10px; line-height: 1.4;">${sentence}</span>
-            <button type="button" onclick="deleteDraftCreateSentence(${index})" style="background: none; border: none; color: var(--danger); cursor: pointer; padding: 0 4px; display: inline-flex; align-items: center;">${ICONS.closeSmall}</button>
+            <span class="create-sentence-text" style="flex: 1; margin-right: 10px; line-height: 1.4;"></span>
+            <button type="button" class="delete-draft-sentence-btn" style="background: none; border: none; color: var(--danger); cursor: pointer; padding: 0 4px; display: inline-flex; align-items: center;">${ICONS.closeSmall}</button>
         `;
+        row.querySelector('.create-sentence-text').textContent = sentence;
+        
+        const deleteBtn = row.querySelector('.delete-draft-sentence-btn');
+        deleteBtn.addEventListener('click', () => {
+            deleteDraftCreateSentence(index);
+        });
+        
         listDiv.appendChild(row);
     });
 }
@@ -113,20 +120,21 @@ export function renderEditSentencesList() {
         row.style.gap = '8px';
         
         row.innerHTML = `
-            <span class="edit-sentence-text" style="flex: 1; margin-right: 10px; line-height: 1.4; cursor: pointer;" title="Double click to edit sentence">${sentence}</span>
+            <span class="edit-sentence-text" style="flex: 1; margin-right: 10px; line-height: 1.4; cursor: pointer;" title="Double click to edit sentence"></span>
             <button type="button" class="delete-edit-sentence-btn" style="background: none; border: none; color: var(--danger); cursor: pointer; padding: 0 4px; display: inline-flex; align-items: center;">${ICONS.closeSmall}</button>
         `;
         
         const span = row.querySelector('.edit-sentence-text');
-        const deleteBtn = row.querySelector('.delete-edit-sentence-btn');
+        span.textContent = sentence;
         
+        const deleteBtn = row.querySelector('.delete-edit-sentence-btn');
         deleteBtn.addEventListener('click', () => {
             deleteEditSentence(index);
         });
         
         span.addEventListener('dblclick', () => {
             row.innerHTML = `
-                <input type="text" class="input-field inline-edit-input" value="${sentence}" style="flex: 1; font-size: 0.9rem; padding: 6px 10px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); outline: none;">
+                <input type="text" class="input-field inline-edit-input" style="flex: 1; font-size: 0.9rem; padding: 6px 10px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); outline: none;">
                 <button type="button" class="btn save-inline-btn" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 8px; background: var(--accent); color: var(--btn-primary-text); border: none; cursor: pointer;">Save</button>
                 <button type="button" class="btn cancel-inline-btn" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); border: 2px solid var(--border-color); cursor: pointer;">Cancel</button>
             `;
@@ -134,6 +142,9 @@ export function renderEditSentencesList() {
             const input = row.querySelector('.inline-edit-input');
             const saveBtn = row.querySelector('.save-inline-btn');
             const cancelBtn = row.querySelector('.cancel-inline-btn');
+            
+            // Set value programmatically to preserve quotes (e.g., ")
+            input.value = sentence;
             
             input.focus();
             input.select();
