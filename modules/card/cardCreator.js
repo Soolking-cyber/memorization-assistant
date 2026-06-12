@@ -967,6 +967,44 @@ export async function fetchDictionaryDefinition(word) {
     
     const cleanWord = word.trim().toLowerCase();
 
+    // 1. Try Supabase database dictionary (Webster's Dictionary) first
+    if (supabase) {
+        try {
+            const { data, error } = await supabase
+                .from('dictionary')
+                .select('part_of_speech, definition')
+                .eq('word', cleanWord);
+                
+            if (error) {
+                console.error("Supabase dictionary query error:", error);
+            } else if (data && data.length > 0) {
+                const partsOfSpeech = [];
+                let definitionText = '';
+                
+                data.forEach((item) => {
+                    const pos = item.part_of_speech || 'definition';
+                    const normalizedPos = pos.charAt(0).toUpperCase() + pos.slice(1).toLowerCase();
+                    if (normalizedPos && !partsOfSpeech.includes(normalizedPos)) {
+                        partsOfSpeech.push(normalizedPos);
+                    }
+                    const cleanDef = removeWordFromDefinition(item.definition, word.trim());
+                    definitionText += `(${normalizedPos})\n${cleanDef}\n\n`;
+                });
+                
+                if (definitionText.trim().length > 0) {
+                    console.log(`Successfully fetched definition for "${cleanWord}" from Supabase Webster's dictionary`);
+                    return {
+                        definition: definitionText.trim(),
+                        partsOfSpeech: partsOfSpeech
+                    };
+                }
+            }
+        } catch (dbErr) {
+            console.warn("Failed to fetch from Supabase dictionary database:", dbErr);
+        }
+    }
+
+    // 2. Fallback to Free Dictionary API
     try {
         const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanWord)}`);
         if (!response.ok) {
