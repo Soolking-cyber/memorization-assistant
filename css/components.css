@@ -6,19 +6,19 @@
     border: 2px solid var(--border-color);
     box-shadow: inset 0 -2px 0 var(--border-color);
     color: var(--text-primary);
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-size: 0.9rem;
+    padding: 12px var(--space-lg);
+    border-radius: var(--radius-md);
+    font-size: var(--font-sm);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.8px;
     cursor: pointer;
     font-family: inherit;
-    transition: all 0.1s ease;
+    transition: var(--transition-fast);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: var(--space-sm);
     user-select: none;
 }
 .btn:hover { 
@@ -48,13 +48,13 @@
     border: none; 
     color: var(--text-secondary); 
     cursor: pointer; 
-    transition: all 0.2s; 
+    transition: var(--transition-smooth); 
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 40px;
     height: 40px;
-    border-radius: 50%;
+    border-radius: var(--radius-full);
 }
 .btn-icon:hover { 
     color: var(--text-primary); 
@@ -77,7 +77,7 @@
 /* Tactile Forms */
 .form-container { 
     width: 100%; 
-    padding: 20px; 
+    padding: var(--space-lg); 
 }
 .centered { 
     text-align: center; 
@@ -88,21 +88,21 @@
 .auth-box { 
     max-width: 450px; 
     width: 100%; 
-    padding: 30px 24px; 
-    margin: 20px auto 0 auto; 
+    padding: var(--space-xl) var(--space-lg); 
+    margin: var(--space-lg) auto 0 auto; 
 }
-.auth-box h3 { font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; }
+.auth-box h3 { font-size: 1.6rem; font-weight: 700; margin-bottom: var(--space-sm); }
 
-.form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-lg); }
 .form-header h2 { font-size: 1.6rem; font-weight: 700;}
 
-.input-group { margin-bottom: 24px; text-align: left; width: 100%; }
+.input-group { margin-bottom: var(--space-lg); text-align: left; width: 100%; }
 .input-group label { 
     display: block; 
-    margin-bottom: 8px; 
+    margin-bottom: var(--space-sm); 
     font-weight: 700; 
     color: var(--text-secondary); 
-    font-size: 0.85rem; 
+    font-size: var(--font-xs); 
     text-transform: uppercase; 
     letter-spacing: 1px; 
 }
@@ -110,8 +110,8 @@
 .input-group select,
 #practice-type-select {
     width: 100%; 
-    padding: 14px; 
-    border-radius: 12px;
+    padding: 12px var(--space-md); 
+    border-radius: var(--radius-md);
     background: var(--bg-card); 
     border: 2px solid var(--border-color);
     color: var(--text-primary); 
@@ -242,7 +242,7 @@
     background: rgba(0, 0, 0, 0.04);
     color: var(--accent);
 }
-[data-theme="dark"] .user-dropdown-item:hover {
+body.dark-theme .user-dropdown-item:hover {
     background: rgba(255, 255, 255, 0.04);
 }
 
@@ -334,7 +334,7 @@
     padding: 4px 10px;
     align-self: flex-start;
 }
-[data-theme="dark"] .profile-stat-badge {
+body.dark-theme .profile-stat-badge {
     background: rgba(255, 255, 255, 0.03);
 }
 .profile-stat-badge .stat-num {

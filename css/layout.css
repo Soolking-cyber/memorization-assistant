@@ -4,7 +4,7 @@
 .top-header {
     background: var(--bg-card);
     border-bottom: 2px solid var(--border-color);
-    padding: 16px 40px;
+    padding: var(--space-md) var(--space-xl);
     width: 100%;
     position: sticky;
     top: 0;
@@ -21,7 +21,7 @@
 .top-header-right {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: var(--space-md);
 }
 .header-icon-btn {
     background: none;
@@ -33,8 +33,8 @@
     justify-content: center;
     width: 38px;
     height: 38px;
-    border-radius: 50%;
-    transition: all 0.2s;
+    border-radius: var(--radius-full);
+    transition: var(--transition-smooth);
 }
 .header-icon-btn:hover {
     background: var(--bg-secondary);
@@ -59,7 +59,7 @@
 .user-avatar {
     width: 36px;
     height: 36px;
-    border-radius: 50%;
+    border-radius: var(--radius-full);
     background: var(--accent);
     color: var(--btn-primary-text);
     display: flex;
@@ -76,10 +76,10 @@
     width: 100%;
     max-width: 1500px;
     margin: 0 auto;
-    padding: 24px 30px;
+    padding: var(--space-lg);
     display: flex;
     flex-direction: row;
-    gap: 30px;
+    gap: var(--space-xl);
     flex-grow: 1;
 }
 
@@ -117,7 +117,7 @@ body.logged-out .app-container {
     flex-direction: column;
     align-items: stretch;
     width: 100%;
-    gap: 8px;
+    gap: var(--space-sm);
 }
 
 /* Tactile Navigation Buttons */
@@ -131,12 +131,12 @@ body.logged-out .app-container {
     letter-spacing: 0.8px;
     font-family: inherit;
     cursor: pointer;
-    padding: 12px 18px;
-    border-radius: 14px;
-    transition: all 0.15s ease;
+    padding: 12px var(--space-md);
+    border-radius: var(--radius-md);
+    transition: var(--transition-smooth);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--space-sm);
     width: 100%;
 }
 .nav-btn:hover:not(.primary-nav-btn) { 
@@ -728,19 +728,19 @@ body.logged-out .app-container {
 
 /* Responsive Adaptations for Mobile Bottom Tab Bar */
 @media (max-width: 768px) {
-    .top-header { padding: 10px 12px; }
-    .top-header-right { gap: 8px; }
+    .top-header { padding: 10px var(--space-md); }
+    .top-header-right { gap: var(--space-sm); }
     .app-container {
         flex-direction: column;
-        padding: 12px 12px 95px 12px !important;
-        gap: 16px !important;
+        padding: var(--space-md) var(--space-md) calc(var(--space-xl) * 2.5 + env(safe-area-inset-bottom, 0px)) var(--space-md) !important;
+        gap: var(--space-md) !important;
     }
     body.logged-out .app-container {
-        padding: 20px 12px !important;
+        padding: var(--space-lg) var(--space-md) !important;
         min-height: calc(100vh - 60px) !important;
     }
     .view {
-        gap: 16px !important;
+        gap: var(--space-md) !important;
     }
     .hero-section h2 {
         font-size: 2.0rem !important;
@@ -752,11 +752,11 @@ body.logged-out .app-container {
         line-height: 1.5 !important;
     }
     .auth-box {
-        padding: 24px 16px !important;
-        margin: 12px auto 0 auto !important;
+        padding: var(--space-lg) var(--space-md) !important;
+        margin: var(--space-md) auto 0 auto !important;
     }
     .form-container {
-        padding: 20px 16px !important;
+        padding: var(--space-lg) var(--space-md) !important;
     }
     .sidebar {
         width: 100%;
@@ -829,7 +829,7 @@ body.logged-out .app-container {
     }
     .dashboard-hero {
         flex-direction: column;
-        padding: 16px !important;
+        padding: var(--space-md) !important;
         text-align: center;
     }
     .hero-left { text-align: center; }
@@ -839,9 +839,9 @@ body.logged-out .app-container {
         align-items: stretch;
     }
     .hero-right { display: none; }
-    .stats-row { flex-direction: column; gap: 10px; }
+    .stats-row { flex-direction: column; gap: var(--space-sm); }
     .flashcard { min-height: 300px; }
-    .card-face { min-height: 300px; padding: 16px !important; }
+    .card-face { min-height: 300px; padding: var(--space-md) !important; }
     .card-content { font-size: 1.15rem; }
 
     /* Canvas specific mobile styles */
@@ -857,7 +857,7 @@ body.logged-out .app-container {
         transform: translateX(-50%) !important;
         margin-right: 0 !important;
         margin-bottom: 0 !important;
-        padding: 8px 12px !important;
+        padding: var(--space-sm) var(--space-md) !important;
         gap: 6px !important;
         width: max-content !important;
         border-radius: 28px !important;

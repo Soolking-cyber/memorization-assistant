@@ -299,8 +299,8 @@
 .map-node-toolbar {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -309,7 +309,7 @@
     width: 220px;
     align-items: stretch;
     box-sizing: border-box;
-    transition: opacity 0.15s ease, transform 0.15s ease;
+    transition: var(--transition-smooth);
     pointer-events: auto !important;
 }
 
@@ -330,11 +330,11 @@
     width: max-content;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--space-xs);
     background: var(--bg-card);
     border: 1px solid var(--border-color);
-    padding: 3px 6px;
-    border-radius: 20px;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-full);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -354,8 +354,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    transition: background 0.15s, transform 0.1s;
+    border-radius: var(--radius-full);
+    transition: var(--transition-fast);
     padding: 0;
 }
 
@@ -418,8 +418,8 @@
     font-weight: 800;
     cursor: pointer;
     padding: 3px 7px;
-    border-radius: 10px;
-    transition: background 0.15s, transform 0.1s;
+    border-radius: var(--radius-sm);
+    transition: var(--transition-fast);
     font-family: inherit;
     outline: none;
 }
@@ -445,12 +445,12 @@
 /* Floating Fullscreen Close Button */
 .fullscreen-close-btn {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: var(--space-lg);
+    right: var(--space-lg);
     z-index: 10000;
     width: 44px;
     height: 44px;
-    border-radius: 50%;
+    border-radius: var(--radius-full);
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     color: var(--text-primary);

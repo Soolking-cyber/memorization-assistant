@@ -1,7 +1,7 @@
 /* === practice.css - Modular segment of 8eacher design system === */
 
 /* Practice View & Interactive Letter Boxes */
-.practice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.practice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-lg); }
 .practice-header h2 { font-size: 1.15rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 #practice-progress { font-weight: 800; color: var(--text-primary); }
 
@@ -11,8 +11,8 @@
     flex: 1;
     min-height: 350px;
     position: relative; 
-    margin-bottom: 24px; 
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    margin-bottom: var(--space-lg); 
+    transition: var(--transition-smooth);
     display: flex;
     flex-direction: column;
 }
@@ -23,9 +23,9 @@
     min-height: 350px;
     display: flex; 
     flex-direction: column; 
-    padding: 24px; 
+    padding: var(--space-lg); 
     box-shadow: inset 0 -2px 0 var(--border-color); 
-    border-radius: 16px; 
+    border-radius: var(--radius-lg); 
     border: 2px solid var(--border-color);
     background: var(--bg-card);
     overflow-y: visible; 
@@ -37,7 +37,7 @@
     color: var(--text-secondary); 
     border-bottom: 2px solid var(--border-color); 
     padding-bottom: 12px; 
-    margin-bottom: 20px; 
+    margin-bottom: var(--space-lg); 
     font-weight: 700; 
 }
 .card-content { 
@@ -58,8 +58,8 @@
     max-width: 100%; 
     max-height: 320px; 
     object-fit: contain; 
-    margin-top: 16px; 
-    border-radius: 10px; 
+    margin-top: var(--space-md); 
+    border-radius: var(--radius-sm); 
     border: 2px solid var(--border-color); 
 }
 
@@ -79,14 +79,14 @@
     gap: 6px;
     align-items: center;
     justify-content: center;
-    margin: 8px 0;
+    margin: var(--space-sm) 0;
 }
 .letter-box {
     width: 28px;
     height: 36px;
     border: 2px solid var(--border-color);
     box-shadow: inset 0 -2px 0 var(--border-color);
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -94,7 +94,7 @@
     font-weight: 800;
     color: var(--text-primary);
     background: var(--bg-card);
-    transition: all 0.1s ease;
+    transition: var(--transition-fast);
 }
 input.letter-box {
     text-align: center;
@@ -131,7 +131,7 @@ input.letter-box:focus {
     height: 28px;
     font-size: 0.9rem;
     box-shadow: inset 0 -1.5px 0 var(--border-color);
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
 }
 
 
@@ -219,11 +219,11 @@ input.letter-box:focus {
     flex-direction: column;
     align-items: stretch;
     justify-content: flex-start;
-    gap: 8px;
+    gap: var(--space-sm);
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-    padding: 12px;
+    padding: var(--space-sm);
     overflow: hidden;
 }
 
@@ -231,7 +231,7 @@ input.letter-box:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     border: 2px solid var(--border-color);
     background: var(--bg-secondary);
     transition: border-color 0.2s ease;
@@ -256,8 +256,8 @@ input.letter-box:focus {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    gap: 12px;
-    margin-bottom: 8px;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
     flex-shrink: 0;
 }
 
@@ -276,8 +276,8 @@ input.letter-box:focus {
     color: var(--accent);
     background: var(--bg-secondary);
     border: 2px solid var(--border-color);
-    padding: 6px 14px;
-    border-radius: 12px;
+    padding: 6px var(--space-md);
+    border-radius: var(--radius-md);
     max-width: 60%;
     white-space: nowrap;
     overflow: hidden;
@@ -290,8 +290,8 @@ input.letter-box:focus {
     .image-card-clue-row {
         flex-direction: column;
         align-items: center;
-        gap: 8px;
-        margin-bottom: 4px;
+        gap: var(--space-sm);
+        margin-bottom: var(--space-xs);
     }
     .image-card-clue-header {
         font-size: 0.75rem;
@@ -306,8 +306,8 @@ input.letter-box:focus {
         width: fit-content;
     }
     .practice-image-card-container {
-        padding: 8px !important;
-        gap: 6px !important;
+        padding: var(--space-sm) !important;
+        gap: var(--space-xs) !important;
     }
 }
 
@@ -447,14 +447,14 @@ body.dark-theme .heatmap-tooltip-activity {
 /* Position and enlarge the canvas zoom controls pill in the bottom-right corner */
 .canvas-zoom-controls {
     position: absolute !important;
-    bottom: 16px !important;
-    right: 16px !important;
+    bottom: var(--space-md) !important;
+    right: var(--space-md) !important;
     left: auto !important;
     top: auto !important;
     transform: none !important;
     margin: 0 !important;
-    padding: 6px 10px !important;
-    border-radius: 24px !important;
+    padding: 6px var(--space-sm) !important;
+    border-radius: var(--radius-full) !important;
     gap: 6px !important;
     z-index: 10000 !important;
 }
@@ -481,7 +481,7 @@ body.dark-theme .heatmap-tooltip-activity {
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 12px !important;
+    gap: var(--space-sm) !important;
     width: 100% !important;
     text-align: center !important;
 }
@@ -530,20 +530,20 @@ body.dark-theme .heatmap-tooltip-activity {
     width: 100% !important;
     display: flex !important;
     flex-direction: column !important;
-    padding: 16px !important;
+    padding: var(--space-md) !important;
     box-sizing: border-box !important;
 }
 
 @media (max-width: 768px) {
     .practice-layout-map > .form-container {
-        padding: 8px !important;
+        padding: var(--space-sm) !important;
     }
 }
 
 .practice-layout-map .practice-workspace {
     display: grid !important;
     grid-template-rows: 1fr auto !important;
-    gap: 12px !important;
+    gap: var(--space-sm) !important;
     width: 100% !important;
     flex: 1 !important;
     min-height: 0 !important;
