@@ -1,3 +1,36 @@
+window.addEventListener('error', (event) => {
+    const div = document.createElement('div');
+    div.style.position = 'fixed';
+    div.style.top = '10px';
+    div.style.left = '10px';
+    div.style.right = '10px';
+    div.style.background = 'red';
+    div.style.color = 'white';
+    div.style.padding = '15px';
+    div.style.zIndex = '999999';
+    div.style.fontSize = '14px';
+    div.style.borderRadius = '5px';
+    div.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+    div.innerHTML = `<strong>Runtime Error:</strong> ${event.message} <br> <small>${event.filename}:${event.lineno}:${event.colno}</small><br><pre style="margin: 5px 0 0 0; font-size: 11px; max-height: 200px; overflow: auto;">${event.error ? event.error.stack : ''}</pre>`;
+    document.body.appendChild(div);
+});
+window.addEventListener('unhandledrejection', (event) => {
+    const div = document.createElement('div');
+    div.style.position = 'fixed';
+    div.style.top = '10px';
+    div.style.left = '10px';
+    div.style.right = '10px';
+    div.style.background = 'orange';
+    div.style.color = 'black';
+    div.style.padding = '15px';
+    div.style.zIndex = '999999';
+    div.style.fontSize = '14px';
+    div.style.borderRadius = '5px';
+    div.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+    div.innerHTML = `<strong>Unhandled Rejection:</strong> ${event.reason} <br><pre style="margin: 5px 0 0 0; font-size: 11px; max-height: 200px; overflow: auto;">${event.reason && event.reason.stack ? event.reason.stack : ''}</pre>`;
+    document.body.appendChild(div);
+});
+
 import { state } from './modules/state.js';
 import { supabase } from './modules/supabaseClient.js';
 import { initSoundSystem } from './modules/sound.js';
