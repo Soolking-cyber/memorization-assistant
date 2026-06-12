@@ -487,7 +487,7 @@ export function renderCurrentCard() {
     if (sentences.length > 0) {
         exerciseTitleEl.textContent = "Complete the sentences with the correct word";
         
-        const explanationHtml = cleanFront.replace(/\n/g, '<br>');
+        const explanationHtml = escapeHtml(cleanFront).replace(/\n/g, '<br>');
         
         let wordTypesHtml = '';
         if (wordTypes.length > 0) {
@@ -518,7 +518,7 @@ export function renderCurrentCard() {
         frontEl.innerHTML = `
             <div class="practice-prompt-container" style="display: flex; flex-direction: column; gap: 16px; width: 100%; justify-content: center; align-items: center; text-align: center; margin: auto 0;">
                 <div class="practice-explanation" style="font-size: 1.15rem; font-weight: 600; color: var(--text-secondary); max-width: 100%; line-height: 1.5; word-break: normal; overflow-wrap: break-word;">
-                    ${escapeHtml(explanationHtml).replace(/\n/g, '<br>')}
+                    ${explanationHtml}
                     ${wordTypesHtml}
                 </div>
                 <div class="practice-divider" style="width: 60px; height: 2px; background: var(--bg-tertiary); margin: 4px 0;"></div>
@@ -529,7 +529,7 @@ export function renderCurrentCard() {
     } else {
         exerciseTitleEl.textContent = "Question";
         
-        const explanationHtml = cleanFront.replace(/\n/g, '<br>');
+        const explanationHtml = escapeHtml(cleanFront).replace(/\n/g, '<br>');
         
         let wordTypesHtml = '';
         if (wordTypes.length > 0) {
@@ -542,7 +542,7 @@ export function renderCurrentCard() {
 
         frontEl.innerHTML = `
             <div class="practice-explanation-only" style="font-size: 1.45rem; font-weight: 700; color: var(--text-primary); max-width: 100%; line-height: 1.5; word-break: normal; overflow-wrap: break-word; text-align: center; margin: auto 0;">
-                ${escapeHtml(explanationHtml).replace(/\n/g, '<br>')}
+                ${explanationHtml}
                 ${wordTypesHtml}
             </div>
         `;
