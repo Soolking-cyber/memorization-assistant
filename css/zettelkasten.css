@@ -5,7 +5,8 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: calc(100vh - 120px);
+    height: calc(100vh - 240px);
+    min-height: 480px;
     position: relative;
     border-radius: var(--radius-lg);
     overflow: hidden;
@@ -222,8 +223,9 @@
 @media (max-width: 768px) {
     /* Limit container height so it doesn't overflow behind the bottom nav bar */
     .graph-view-container {
-        height: calc(100dvh - 180px);
-        height: calc(100vh - 180px);
+        height: calc(100dvh - 300px);
+        height: calc(100vh - 300px);
+        min-height: 400px;
     }
 
     /* Stack toolbar into grid: Row 1 = Title, Row 2 = Search */

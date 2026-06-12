@@ -34,6 +34,7 @@ export function initZettelkastenView() {
     
     // Resize handler
     resizeCanvas();
+    window.removeEventListener('resize', resizeCanvas);
     window.addEventListener('resize', resizeCanvas);
     
     // Construct Nodes and Links from state.cards
@@ -385,9 +386,10 @@ function matchesFilter(node) {
 function tick() {
     if (!canvas || !ctx) return;
     
-    // Check if the graph view is hidden
-    const viewZettel = document.getElementById('view-zettelkasten');
-    if (viewZettel && viewZettel.classList.contains('hidden')) {
+    // Check if the graph view tab is hidden or view-stats is hidden
+    const viewStats = document.getElementById('view-stats');
+    const graphTab = document.getElementById('stats-tab-content-graph');
+    if ((viewStats && viewStats.classList.contains('hidden')) || (graphTab && graphTab.classList.contains('hidden'))) {
         if (animFrameId) {
             cancelAnimationFrame(animFrameId);
             animFrameId = null;

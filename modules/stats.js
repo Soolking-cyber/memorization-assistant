@@ -551,3 +551,42 @@ export function renderCategoryCards() {
         grid.appendChild(cardEl);
     });
 }
+
+export function initStatsView() {
+    const tabButtons = document.querySelectorAll('#stats-view-tabs [data-stats-tab]');
+    const tabContents = {
+        overview: document.getElementById('stats-tab-content-overview'),
+        graph: document.getElementById('stats-tab-content-graph')
+    };
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const selectedTab = btn.getAttribute('data-stats-tab');
+            
+            // Toggle active class on tab buttons
+            tabButtons.forEach(b => {
+                if (b.getAttribute('data-stats-tab') === selectedTab) {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
+            });
+
+            // Toggle hidden class on tab contents
+            Object.keys(tabContents).forEach(key => {
+                if (tabContents[key]) {
+                    if (key === selectedTab) {
+                        tabContents[key].classList.remove('hidden');
+                    } else {
+                        tabContents[key].classList.add('hidden');
+                    }
+                }
+            });
+
+            // If selected tab is graph, initialize graph view
+            if (selectedTab === 'graph' && window.initZettelkastenView) {
+                window.initZettelkastenView();
+            }
+        });
+    });
+}

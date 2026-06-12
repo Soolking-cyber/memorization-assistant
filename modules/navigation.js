@@ -4,7 +4,7 @@ import { playUISound } from './sound.js';
 import { hideExplanationTooltip } from './canvas.js';
 import { loadData, renderManageView, renderCreateSentencesList, updateCardInDB } from './flashcardCrud.js';
 import { updateDashboard, handleTypeSelectChange } from './dashboard.js';
-import { renderStatistics } from './stats.js';
+import { renderStatistics, initStatsView } from './stats.js';
 import { buildCustomDropdownUI } from './uiHelpers.js';
 import { renderSettingsToggles } from './gameManager.js';
 
@@ -52,6 +52,9 @@ export function initNavigation() {
             switchView(targetView);
         });
     });
+    
+    // Initialize integrated sub-tabs in Stats view
+    initStatsView();
 }
 
 export async function switchView(viewId) {
@@ -159,6 +162,10 @@ export async function switchView(viewId) {
         }
     } else if (viewId === 'stats') {
         await renderStatistics();
+        const graphTab = document.getElementById('stats-tab-content-graph');
+        if (graphTab && !graphTab.classList.contains('hidden') && window.initZettelkastenView) {
+            window.initZettelkastenView();
+        }
     } else if (viewId === 'collection') {
         if (window.renderCollectionDeck) {
             await window.renderCollectionDeck();
@@ -166,10 +173,6 @@ export async function switchView(viewId) {
     } else if (viewId === 'scramble') {
         if (window.initScrambleView) {
             await window.initScrambleView();
-        }
-    } else if (viewId === 'zettelkasten') {
-        if (window.initZettelkastenView) {
-            window.initZettelkastenView();
         }
     }
 
