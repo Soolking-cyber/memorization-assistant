@@ -151,11 +151,6 @@ export function updateTypeDatalists() {
                         select.selectedSubcategories[tcConfig.name] = [...tcConfig.subcategories];
                     } else {
                         select.selectedSubcategories[tcConfig.name] = select.selectedSubcategories[tcConfig.name].filter(sub => tcConfig.subcategories.includes(sub));
-                        tcConfig.subcategories.forEach(sub => {
-                            if (!select.selectedSubcategories[tcConfig.name].includes(sub)) {
-                                select.selectedSubcategories[tcConfig.name].push(sub);
-                            }
-                        });
                     }
                 });
             }

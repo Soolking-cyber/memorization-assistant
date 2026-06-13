@@ -601,6 +601,29 @@ export function buildCustomDropdownUI(selectId) {
                                 select.selectedValues = select.selectedValues.filter(v => v !== opt.value);
                             }
                             
+                            // Update mixed option status based on complete subcategory selections
+                            const allIndividualTypes = [...select.options]
+                                .map(o => o.value)
+                                .filter(v => v !== 'mixed' && v !== 'add_new');
+                            const allChecked = allIndividualTypes.every(v => select.selectedValues.includes(v));
+                            
+                            let hasSubcategoryFiltering = false;
+                            if (select.selectedSubcategories && state.cardTypesConfig) {
+                                hasSubcategoryFiltering = Object.keys(select.selectedSubcategories).some(type => {
+                                    const selected = select.selectedSubcategories[type] || [];
+                                    const config = state.cardTypesConfig.find(tc => tc.name === type);
+                                    return config && config.subcategories.length > 0 && selected.length < config.subcategories.length;
+                                });
+                            }
+                            
+                            if (allChecked && !hasSubcategoryFiltering) {
+                                if (!select.selectedValues.includes('mixed')) {
+                                    select.selectedValues.push('mixed');
+                                }
+                            } else {
+                                select.selectedValues = select.selectedValues.filter(v => v !== 'mixed');
+                            }
+                            
                             // Re-calculate select.value
                             if (select.selectedValues.includes('mixed')) {
                                 select.value = 'mixed';
