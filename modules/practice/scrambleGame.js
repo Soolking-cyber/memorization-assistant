@@ -1,4 +1,4 @@
-import { state } from '../state.js';
+import { state, isVocabularyType } from '../state.js';
 import { dbGet } from '../db.js';
 import { applySM2Grade } from '../spacedRepetition.js';
 import { logReviewAttempt } from '../practice.js';
@@ -7,7 +7,7 @@ import { calculateCardStats } from '../spacedRepetition.js';
 import { switchView } from '../navigation.js';
 import { ICONS } from '../icons.js';
 import { buildCustomDropdownUI } from '../uiHelpers.js';
-import { escapeHtml } from '../utils.js';
+import { escapeHtml, parseVocabularyCard } from '../utils.js';
 
 
 // Gameplay state
@@ -60,7 +60,7 @@ export async function initScrambleView() {
 
     // Filter vocabulary cards and compute stats (now based on unified score)
     const vocabCards = state.cards
-        .filter(card => card.type && card.type.toLowerCase() === 'vocabulary')
+        .filter(card => card.type && isVocabularyType(card.type))
         .map(card => {
             const stats = calculateCardStats(card, logs);
             return { card, stats };
@@ -197,7 +197,7 @@ function loadNextWord() {
 
     scrambleState.totalSeen++;
     const card = scrambleState.cards[scrambleState.currentIndex];
-    const targetWord = card.back.trim();
+    const { targetWord, definition } = parseVocabularyCard(card);
 
     // Reset feedback
     const feedbackBox = document.getElementById('scramble-feedback-box');
@@ -225,7 +225,7 @@ function loadNextWord() {
     // Clue text
     const clueText = document.getElementById('scramble-clue-text');
     if (clueText) {
-        clueText.textContent = card.front || 'Memory Clue';
+        clueText.textContent = definition || 'Memory Clue';
     }
 
     // Render universal memory strength badge
@@ -444,16 +444,17 @@ function checkSpelling() {
     clearGameTimer();
 
     const card = scrambleState.cards[scrambleState.currentIndex];
-    const targetWord = card.back.trim().toLowerCase();
+    const { targetWord: parsedWord } = parseVocabularyCard(card);
+    const targetWord = parsedWord.toLowerCase();
 
     // Reconstruct user spelled string
     let typedSpelling = '';
     let assembledCount = 0;
 
-    // Reconstruct matching spaces and punctuations from the card back structure
+    // Reconstruct matching spaces and punctuations from the target word structure
     let letterIndex = 0;
-    for (let i = 0; i < card.back.trim().length; i++) {
-        const char = card.back.trim()[i];
+    for (let i = 0; i < parsedWord.length; i++) {
+        const char = parsedWord[i];
         if (/\s/.test(char)) {
             typedSpelling += ' ';
         } else if (/[.,\/#!$%\^&\*;:{}=\-_`~()]/.test(char)) {
@@ -469,7 +470,7 @@ function checkSpelling() {
         }
     }
 
-    const success = (typedSpelling.trim() === targetWord);
+    const success = (typedSpelling.trim().toLowerCase() === targetWord);
 
     // Sync progress metrics
     const elapsedSeconds = (Date.now() - scrambleState.wordStartTime) / 1000;
@@ -568,7 +569,7 @@ function checkSpelling() {
                     Recall Failed
                 </div>
                 <div style="font-size: 0.8rem; margin-top: 2px;">Correct word:</div>
-                <div class="scramble-feedback-correct">${escapeHtml(card.back.toUpperCase())}</div>
+                <div class="scramble-feedback-correct">${escapeHtml(parsedWord.toUpperCase())}</div>
             `;
         }
 
@@ -621,6 +622,7 @@ function handleWordTimeout() {
     if (actionBtn && actionBtn.dataset.nextMode === 'true') return;
 
     const card = scrambleState.cards[scrambleState.currentIndex];
+    const { targetWord: parsedWord } = parseVocabularyCard(card);
 
     // Shaking & red flash
     const arena = document.getElementById('scramble-card-arena');
@@ -644,7 +646,7 @@ function handleWordTimeout() {
                 ${ICONS.heartBreak} Time Expired!
             </div>
             <div style="font-size: 0.8rem; margin-top: 2px;">Correct spelling was:</div>
-            <div class="scramble-feedback-correct">${escapeHtml(card.back.toUpperCase())}</div>
+            <div class="scramble-feedback-correct">${escapeHtml(parsedWord.toUpperCase())}</div>
         `;
     }
 

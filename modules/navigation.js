@@ -52,6 +52,27 @@ export function initNavigation() {
             switchView(targetView);
         });
     });
+
+    // Bind games hub card triggers dynamically
+    document.querySelectorAll('.game-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            const gameId = card.dataset.gameId;
+            if (gameId) {
+                switchView(gameId);
+            }
+        });
+    });
+
+    document.querySelectorAll('.game-card .btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const card = btn.closest('.game-card');
+            const gameId = card ? card.dataset.gameId : null;
+            if (gameId) {
+                switchView(gameId);
+            }
+        });
+    });
     
     // Initialize integrated sub-tabs in Stats view
     initStatsView();

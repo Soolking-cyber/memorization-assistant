@@ -1,4 +1,4 @@
-import { state } from './state.js';
+import { state, isVocabularyType } from './state.js';
 import { dbGet, dbSet } from './db.js';
 import { switchView } from './navigation.js';
 import { supabase } from './supabaseClient.js';
@@ -7,7 +7,7 @@ import { applySM2Grade, calculateCardStats } from './spacedRepetition.js';
 import { logReviewAttempt } from './practice.js';
 import { playUISound } from './sound.js';
 import { ICONS } from './icons.js';
-import { escapeHtml } from './utils.js';
+import { escapeHtml, parseVocabularyCard } from './utils.js';
 
 
 /**
@@ -41,7 +41,7 @@ export async function renderCollectionDeck() {
     
     // First, filter and map all vocabulary cards with their calculated stats
     const vocabCards = state.cards
-        .filter(card => card.type && card.type.toLowerCase() === 'vocabulary')
+        .filter(card => card.type && isVocabularyType(card.type))
         .map(card => {
             const stats = calculateCardStats(card, logs);
             return { card, stats };
@@ -206,6 +206,8 @@ function renderActiveStackCard() {
         return;
     }
     
+    const { targetWord, definition } = parseVocabularyCard(card);
+    
     // Initialize card-level gamification state
     state.clueRevealed = false;
     state.backspacePressed = false;
@@ -231,7 +233,7 @@ function renderActiveStackCard() {
     dbGet('review_activity_logs').then(l => {
         logs = l || [];
         const stats = calculateCardStats(card, logs);
-        const titleText = getCardTitle(card);
+        const titleText = isVocabularyType(card.type) ? definition : getCardTitle(card);
         
         let illustrationContent = `<div class="illustration-text" style="font-size: 1.15rem; font-weight: 800; line-height: 1.55; overflow-y: auto; max-height: 100%; text-align: center; padding: 16px 20px; font-family: 'Outfit', sans-serif; color: var(--text-primary);">${escapeHtml(titleText)}</div>`;
         if (card.type === 'Image Card' && card.image_front_url) {
@@ -282,7 +284,7 @@ function renderActiveStackCard() {
                     </div>
                     
                     <div class="attack-input-wrapper" style="display: flex; justify-content: center; width: 100%; overflow: visible;">
-                        ${generateSpellingBoxesHTML(card.back)}
+                        ${generateSpellingBoxesHTML(targetWord)}
                     </div>
                     
                     <div id="deck-attack-feedback" class="attack-feedback hidden"></div>
@@ -306,7 +308,7 @@ function renderActiveStackCard() {
             
             if (stats.sentences.length > 0) {
                 const rawSentence = stats.sentences[activeSentenceIndex];
-                const blurredSentence = blurWordInSentence(rawSentence, card.back);
+                const blurredSentence = blurWordInSentence(rawSentence, targetWord);
                 
                 let navigationHTML = '';
                 if (stats.sentences.length > 1) {
@@ -404,7 +406,7 @@ function renderActiveStackCard() {
                     e.preventDefault();
                     e.stopPropagation();
                     if (!attackBtn.dataset.nextMode) {
-                        const compiledTyped = getTypedAnswer(card.back);
+                        const compiledTyped = getTypedAnswer(targetWord);
                         evaluateStackAnswer(card, compiledTyped, feedbackBox, attackBtn);
                     } else {
                         proceedToNextStackCard(cardEl);
@@ -422,7 +424,7 @@ function renderActiveStackCard() {
         if (attackBtn) {
             attackBtn.addEventListener('click', () => {
                 if (!attackBtn.dataset.nextMode) {
-                    const compiledTyped = getTypedAnswer(card.back);
+                    const compiledTyped = getTypedAnswer(targetWord);
                     evaluateStackAnswer(card, compiledTyped, feedbackBox, attackBtn);
                 } else {
                     proceedToNextStackCard(cardEl);
@@ -470,8 +472,10 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
     const elapsedSeconds = (Date.now() - state.recallCardStartTime) / 1000;
     state.recallTotalTime += elapsedSeconds;
 
+    const { targetWord } = parseVocabularyCard(card);
+
     // If empty or Can't Guess, evaluate match percentage as 0 (escaped)
-    const score = typed ? calculateMatchPercentage(typed, card.back) : 0;
+    const score = typed ? calculateMatchPercentage(typed, targetWord) : 0;
     
     // Hide the "Can't Guess" button if it exists
     const cantGuessBtn = document.getElementById('btn-deck-cant-guess');
@@ -566,7 +570,7 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
     inputs.forEach(inp => inp.disabled = true);
     
     // Recalculate SM-2 Intervals & Log attempt
-    applySM2Grade(gradeInt);
+    applySM2Grade(card.id, gradeInt);
     logReviewAttempt(card.id, gradeInt, score);
 
     // Calculate score difference
@@ -615,7 +619,7 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
                 RECALL FAILED
             </div>
             <div>Correct Spelling:</div>
-            <div class="feedback-correct-val">${escapeHtml(card.back)}</div>
+            <div class="feedback-correct-val">${escapeHtml(targetWord)}</div>
         `;
         
         // Show custom interactive context clue-attachment form if guess failed
@@ -632,7 +636,7 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
                         <span>Attach Context Clue</span>
                     </div>
                     <span style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
-                        Add an example sentence containing the target word <strong>"${escapeHtml(card.back)}"</strong> to see it in context.
+                        Add an example sentence containing the target word <strong>"${escapeHtml(targetWord)}"</strong> to see it in context.
                     </span>
                     <div style="display: flex; gap: 8px; width: 100%; margin-top: 4px;">
                         <input type="text" id="deck-attach-sentence-input" class="input-field" placeholder="e.g. He showed high affinity for the task." style="flex: 1; padding: 8px 12px; font-size: 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.1); color: var(--text-primary); outline: none;">
@@ -660,10 +664,10 @@ function evaluateStackAnswer(card, typed, feedbackBox, attackBtn) {
                         return;
                     }
                     
-                    const escapedTarget = card.back.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                    const escapedTarget = targetWord.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
                     const substringCheckRegex = new RegExp(escapedTarget, 'i');
                     if (!substringCheckRegex.test(sentenceText)) {
-                        errorEl.textContent = `The sentence must contain the target word "${card.back}"!`;
+                        errorEl.textContent = `The sentence must contain the target word "${targetWord}"!`;
                         errorEl.style.color = "var(--danger)";
                         errorEl.classList.remove('hidden');
                         return;
