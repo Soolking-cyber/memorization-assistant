@@ -1,13 +1,25 @@
 import { safeJsonParse } from './utils.js';
 
-let customTypes = safeJsonParse(localStorage.getItem('customTypes'), ['Vocabulary', 'Memory Map', 'Image Card', 'Unknown']);
-if (!Array.isArray(customTypes)) customTypes = ['Vocabulary', 'Memory Map', 'Image Card', 'Unknown'];
-customTypes = customTypes.filter(t => typeof t === 'string' && t !== 'vocabulary' && t !== 'mixed');
-if (!customTypes.includes('Vocabulary')) customTypes.push('Vocabulary');
-if (!customTypes.includes('Memory Map')) customTypes.push('Memory Map');
-if (!customTypes.includes('Image Card')) customTypes.push('Image Card');
-if (!customTypes.includes('Zettelkasten')) customTypes.push('Zettelkasten');
-if (!customTypes.includes('Unknown')) customTypes.push('Unknown');
+let cardTypesConfig = safeJsonParse(localStorage.getItem('cardTypesConfig'), null);
+if (!cardTypesConfig) {
+    let customTypes = safeJsonParse(localStorage.getItem('customTypes'), ['Vocabulary', 'Memory Map', 'Image Card', 'Unknown']);
+    if (!Array.isArray(customTypes)) customTypes = ['Vocabulary', 'Memory Map', 'Image Card', 'Unknown'];
+    customTypes = customTypes.filter(t => typeof t === 'string' && t !== 'vocabulary' && t !== 'mixed');
+    if (!customTypes.includes('Vocabulary')) customTypes.push('Vocabulary');
+    if (!customTypes.includes('Memory Map')) customTypes.push('Memory Map');
+    if (!customTypes.includes('Image Card')) customTypes.push('Image Card');
+    if (!customTypes.includes('Zettelkasten')) customTypes.push('Zettelkasten');
+    if (!customTypes.includes('Unknown')) customTypes.push('Unknown');
+    
+    cardTypesConfig = customTypes.map(t => {
+        let subs = [];
+        if (t === 'Vocabulary') {
+            subs = ['English', 'Vietnamese'];
+        }
+        return { name: t, subcategories: subs };
+    });
+    localStorage.setItem('cardTypesConfig', JSON.stringify(cardTypesConfig));
+}
 let activeModules = safeJsonParse(localStorage.getItem('active_modules'), ['scramble', 'collection']);
 if (!Array.isArray(activeModules)) activeModules = ['scramble', 'collection'];
 try { localStorage.setItem('active_modules', JSON.stringify(activeModules)); } catch (e) { console.warn('localStorage write failed:', e); }
@@ -15,7 +27,20 @@ try { localStorage.setItem('active_modules', JSON.stringify(activeModules)); } c
 export const state = {
     cards: [],
     activeModules: activeModules,
-    customTypes: customTypes,
+    cardTypesConfig: cardTypesConfig,
+    
+    get customTypes() {
+        return this.cardTypesConfig.map(tc => tc.name);
+    },
+    set customTypes(newTypes) {
+        const currentConfig = this.cardTypesConfig || [];
+        this.cardTypesConfig = newTypes.map(name => {
+            const existing = currentConfig.find(tc => tc.name === name);
+            return existing || { name, subcategories: [] };
+        });
+        localStorage.setItem('cardTypesConfig', JSON.stringify(this.cardTypesConfig));
+        localStorage.setItem('customTypes', JSON.stringify(newTypes));
+    },
     dailyReviewLimit: 0,
 
     reviewQueue: [],

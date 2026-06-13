@@ -503,7 +503,7 @@ body.dark-theme .profile-stat-badge {
     -webkit-backdrop-filter: blur(16px);
     border: 2px solid var(--border-color);
     border-radius: 12px;
-    overflow: hidden;
+    overflow: visible;
     z-index: 10000;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
     opacity: 0;
@@ -880,6 +880,94 @@ svg.icon-svg path[fill="currentColor"] {
 
 .game-card-icon {
     transition: transform 0.3s ease;
+}
+
+/* Card Type Drag & Subcategory Submenu Styles */
+.custom-dropdown-item {
+    position: relative;
+}
+
+.custom-dropdown-item[draggable="true"] {
+    cursor: grab;
+}
+
+.custom-dropdown-item.dragging {
+    opacity: 0.4;
+    border: 1px dashed var(--accent);
+}
+
+.custom-dropdown-grip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    color: var(--text-tertiary);
+    cursor: grab;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+}
+
+.custom-dropdown-item:hover .custom-dropdown-grip {
+    opacity: 1;
+}
+
+.custom-dropdown-submenu {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 100%;
+    width: 200px;
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    padding: 6px 0;
+    z-index: 10001;
+    overflow: hidden;
+}
+
+.custom-dropdown-item:hover .custom-dropdown-submenu {
+    display: block;
+}
+
+.custom-dropdown.dragging-active .custom-dropdown-submenu {
+    display: none !important;
+}
+
+.custom-dropdown-submenu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.custom-dropdown-submenu-item:hover {
+    background: var(--bg-secondary);
+}
+
+.custom-dropdown-submenu-add {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    border-top: 1px solid var(--border-color);
+    margin-top: 4px;
+}
+
+.custom-dropdown-submenu-add:hover {
+    background: var(--bg-secondary);
 }
 
 

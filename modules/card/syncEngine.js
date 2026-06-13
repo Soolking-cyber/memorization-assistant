@@ -78,6 +78,7 @@ export async function loadData() {
                 const cached = cardsMap.get(card.id);
                 if (!cached || 
                     cached.type !== card.type ||
+                    cached.subcategory !== card.subcategory ||
                     cached.front !== card.front ||
                     cached.back !== card.back ||
                     cached.image_front_url !== card.image_front_url ||

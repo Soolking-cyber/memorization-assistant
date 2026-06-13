@@ -1,7 +1,7 @@
 import { state } from '../state.js';
 import { supabase } from '../supabaseClient.js';
 import { playUISound } from '../sound.js';
-import { updateDashboard, getSelectedTypes, getReviewsCountToday } from '../dashboard.js';
+import { updateDashboard, getSelectedTypes, getReviewsCountToday, cardMatchesFilters } from '../dashboard.js';
 import { switchView } from '../navigation.js';
 import { loadData } from '../flashcardCrud.js';
 import { renderCurrentCard } from '../practice.js';
@@ -33,12 +33,12 @@ export function startForcedPractice(count) {
 export async function startPractice(forceStudyAhead = false) {
     state.isForcedMode = false;
     const now = Date.now();
-    const activeTypes = getSelectedTypes('practice-type-select');
+    getSelectedTypes('practice-type-select');
     let cardsToReview = [];
     if (forceStudyAhead) {
-        cardsToReview = state.cards.filter(c => activeTypes.includes(c.type));
+        cardsToReview = state.cards.filter(c => cardMatchesFilters(c, 'practice-type-select'));
     } else {
-        cardsToReview = state.cards.filter(c => c.nextReview <= now && activeTypes.includes(c.type))
+        cardsToReview = state.cards.filter(c => c.nextReview <= now && cardMatchesFilters(c, 'practice-type-select'))
                            .sort((a, b) => a.nextReview - b.nextReview);
     }
                        

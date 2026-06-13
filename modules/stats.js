@@ -424,6 +424,12 @@ export async function renderStatistics() {
                     if (select) {
                         select.selectedValues = type === 'mixed' ? [...select.options].map(o => o.value).filter(v => v !== 'add_new') : [type];
                         select.value = type === 'mixed' ? 'mixed' : type;
+                        select.selectedSubcategories = {};
+                        if (state.cardTypesConfig) {
+                            state.cardTypesConfig.forEach(tcConfig => {
+                                select.selectedSubcategories[tcConfig.name] = [...tcConfig.subcategories];
+                            });
+                        }
                         buildCustomDropdownUI('practice-type-select');
                         updateDashboard();
                         if (dueType > 0) {
@@ -534,6 +540,12 @@ export function renderCategoryCards() {
                 if (select) {
                     select.selectedValues = type === 'mixed' ? [...select.options].map(o => o.value).filter(v => v !== 'add_new') : [type];
                     select.value = type === 'mixed' ? 'mixed' : type;
+                    select.selectedSubcategories = {};
+                    if (state.cardTypesConfig) {
+                        state.cardTypesConfig.forEach(tcConfig => {
+                            select.selectedSubcategories[tcConfig.name] = [...tcConfig.subcategories];
+                        });
+                    }
                     buildCustomDropdownUI('practice-type-select');
                     updateDashboard();
                     if (due > 0) {

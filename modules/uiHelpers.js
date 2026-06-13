@@ -1,5 +1,6 @@
 import { playUISound } from './sound.js';
 import { escapeHtml } from './utils.js';
+import { state } from './state.js';
 
 export const fontSizeMap = {
     small: { keyword: '0.7rem', exp: '0.65rem' },
@@ -209,6 +210,7 @@ export function buildCustomDropdownUI(selectId) {
     select.style.display = 'none';
     
     const isMultiSelect = selectId === 'practice-type-select' || selectId === 'manage-type-select' || selectId === 'vocab-word-types' || selectId === 'edit-vocab-word-types' || selectId === 'vocab-type' || selectId === 'edit-vocab-type';
+    const isCardTypeDropdown = selectId === 'card-type' || selectId === 'edit-card-type' || selectId === 'practice-type-select' || selectId === 'manage-type-select';
     
     let customWrapper = document.getElementById(`custom-dropdown-${selectId}`);
     if (!customWrapper) {
@@ -232,6 +234,15 @@ export function buildCustomDropdownUI(selectId) {
             select.selectedValues = options;
         }
     }
+
+    if (isCardTypeDropdown && isMultiSelect && !select.selectedSubcategories) {
+        select.selectedSubcategories = {};
+        if (state.cardTypesConfig) {
+            state.cardTypesConfig.forEach(tcConfig => {
+                select.selectedSubcategories[tcConfig.name] = [...tcConfig.subcategories];
+            });
+        }
+    }
     
     customWrapper.innerHTML = '';
     
@@ -252,22 +263,64 @@ export function buildCustomDropdownUI(selectId) {
                 triggerText.textContent = `${select.selectedValues.length} Types Selected`;
             }
         } else {
+            // Card Type Multi-Select
             const activeIndividualTypes = select.selectedValues.filter(v => v !== 'mixed');
             const totalTypes = [...select.options].filter(o => o.value !== 'mixed' && o.value !== 'add_new').length;
             
-            if (select.selectedValues.includes('mixed') || activeIndividualTypes.length === totalTypes) {
+            // Check if any subcategory filtering is active
+            let hasSubcategoryFiltering = false;
+            if (select.selectedSubcategories && state.cardTypesConfig) {
+                hasSubcategoryFiltering = Object.keys(select.selectedSubcategories).some(type => {
+                    const selected = select.selectedSubcategories[type] || [];
+                    const config = state.cardTypesConfig.find(tc => tc.name === type);
+                    return config && config.subcategories.length > 0 && selected.length < config.subcategories.length;
+                });
+            }
+
+            if ((select.selectedValues.includes('mixed') || activeIndividualTypes.length === totalTypes) && !hasSubcategoryFiltering) {
                 triggerText.textContent = 'All Types (Mixed)';
             } else if (activeIndividualTypes.length === 0) {
                 triggerText.textContent = 'None Selected';
-            } else if (activeIndividualTypes.length <= 2) {
-                triggerText.textContent = activeIndividualTypes.join(', ');
             } else {
-                triggerText.textContent = `${activeIndividualTypes.length} Types Selected`;
+                const parts = [];
+                activeIndividualTypes.forEach(type => {
+                    const config = state.cardTypesConfig ? state.cardTypesConfig.find(tc => tc.name === type) : null;
+                    const selectedSubs = select.selectedSubcategories ? select.selectedSubcategories[type] : null;
+                    if (config && config.subcategories.length > 0 && selectedSubs) {
+                        if (selectedSubs.length === config.subcategories.length) {
+                            parts.push(type);
+                        } else if (selectedSubs.length > 0) {
+                            parts.push(`${type} (${selectedSubs.join(', ')})`);
+                        }
+                    } else {
+                        parts.push(type);
+                    }
+                });
+                if (parts.length === 0) {
+                    triggerText.textContent = 'None Selected';
+                } else {
+                    const summary = parts.join(', ');
+                    triggerText.textContent = summary.length > 25 ? `${parts.length} Types Selected` : summary;
+                }
             }
         }
     } else {
+        // Single Select
         const activeOpt = [...select.options].find(o => o.value === select.value) || select.options[0];
-        triggerText.textContent = activeOpt ? activeOpt.textContent : '';
+        if (activeOpt) {
+            if (isCardTypeDropdown && select.selectedSubcategory) {
+                const config = state.cardTypesConfig ? state.cardTypesConfig.find(tc => tc.name === activeOpt.value) : null;
+                if (config && config.subcategories.includes(select.selectedSubcategory)) {
+                    triggerText.textContent = `${activeOpt.textContent} (${select.selectedSubcategory})`;
+                } else {
+                    triggerText.textContent = activeOpt.textContent;
+                }
+            } else {
+                triggerText.textContent = activeOpt.textContent;
+            }
+        } else {
+            triggerText.textContent = '';
+        }
     }
     
     const arrowSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -294,6 +347,46 @@ export function buildCustomDropdownUI(selectId) {
         item.className = 'custom-dropdown-item';
         item.dataset.value = opt.value;
         
+        // Setup draggability for card types dropdowns
+        const canDrag = isCardTypeDropdown && opt.value !== 'mixed' && opt.value !== 'add_new';
+        if (canDrag) {
+            item.draggable = true;
+            
+            const grip = document.createElement('span');
+            grip.className = 'custom-dropdown-grip';
+            grip.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><circle cx="9" cy="5" r="1.5"></circle><circle cx="9" cy="12" r="1.5"></circle><circle cx="9" cy="19" r="1.5"></circle><circle cx="15" cy="5" r="1.5"></circle><circle cx="15" cy="12" r="1.5"></circle><circle cx="15" cy="19" r="1.5"></circle></svg>';
+            item.appendChild(grip);
+            
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', opt.value);
+                item.classList.add('dragging');
+                customWrapper.classList.add('dragging-active');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+                customWrapper.classList.remove('dragging-active');
+            });
+            item.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const draggingItem = menu.querySelector('.dragging');
+                if (draggingItem && draggingItem !== item) {
+                    const rect = item.getBoundingClientRect();
+                    const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+                    menu.insertBefore(draggingItem, next ? item.nextSibling : item);
+                }
+            });
+            item.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const newOrder = [...menu.querySelectorAll('.custom-dropdown-item')]
+                    .map(el => el.dataset.value)
+                    .filter(val => val && val !== 'add_new' && val !== 'mixed');
+                
+                document.dispatchEvent(new CustomEvent('cardTypesReordered', { detail: { newOrder } }));
+            });
+        }
+        
+        // Multi-select or single-select specific rendering
         if (isMultiSelect) {
             const isChecked = select.selectedValues.includes(opt.value);
             
@@ -312,6 +405,7 @@ export function buildCustomDropdownUI(selectId) {
                 item.classList.add('active');
             }
             
+            // Click listener for main item (multi-select)
             item.addEventListener('click', (e) => {
                 e.stopPropagation();
                 playUISound('click');
@@ -327,29 +421,58 @@ export function buildCustomDropdownUI(selectId) {
                         o.selected = select.selectedValues.includes(o.value);
                     });
                 } else {
+                    // Card Type multi-select
+                    const tcConfig = state.cardTypesConfig ? state.cardTypesConfig.find(tc => tc.name === opt.value) : null;
                     if (opt.value === 'mixed') {
                         const wasChecked = select.selectedValues.includes('mixed');
                         if (wasChecked) {
                             select.selectedValues = [];
+                            if (select.selectedSubcategories) {
+                                Object.keys(select.selectedSubcategories).forEach(type => {
+                                    select.selectedSubcategories[type] = [];
+                                });
+                            }
                         } else {
                             select.selectedValues = [...select.options]
                                 .map(o => o.value)
                                 .filter(v => v !== 'add_new');
+                            if (select.selectedSubcategories && state.cardTypesConfig) {
+                                state.cardTypesConfig.forEach(tcConfig => {
+                                    select.selectedSubcategories[tcConfig.name] = [...tcConfig.subcategories];
+                                });
+                            }
                         }
                     } else {
                         const isChecked = select.selectedValues.includes(opt.value);
                         if (isChecked) {
                             select.selectedValues = select.selectedValues.filter(v => v !== opt.value);
                             select.selectedValues = select.selectedValues.filter(v => v !== 'mixed');
+                            if (select.selectedSubcategories) {
+                                select.selectedSubcategories[opt.value] = [];
+                            }
                         } else {
                             select.selectedValues.push(opt.value);
+                            if (select.selectedSubcategories && tcConfig) {
+                                select.selectedSubcategories[opt.value] = [...tcConfig.subcategories];
+                            }
                             
                             const allIndividualTypes = [...select.options]
                                 .map(o => o.value)
                                 .filter(v => v !== 'mixed' && v !== 'add_new');
                             
                             const allChecked = allIndividualTypes.every(v => select.selectedValues.includes(v));
-                            if (allChecked) {
+                            
+                            // Check if subcategory filtering is active
+                            let hasSubcategoryFiltering = false;
+                            if (select.selectedSubcategories && state.cardTypesConfig) {
+                                hasSubcategoryFiltering = Object.keys(select.selectedSubcategories).some(type => {
+                                    const selected = select.selectedSubcategories[type] || [];
+                                    const config = state.cardTypesConfig.find(tc => tc.name === type);
+                                    return config && config.subcategories.length > 0 && selected.length < config.subcategories.length;
+                                });
+                            }
+
+                            if (allChecked && !hasSubcategoryFiltering) {
                                 select.selectedValues.push('mixed');
                             }
                         }
@@ -369,7 +492,10 @@ export function buildCustomDropdownUI(selectId) {
             });
             
         } else {
-            item.textContent = opt.textContent;
+            // Single select
+            const textSpan = document.createElement('span');
+            textSpan.textContent = opt.textContent;
+            item.appendChild(textSpan);
             
             if (opt.value === select.value) {
                 item.classList.add('active');
@@ -383,18 +509,161 @@ export function buildCustomDropdownUI(selectId) {
                 check.setAttribute('stroke-linejoin', 'round');
                 check.style.width = '14px';
                 check.style.height = '14px';
+                check.style.marginLeft = '8px';
                 check.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
                 item.appendChild(check);
             }
             
+            // Click listener for main item (single-select)
             item.addEventListener('click', (e) => {
                 e.stopPropagation();
                 playUISound('click');
                 select.value = opt.value;
+                if (isCardTypeDropdown) {
+                    select.selectedSubcategory = null;
+                }
                 select.dispatchEvent(new Event('change', { bubbles: true }));
                 buildCustomDropdownUI(selectId);
                 customWrapper.classList.remove('open');
             });
+        }
+        
+        // Setup Hover Subcategory Submenu
+        if (isCardTypeDropdown && opt.value !== 'mixed' && opt.value !== 'add_new') {
+            const tcConfig = state.cardTypesConfig ? state.cardTypesConfig.find(tc => tc.name === opt.value) : null;
+            if (tcConfig) {
+                // Add tiny indicator arrow to show submenu exists
+                const rightArrow = document.createElement('span');
+                rightArrow.style.marginLeft = 'auto';
+                rightArrow.style.fontSize = '0.75rem';
+                rightArrow.style.opacity = '0.5';
+                rightArrow.innerHTML = '&#9656;';
+                item.appendChild(rightArrow);
+                
+                const submenu = document.createElement('div');
+                submenu.className = 'custom-dropdown-submenu';
+                
+                // Position adjustment on hover to avoid clipping
+                item.addEventListener('mouseenter', () => {
+                    const rect = item.getBoundingClientRect();
+                    const submenuWidth = 200;
+                    if (rect.right + submenuWidth > window.innerWidth) {
+                        submenu.style.left = 'auto';
+                        submenu.style.right = '100%';
+                    } else {
+                        submenu.style.left = '100%';
+                        submenu.style.right = 'auto';
+                    }
+                });
+                
+                // Render Subcategories
+                tcConfig.subcategories.forEach(sub => {
+                    const submenuItem = document.createElement('div');
+                    submenuItem.className = 'custom-dropdown-submenu-item';
+                    
+                    const isSubChecked = isMultiSelect
+                        ? (select.selectedSubcategories[opt.value] && select.selectedSubcategories[opt.value].includes(sub))
+                        : (select.selectedSubcategory === sub);
+                    
+                    const subCheckbox = document.createElement('span');
+                    subCheckbox.className = `custom-dropdown-checkbox ${isSubChecked ? 'checked' : ''}`;
+                    if (isSubChecked) {
+                        subCheckbox.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="width:11px; height:11px;"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                    }
+                    
+                    const subText = document.createElement('span');
+                    subText.textContent = sub;
+                    
+                    submenuItem.appendChild(subCheckbox);
+                    submenuItem.appendChild(subText);
+                    
+                    submenuItem.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        playUISound('click');
+                        
+                        if (isMultiSelect) {
+                            if (!select.selectedSubcategories[opt.value]) {
+                                select.selectedSubcategories[opt.value] = [];
+                            }
+                            const isAlreadyChecked = select.selectedSubcategories[opt.value].includes(sub);
+                            if (isAlreadyChecked) {
+                                select.selectedSubcategories[opt.value] = select.selectedSubcategories[opt.value].filter(v => v !== sub);
+                            } else {
+                                select.selectedSubcategories[opt.value].push(sub);
+                            }
+                            
+                            // Adjust parent type checkbox selection
+                            const hasAnyChecked = select.selectedSubcategories[opt.value].length > 0;
+                            const isParentChecked = select.selectedValues.includes(opt.value);
+                            if (hasAnyChecked && !isParentChecked) {
+                                select.selectedValues.push(opt.value);
+                            } else if (!hasAnyChecked && isParentChecked) {
+                                select.selectedValues = select.selectedValues.filter(v => v !== opt.value);
+                            }
+                            
+                            // Re-calculate select.value
+                            if (select.selectedValues.includes('mixed')) {
+                                select.value = 'mixed';
+                            } else if (select.selectedValues.length > 0) {
+                                select.value = select.selectedValues[0];
+                            } else {
+                                select.value = '';
+                            }
+                        } else {
+                            // Single Select
+                            if (select.selectedSubcategory === sub) {
+                                select.selectedSubcategory = null;
+                            } else {
+                                select.selectedSubcategory = sub;
+                                select.value = opt.value;
+                            }
+                            customWrapper.classList.remove('open');
+                        }
+                        
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                        buildCustomDropdownUI(selectId);
+                    });
+                    
+                    submenu.appendChild(submenuItem);
+                });
+                
+                // Add Subcategory Prompt Trigger
+                const addSubBtn = document.createElement('div');
+                addSubBtn.className = 'custom-dropdown-submenu-add';
+                addSubBtn.innerHTML = '<span>+ Add Subcategory...</span>';
+                addSubBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    playUISound('click');
+                    
+                    const newSub = await window.prompt(`Enter new subcategory for ${opt.value}:`);
+                    if (newSub && newSub.trim() !== '') {
+                        const cleanSub = newSub.trim();
+                        if (!tcConfig.subcategories.includes(cleanSub)) {
+                            tcConfig.subcategories.push(cleanSub);
+                            localStorage.setItem('cardTypesConfig', JSON.stringify(state.cardTypesConfig));
+                            
+                            // Auto check new subcategory
+                            if (isMultiSelect) {
+                                if (!select.selectedSubcategories[opt.value]) {
+                                    select.selectedSubcategories[opt.value] = [];
+                                }
+                                select.selectedSubcategories[opt.value].push(cleanSub);
+                                if (!select.selectedValues.includes(opt.value)) {
+                                    select.selectedValues.push(opt.value);
+                                }
+                            } else {
+                                select.selectedSubcategory = cleanSub;
+                                select.value = opt.value;
+                            }
+                            
+                            select.dispatchEvent(new Event('change', { bubbles: true }));
+                            buildCustomDropdownUI(selectId);
+                        }
+                    }
+                });
+                submenu.appendChild(addSubBtn);
+                item.appendChild(submenu);
+            }
         }
         
         menu.appendChild(item);

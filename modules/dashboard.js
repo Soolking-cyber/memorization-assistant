@@ -139,6 +139,27 @@ export function updateTypeDatalists() {
                 });
             }
         }
+
+        const isCardTypeDropdown = selectId === 'card-type' || selectId === 'edit-card-type' || selectId === 'practice-type-select' || selectId === 'manage-type-select';
+        if (isCardTypeDropdown) {
+            if (!select.selectedSubcategories) {
+                select.selectedSubcategories = {};
+            }
+            if (state.cardTypesConfig) {
+                state.cardTypesConfig.forEach(tcConfig => {
+                    if (!select.selectedSubcategories[tcConfig.name]) {
+                        select.selectedSubcategories[tcConfig.name] = [...tcConfig.subcategories];
+                    } else {
+                        select.selectedSubcategories[tcConfig.name] = select.selectedSubcategories[tcConfig.name].filter(sub => tcConfig.subcategories.includes(sub));
+                        tcConfig.subcategories.forEach(sub => {
+                            if (!select.selectedSubcategories[tcConfig.name].includes(sub)) {
+                                select.selectedSubcategories[tcConfig.name].push(sub);
+                            }
+                        });
+                    }
+                });
+            }
+        }
         
         buildCustomDropdownUI(selectId);
     };
@@ -163,6 +184,33 @@ export function getSelectedTypes(selectId) {
     return select.selectedValues.filter(v => v !== 'mixed' && v !== 'add_new');
 }
 
+export function cardMatchesFilters(card, selectId) {
+    const select = document.getElementById(selectId);
+    if (!select) return true;
+    
+    const activeTypes = select.selectedValues || [];
+    if (activeTypes.length === 0) return false;
+    
+    if (!activeTypes.includes(card.type)) return false;
+    
+    if (select.selectedSubcategories && state.cardTypesConfig) {
+        const config = state.cardTypesConfig.find(tc => tc.name === card.type);
+        if (config && config.subcategories.length > 0) {
+            const selectedSubs = select.selectedSubcategories[card.type] || [];
+            const cardSub = card.subcategory || '';
+            return selectedSubs.includes(cardSub);
+        }
+    }
+    
+    return true;
+}
+
+document.addEventListener('cardTypesReordered', (e) => {
+    state.customTypes = e.detail.newOrder;
+    updateTypeDatalists();
+    updateDashboard();
+});
+
 export async function updateDashboard() {
     updateTypeDatalists();
     renderCategoryTabs();
@@ -172,9 +220,9 @@ export async function updateDashboard() {
     const btnPractice = document.getElementById('btn-practice');
     const statusMsg = document.getElementById('practice-status-msg');
 
-    const activeTypes = getSelectedTypes('practice-type-select');
+    getSelectedTypes('practice-type-select');
 
-    const filteredCards = state.cards.filter(c => activeTypes.includes(c.type));
+    const filteredCards = state.cards.filter(c => cardMatchesFilters(c, 'practice-type-select'));
     const total = filteredCards.length;
     const now = Date.now();
     const dueCards = filteredCards.filter(c => c.nextReview <= now);

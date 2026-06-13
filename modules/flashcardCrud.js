@@ -2,7 +2,7 @@ import { state, isVocabularyType } from './state.js';
 import { supabase } from './supabaseClient.js';
 import { ICONS } from './icons.js';
 import { dbSet } from './db.js';
-import { getSelectedTypes } from './dashboard.js';
+import { getSelectedTypes, cardMatchesFilters } from './dashboard.js';
 import { escapeHtml, parseVocabularyCard } from './utils.js';
 
 import {
@@ -65,8 +65,8 @@ export function renderManageView() {
         return;
     }
 
-    const activeTypes = getSelectedTypes('manage-type-select');
-    let filteredCards = state.cards.filter(c => activeTypes.includes(c.type));
+    getSelectedTypes('manage-type-select');
+    let filteredCards = state.cards.filter(c => cardMatchesFilters(c, 'manage-type-select'));
 
     const searchInput = document.getElementById('manage-search-input');
     const searchQuery = searchInput ? searchInput.value.trim().toLowerCase() : '';

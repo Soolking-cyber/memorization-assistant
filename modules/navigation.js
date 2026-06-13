@@ -160,6 +160,12 @@ export async function switchView(viewId) {
         if (select) {
             select.selectedValues = [...select.options].map(o => o.value).filter(v => v !== 'add_new');
             select.value = 'mixed';
+            select.selectedSubcategories = {};
+            if (state.cardTypesConfig) {
+                state.cardTypesConfig.forEach(tcConfig => {
+                    select.selectedSubcategories[tcConfig.name] = [...tcConfig.subcategories];
+                });
+            }
             buildCustomDropdownUI('practice-type-select');
         }
         

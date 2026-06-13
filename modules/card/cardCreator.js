@@ -170,9 +170,12 @@ export async function handleCreateCard(e) {
         }
     }
 
+    const subcategory = document.getElementById('card-type') ? document.getElementById('card-type').selectedSubcategory : null;
+
     const newCard = {
         user_id: state.userSession.user.id,
         type: activeType,
+        subcategory: subcategory,
         front: frontText,
         back: backText,
         image_front_url: image_front_url,
@@ -205,6 +208,7 @@ export async function handleCreateCard(e) {
     if (selectEl) {
         const nextType = [...selectEl.options].some(o => o.value === activeType) ? activeType : 'Vocabulary';
         selectEl.value = nextType;
+        selectEl.selectedSubcategory = null;
         buildCustomDropdownUI('card-type');
         selectEl.dispatchEvent(new Event('change', { bubbles: true }));
     }
@@ -512,6 +516,10 @@ export function openEditView(cardId) {
         renderEditSentencesList();
     }
 
+    const editSelect = document.getElementById('edit-card-type');
+    if (editSelect) {
+        editSelect.selectedSubcategory = card.subcategory || null;
+    }
     buildCustomDropdownUI('edit-card-type');
     switchView('edit');
 }
@@ -723,10 +731,13 @@ export async function handleEditCardSubmit(e) {
         }
     }
 
+    const subcategory = document.getElementById('edit-card-type') ? document.getElementById('edit-card-type').selectedSubcategory : null;
+
     const { data, error } = await supabase
         .from('flashcards')
         .update({
             type: typeText,
+            subcategory: subcategory,
             front: frontText,
             back: backText,
             image_front_url: new_image_front_url,
