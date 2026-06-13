@@ -416,6 +416,7 @@ h1, h2, h3, h4 {
     line-height: 1.5;
     outline: none;
     box-sizing: border-box;
+    height: 48px;
 }
 
 .input-field:focus { 

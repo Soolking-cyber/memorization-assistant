@@ -263,8 +263,8 @@ Sum of all cards' memory strength scores (max 100 per card).">
                                 <div class="input-group">
                                     <label>Word & Type</label>
                                     <div class="input-row" style="display: flex; gap: 12px; align-items: center; width: 100%;">
-                                        <input type="text" id="vocab-word" class="input-field" placeholder="Type word here..." style="flex: 8; width: 80%; box-sizing: border-box;">
-                                        <div style="flex: 2; width: 20%; box-sizing: border-box;">
+                                        <input type="text" id="vocab-word" class="input-field" placeholder="Type word here..." style="flex: 6; width: 60%; box-sizing: border-box; height: 48px;">
+                                        <div style="flex: 4; width: 40%; box-sizing: border-box;">
                                             <select id="vocab-type" multiple style="width: 100%; min-height: 48px;">
                                                 <option value="">Select Type</option>
                                                 <option value="Noun">Noun</option>
@@ -284,7 +284,7 @@ Sum of all cards' memory strength scores (max 100 per card).">
                                     <label for="vocab-meaning">Description / Meaning</label>
                                     <textarea id="vocab-meaning" placeholder="Meaning of the word..."></textarea>
                                     <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
-                                        <button type="button" id="btn-vocab-add-meaning" class="btn secondary" style="min-height: 38px; font-size: 0.9rem;" title="Fetch definition from dictionary">Add Meaning</button>
+                                        <button type="button" id="btn-vocab-add-meaning" class="btn secondary" style="min-height: 48px; font-size: 0.9rem;" title="Fetch definition from dictionary">Add Meaning</button>
                                     </div>
                                     <div class="file-input-container">
                                         <input type="file" id="vocab-front-image" class="file-input-hidden" accept="image/*">
@@ -306,7 +306,7 @@ Sum of all cards' memory strength scores (max 100 per card).">
                                 </div>
                                 <div class="input-row">
                                     <input type="text" id="create-new-sentence" class="input-field" placeholder="e.g. The cells contain Mitochondria.">
-                                    <button type="button" id="btn-create-add-sentence" class="btn">+ Add</button>
+                                    <button type="button" id="btn-create-add-sentence" class="btn" style="height: 48px;">+ Add</button>
                                 </div>
                                 <span id="create-sentence-error" style="color: var(--danger); font-size: 0.8rem; margin-top: 6px; display: none;"></span>
                             </div>
@@ -445,8 +445,8 @@ Sum of all cards' memory strength scores (max 100 per card).">
                                 <div class="input-group">
                                     <label>Word & Type</label>
                                     <div class="input-row" style="display: flex; gap: 12px; align-items: center; width: 100%;">
-                                        <input type="text" id="edit-vocab-word" class="input-field" placeholder="Type word here..." style="flex: 8; width: 80%; box-sizing: border-box;">
-                                        <div style="flex: 2; width: 20%; box-sizing: border-box;">
+                                        <input type="text" id="edit-vocab-word" class="input-field" placeholder="Type word here..." style="flex: 6; width: 60%; box-sizing: border-box; height: 48px;">
+                                        <div style="flex: 4; width: 40%; box-sizing: border-box;">
                                             <select id="edit-vocab-type" multiple style="width: 100%; min-height: 48px;">
                                                 <option value="">Select Type</option>
                                                 <option value="Noun">Noun</option>
@@ -466,7 +466,7 @@ Sum of all cards' memory strength scores (max 100 per card).">
                                     <label for="edit-vocab-meaning">Description / Meaning</label>
                                     <textarea id="edit-vocab-meaning" placeholder="Meaning of the word..."></textarea>
                                     <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
-                                        <button type="button" id="btn-edit-vocab-add-meaning" class="btn secondary" style="min-height: 38px; font-size: 0.9rem;" title="Fetch definition from dictionary">Add Meaning</button>
+                                        <button type="button" id="btn-edit-vocab-add-meaning" class="btn secondary" style="min-height: 48px; font-size: 0.9rem;" title="Fetch definition from dictionary">Add Meaning</button>
                                     </div>
                                     
                                     <!-- Edit Vocab Front Image Preview and Upload -->
@@ -500,7 +500,7 @@ Sum of all cards' memory strength scores (max 100 per card).">
                                 </div>
                                 <div class="input-row">
                                     <input type="text" id="edit-new-sentence" class="input-field" placeholder="e.g. The cells contain Mitochondria.">
-                                    <button type="button" id="btn-edit-add-sentence" class="btn">+ Add</button>
+                                    <button type="button" id="btn-edit-add-sentence" class="btn" style="height: 48px;">+ Add</button>
                                 </div>
                                 <span id="edit-sentence-error" style="color: var(--danger); font-size: 0.8rem; margin-top: 6px; display: none;"></span>
                             </div>
