@@ -970,7 +970,7 @@ function removeWordFromDefinition(definition, word) {
     return result;
 }
 
-export async function fetchDictionaryDefinition(word) {
+export async function fetchDictionaryDefinition(word, subcategory = null) {
     if (!word || word.trim() === '') {
         await window.alert("Please type a word first!");
         return null;
@@ -978,7 +978,67 @@ export async function fetchDictionaryDefinition(word) {
     
     const cleanWord = word.trim().toLowerCase();
 
-    // 1. Try Supabase database dictionary (Webster's Dictionary) first
+    // 1. Try Vietnamese Translation if subcategory is Vietnamese
+    if (subcategory && subcategory.toLowerCase() === 'vietnamese') {
+        try {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=vi&tl=en&dt=t&dt=bd&q=${encodeURIComponent(cleanWord)}`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Google Translate API returned status ${response.status}`);
+            }
+            const data = await response.json();
+            if (data && data[0] && data[0][0] && data[0][0][0]) {
+                const mainTranslation = data[0][0][0];
+                const partsOfSpeech = [];
+                let definitionText = '';
+                let mainTranslationFound = false;
+                
+                if (data[1] && Array.isArray(data[1])) {
+                    data[1].forEach(entry => {
+                        const pos = entry[0];
+                        const entryWord = entry[3];
+                        
+                        // Ignore entries that match a different base word (e.g. ignoring accents)
+                        if (entryWord && entryWord.normalize('NFC').toLowerCase() !== cleanWord.normalize('NFC')) {
+                            return;
+                        }
+                        
+                        if (pos) {
+                            const normalizedPos = pos.charAt(0).toUpperCase() + pos.slice(1).toLowerCase();
+                            if (!partsOfSpeech.includes(normalizedPos)) {
+                                partsOfSpeech.push(normalizedPos);
+                            }
+                            const alternatives = entry[1];
+                            if (alternatives && Array.isArray(alternatives)) {
+                                if (alternatives.some(alt => alt.toLowerCase() === mainTranslation.toLowerCase())) {
+                                    mainTranslationFound = true;
+                                }
+                                definitionText += `(${normalizedPos})\n${alternatives.join(', ')}\n\n`;
+                            }
+                        }
+                    });
+                }
+                
+                if (definitionText.trim().length > 0) {
+                    if (!mainTranslationFound) {
+                        definitionText = `${mainTranslation}\n\n` + definitionText;
+                    }
+                } else {
+                    definitionText = mainTranslation;
+                }
+                
+                console.log(`Successfully fetched definition for "${cleanWord}" from Google Translation (VI->EN)`);
+                return {
+                    definition: definitionText.trim(),
+                    partsOfSpeech: partsOfSpeech
+                };
+            }
+        } catch (err) {
+            console.warn("Failed to fetch Vietnamese translation:", err);
+        }
+    }
+
+    // 2. Try Supabase database dictionary (Webster's Dictionary) first
     if (supabase) {
         try {
             const { data, error } = await supabase
@@ -1099,7 +1159,9 @@ export function initVocabFormListeners() {
             btnCreateAddMeaning.textContent = "Fetching...";
             btnCreateAddMeaning.disabled = true;
             
-            const res = await fetchDictionaryDefinition(word);
+            const cardTypeEl = document.getElementById('card-type');
+            const subcategory = cardTypeEl ? cardTypeEl.selectedSubcategory : null;
+            const res = await fetchDictionaryDefinition(word, subcategory);
             
             btnCreateAddMeaning.textContent = btnText;
             btnCreateAddMeaning.disabled = false;
@@ -1143,7 +1205,9 @@ export function initVocabFormListeners() {
             btnEditAddMeaning.textContent = "Fetching...";
             btnEditAddMeaning.disabled = true;
             
-            const res = await fetchDictionaryDefinition(word);
+            const editCardTypeEl = document.getElementById('edit-card-type');
+            const subcategory = editCardTypeEl ? editCardTypeEl.selectedSubcategory : null;
+            const res = await fetchDictionaryDefinition(word, subcategory);
             
             btnEditAddMeaning.textContent = btnText;
             btnEditAddMeaning.disabled = false;
