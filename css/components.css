@@ -865,9 +865,27 @@ svg.icon-svg path[fill="currentColor"] {
     cursor: not-allowed;
 }
 
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
 /* Premium Game Card Component */
 .game-card {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    align-items: flex-start;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
 }
 
 .game-card:hover {
@@ -882,7 +900,83 @@ svg.icon-svg path[fill="currentColor"] {
 }
 
 .game-card-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
     transition: transform 0.3s ease;
+}
+
+.game-card-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+
+.game-card > div:first-of-type {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.game-card h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.game-card p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.game-card .btn {
+    margin-top: 20px;
+    width: 100%;
+    font-weight: 700;
+}
+
+/* Recall Decks Theme Colors (Muted Blue-Gray) */
+[data-game-id="collection"] .game-card-badge {
+    background: rgba(79, 110, 138, 0.15);
+    color: #5c7890;
+}
+body.dark-theme [data-game-id="collection"] .game-card-badge {
+    background: rgba(125, 145, 161, 0.15);
+    color: #8fa3b3;
+}
+[data-game-id="collection"] .game-card-icon {
+    background: linear-gradient(135deg, #5c7080, #4a5a6a);
+}
+body.dark-theme [data-game-id="collection"] .game-card-icon {
+    background: linear-gradient(135deg, #7d91a1, #5e7080);
+}
+
+/* Word Scramble Theme Colors (Muted Gold) */
+[data-game-id="scramble"] .game-card-badge {
+    background: rgba(171, 147, 81, 0.15);
+    color: #ab9351;
+}
+body.dark-theme [data-game-id="scramble"] .game-card-badge {
+    background: rgba(184, 152, 88, 0.15);
+    color: #c7b06d;
+}
+[data-game-id="scramble"] .game-card-icon {
+    background: linear-gradient(135deg, #ab9351, #947f43);
+}
+body.dark-theme [data-game-id="scramble"] .game-card-icon {
+    background: linear-gradient(135deg, #b89858, #947b47);
 }
 
 /* Card Type Drag & Subcategory Submenu Styles */
