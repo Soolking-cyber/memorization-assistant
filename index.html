@@ -723,7 +723,7 @@ Sum of all cards' memory strength scores (max 100 per card).">
                                  <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">Recall Decks</h3>
                                  <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">Study vocabulary decks using spaced repetition. Reconstruct definitions and score yourself to build long-term memory.</p>
                              </div>
-                             <button class="btn primary" style="margin-top: 20px; width: 100%; font-weight: 700;">Start Recall</button>
+                             <button class="btn primary" onclick="switchView('collection'); event.stopPropagation();" style="margin-top: 20px; width: 100%; font-weight: 700;">Start Recall</button>
                          </div>
                          
                          <!-- Game 2: Word Scramble -->
@@ -738,7 +738,7 @@ Sum of all cards' memory strength scores (max 100 per card).">
                                  <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">Word Scramble</h3>
                                  <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">Test your spelling, speed, and recall. Drag or tap letter tiles to reassemble scrambled words before the time runs out.</p>
                              </div>
-                             <button class="btn primary" style="margin-top: 20px; width: 100%; font-weight: 700; background: var(--warning); border-color: var(--warning);">Start Scramble</button>
+                             <button class="btn primary" onclick="switchView('scramble'); event.stopPropagation();" style="margin-top: 20px; width: 100%; font-weight: 700; background: var(--warning); border-color: var(--warning);">Start Scramble</button>
                          </div>
                      </div>
                  </div>
