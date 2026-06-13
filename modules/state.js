@@ -1,17 +1,35 @@
 import { safeJsonParse } from './utils.js';
 
 let cardTypesConfig = safeJsonParse(localStorage.getItem('cardTypesConfig'), null);
+if (cardTypesConfig && Array.isArray(cardTypesConfig)) {
+    // Filter out 'Vietnamese Vocabulary' from existing config
+    const cleanConfig = cardTypesConfig.filter(tc => tc && tc.name && tc.name.toLowerCase() !== 'vietnamese vocabulary');
+    if (cleanConfig.length !== cardTypesConfig.length) {
+        cardTypesConfig = cleanConfig;
+        localStorage.setItem('cardTypesConfig', JSON.stringify(cardTypesConfig));
+    }
+}
+
+let customTypes = safeJsonParse(localStorage.getItem('customTypes'), null);
+if (customTypes && Array.isArray(customTypes)) {
+    const cleanTypes = customTypes.filter(t => typeof t === 'string' && t.toLowerCase() !== 'vietnamese vocabulary');
+    if (cleanTypes.length !== customTypes.length) {
+        customTypes = cleanTypes;
+        localStorage.setItem('customTypes', JSON.stringify(customTypes));
+    }
+}
+
 if (!cardTypesConfig) {
-    let customTypes = safeJsonParse(localStorage.getItem('customTypes'), ['Vocabulary', 'Memory Map', 'Image Card', 'Unknown']);
-    if (!Array.isArray(customTypes)) customTypes = ['Vocabulary', 'Memory Map', 'Image Card', 'Unknown'];
-    customTypes = customTypes.filter(t => typeof t === 'string' && t !== 'vocabulary' && t !== 'mixed');
-    if (!customTypes.includes('Vocabulary')) customTypes.push('Vocabulary');
-    if (!customTypes.includes('Memory Map')) customTypes.push('Memory Map');
-    if (!customTypes.includes('Image Card')) customTypes.push('Image Card');
-    if (!customTypes.includes('Zettelkasten')) customTypes.push('Zettelkasten');
-    if (!customTypes.includes('Unknown')) customTypes.push('Unknown');
+    let initialTypes = customTypes || ['Vocabulary', 'Memory Map', 'Image Card', 'Unknown'];
+    if (!Array.isArray(initialTypes)) initialTypes = ['Vocabulary', 'Memory Map', 'Image Card', 'Unknown'];
+    initialTypes = initialTypes.filter(t => typeof t === 'string' && t !== 'vocabulary' && t !== 'mixed' && t.toLowerCase() !== 'vietnamese vocabulary');
+    if (!initialTypes.includes('Vocabulary')) initialTypes.push('Vocabulary');
+    if (!initialTypes.includes('Memory Map')) initialTypes.push('Memory Map');
+    if (!initialTypes.includes('Image Card')) initialTypes.push('Image Card');
+    if (!initialTypes.includes('Zettelkasten')) initialTypes.push('Zettelkasten');
+    if (!initialTypes.includes('Unknown')) initialTypes.push('Unknown');
     
-    cardTypesConfig = customTypes.map(t => {
+    cardTypesConfig = initialTypes.map(t => {
         let subs = [];
         if (t === 'Vocabulary') {
             subs = ['English', 'Vietnamese'];

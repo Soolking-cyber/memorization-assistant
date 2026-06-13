@@ -328,7 +328,7 @@ export async function removeType(typeToRemove) {
 export async function handleTypeSelectChange(e) {
     let val = e.target.value;
     if (val === 'add_new') {
-        const newType = await window.prompt("Enter new memory type (e.g., 'Vietnamese Vocabulary' to treat it as a vocabulary set):");
+        const newType = await window.prompt("Enter new memory type (e.g., 'Spanish Vocabulary' to treat it as a vocabulary set):");
         if (newType && newType.trim() !== '') {
             const cleanType = newType.trim();
             if (!state.customTypes.includes(cleanType)) {
