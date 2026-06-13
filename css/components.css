@@ -920,7 +920,7 @@ svg.icon-svg path[fill="currentColor"] {
     border-radius: 12px;
 }
 
-.game-card > div:first-of-type {
+.game-card-content {
     display: flex;
     flex-direction: column;
     gap: 12px;
