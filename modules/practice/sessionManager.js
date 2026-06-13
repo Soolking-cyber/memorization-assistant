@@ -1,7 +1,7 @@
 import { state } from '../state.js';
 import { supabase } from '../supabaseClient.js';
 import { playUISound } from '../sound.js';
-import { updateDashboard, getSelectedTypes } from '../dashboard.js';
+import { updateDashboard, getSelectedTypes, getReviewsCountToday } from '../dashboard.js';
 import { switchView } from '../navigation.js';
 import { loadData } from '../flashcardCrud.js';
 import { renderCurrentCard } from '../practice.js';
@@ -30,17 +30,34 @@ export function startForcedPractice(count) {
     renderCurrentCard();
 }
 
-export function startPractice(forceStudyAhead = false) {
+export async function startPractice(forceStudyAhead = false) {
     state.isForcedMode = false;
     const now = Date.now();
     const activeTypes = getSelectedTypes('practice-type-select');
+    let cardsToReview = [];
     if (forceStudyAhead) {
-        state.reviewQueue = state.cards.filter(c => activeTypes.includes(c.type));
+        cardsToReview = state.cards.filter(c => activeTypes.includes(c.type));
     } else {
-        state.reviewQueue = state.cards.filter(c => c.nextReview <= now && activeTypes.includes(c.type))
+        cardsToReview = state.cards.filter(c => c.nextReview <= now && activeTypes.includes(c.type))
                            .sort((a, b) => a.nextReview - b.nextReview);
     }
                        
+    if (cardsToReview.length === 0) return;
+    
+    // Apply daily limit
+    const limit = state.dailyReviewLimit || 0;
+    if (limit > 0 && !forceStudyAhead) {
+        const reviewsToday = await getReviewsCountToday();
+        const remaining = Math.max(0, limit - reviewsToday);
+        if (remaining <= 0) {
+            await window.alert(`You have already reached your daily limit of ${limit} reviews today!`);
+            return;
+        }
+        state.reviewQueue = cardsToReview.slice(0, remaining);
+    } else {
+        state.reviewQueue = cardsToReview;
+    }
+    
     if (state.reviewQueue.length === 0) return;
     
     state.currentReviewIndex = 0;

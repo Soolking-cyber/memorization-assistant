@@ -16,6 +16,7 @@ export const state = {
     cards: [],
     activeModules: activeModules,
     customTypes: customTypes,
+    dailyReviewLimit: 0,
 
     reviewQueue: [],
     currentReviewIndex: 0,

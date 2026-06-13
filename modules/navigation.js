@@ -309,6 +309,7 @@ export function initProfileMenu() {
                 
                 const savedUsername = localStorage.getItem(`profile_username_${userId}`) || '';
                 const savedAvatarUrl = localStorage.getItem(`profile_avatar_url_${userId}`) || '';
+                const savedDailyLimit = localStorage.getItem(`daily_review_limit_${userId}`) || '';
                 
                 const displayName = savedUsername || email;
                 const initial = displayName.charAt(0).toUpperCase();
@@ -316,11 +317,13 @@ export function initProfileMenu() {
                 const settingsAvatar = document.getElementById('settings-avatar');
                 const settingsEmail = document.getElementById('settings-email');
                 const settingsStatCount = document.getElementById('settings-stat-count');
+                const dailyLimitInput = document.getElementById('settings-daily-limit-input');
                 
                 if (settingsEmail) settingsEmail.textContent = savedUsername ? `${savedUsername} (${email})` : email;
                 if (settingsStatCount) settingsStatCount.textContent = state.cards.length;
                 
                 if (usernameInput) usernameInput.value = savedUsername;
+                if (dailyLimitInput) dailyLimitInput.value = savedDailyLimit ? parseInt(savedDailyLimit, 10) : '';
                 
                 if (settingsAvatar) {
                     if (savedAvatarUrl) {
@@ -496,19 +499,26 @@ export function initProfileMenu() {
             const userId = state.userSession.user.id;
             
             const username = usernameInput ? usernameInput.value.trim() : '';
+            const dailyLimitInput = document.getElementById('settings-daily-limit-input');
+            const dailyLimitVal = dailyLimitInput ? parseInt(dailyLimitInput.value, 10) : 0;
+            const dailyLimit = isNaN(dailyLimitVal) || dailyLimitVal < 0 ? 0 : dailyLimitVal;
             
             localStorage.setItem(`profile_username_${userId}`, username);
+            localStorage.setItem(`daily_review_limit_${userId}`, dailyLimit);
+            state.dailyReviewLimit = dailyLimit;
             
             if (supabase) {
                 supabase.auth.updateUser({
                     data: {
-                        display_name: username
+                        display_name: username,
+                        daily_review_limit: dailyLimit
                     }
                 }).then();
             }
             
             playUISound('success');
             updateUserAvatarBadge();
+            await updateDashboard();
             if (settingsModal) settingsModal.classList.add('hidden');
             await window.alert("Profile settings saved successfully!");
         });

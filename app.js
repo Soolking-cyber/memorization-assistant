@@ -56,10 +56,19 @@ async function checkAuth() {
         state.userSession = session;
         updateUserAvatarBadge();
         
-        if (session.user && session.user.user_metadata && session.user.user_metadata.active_modules) {
-            state.activeModules = session.user.user_metadata.active_modules;
-            localStorage.setItem('active_modules', JSON.stringify(state.activeModules));
-            await loadModules();
+        if (session.user && session.user.user_metadata) {
+            if (session.user.user_metadata.active_modules) {
+                state.activeModules = session.user.user_metadata.active_modules;
+                localStorage.setItem('active_modules', JSON.stringify(state.activeModules));
+                await loadModules();
+            }
+            if (session.user.user_metadata.daily_review_limit !== undefined) {
+                state.dailyReviewLimit = parseInt(session.user.user_metadata.daily_review_limit, 10) || 0;
+                localStorage.setItem(`daily_review_limit_${session.user.id}`, state.dailyReviewLimit);
+            } else {
+                const storedLimit = localStorage.getItem(`daily_review_limit_${session.user.id}`);
+                state.dailyReviewLimit = storedLimit ? parseInt(storedLimit, 10) : 0;
+            }
         }
         
         try {
@@ -97,10 +106,19 @@ async function checkAuth() {
             state.userSession = session;
             updateUserAvatarBadge();
             
-            if (session.user && session.user.user_metadata && session.user.user_metadata.active_modules) {
-                state.activeModules = session.user.user_metadata.active_modules;
-                localStorage.setItem('active_modules', JSON.stringify(state.activeModules));
-                await loadModules();
+            if (session.user && session.user.user_metadata) {
+                if (session.user.user_metadata.active_modules) {
+                    state.activeModules = session.user.user_metadata.active_modules;
+                    localStorage.setItem('active_modules', JSON.stringify(state.activeModules));
+                    await loadModules();
+                }
+                if (session.user.user_metadata.daily_review_limit !== undefined) {
+                    state.dailyReviewLimit = parseInt(session.user.user_metadata.daily_review_limit, 10) || 0;
+                    localStorage.setItem(`daily_review_limit_${session.user.id}`, state.dailyReviewLimit);
+                } else {
+                    const storedLimit = localStorage.getItem(`daily_review_limit_${session.user.id}`);
+                    state.dailyReviewLimit = storedLimit ? parseInt(storedLimit, 10) : 0;
+                }
             }
             
             try {

@@ -6,6 +6,20 @@ import { escapeHtml } from './utils.js';
 import { renderCategoryTabs, renderCategoryCards } from './stats.js';
 import { updateFormLabelsAndPlaceholders } from './flashcardCrud.js';
 import { renderEditorNodes } from './canvas.js';
+import { dbGet } from './db.js';
+
+export async function getReviewsCountToday() {
+    try {
+        const localLogs = await dbGet('review_activity_logs') || [];
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+        const startOfTodayMs = startOfToday.getTime();
+        return localLogs.filter(log => log.timestamp >= startOfTodayMs).length;
+    } catch (e) {
+        console.warn("Failed to get review count today:", e);
+        return 0;
+    }
+}
 
 export function renderTypeTags() {
     const createContainer = document.getElementById('create-type-tags');
@@ -149,7 +163,7 @@ export function getSelectedTypes(selectId) {
     return select.selectedValues.filter(v => v !== 'mixed' && v !== 'add_new');
 }
 
-export function updateDashboard() {
+export async function updateDashboard() {
     updateTypeDatalists();
     renderCategoryTabs();
     
@@ -188,7 +202,18 @@ export function updateDashboard() {
     const settingsStatCount = document.getElementById('settings-stat-count');
     if (settingsStatCount) settingsStatCount.textContent = state.cards.length;
 
-    if (dueCards.length > 0) {
+    // Check daily limit
+    const limit = state.dailyReviewLimit || 0;
+    let reviewsToday = 0;
+    if (limit > 0) {
+        reviewsToday = await getReviewsCountToday();
+    }
+    const isLimitReached = limit > 0 && reviewsToday >= limit;
+
+    if (isLimitReached) {
+        if (btnPractice) btnPractice.style.display = 'none';
+        if (statusMsg) statusMsg.textContent = `Daily limit reached! You reviewed ${reviewsToday}/${limit} cards today. Keep it up!`;
+    } else if (dueCards.length > 0) {
         if (btnPractice) btnPractice.style.display = 'inline-block';
         if (statusMsg) statusMsg.textContent = `${dueCards.length} memories are ready for retention mapping.`;
     } else if (total === 0) {
