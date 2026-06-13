@@ -1,14 +1,16 @@
-import { state } from '../state.js';
+import { state, isVocabularyType } from '../state.js';
 import { validateExampleSentence } from '../practice.js';
 import { ICONS } from '../icons.js';
 
 export function handleCreateAddSentence() {
     const sentenceInput = document.getElementById('create-new-sentence');
-    const targetWordInput = document.getElementById('card-back');
+    const cardTypeSelect = document.getElementById('card-type');
+    const isVocab = cardTypeSelect && isVocabularyType(cardTypeSelect.value);
+    const targetWordInput = document.getElementById(isVocab ? 'vocab-word' : 'card-back');
     const errorSpan = document.getElementById('create-sentence-error');
     
     const sentenceText = sentenceInput.value.trim();
-    const targetWord = targetWordInput.value.trim();
+    const targetWord = targetWordInput ? targetWordInput.value.trim() : '';
     
     if (!targetWord) {
         errorSpan.textContent = "Please specify a target word (Back) first!";
@@ -72,11 +74,13 @@ export function deleteDraftCreateSentence(index) {
 
 export function handleEditAddSentence() {
     const sentenceInput = document.getElementById('edit-new-sentence');
-    const targetWordInput = document.getElementById('edit-card-back');
+    const cardTypeSelect = document.getElementById('edit-card-type');
+    const isVocab = cardTypeSelect && isVocabularyType(cardTypeSelect.value);
+    const targetWordInput = document.getElementById(isVocab ? 'edit-vocab-word' : 'edit-card-back');
     const errorSpan = document.getElementById('edit-sentence-error');
     
     const sentenceText = sentenceInput.value.trim();
-    const targetWord = targetWordInput.value.trim();
+    const targetWord = targetWordInput ? targetWordInput.value.trim() : '';
     
     if (!targetWord) {
         errorSpan.textContent = "Please specify a target word (Back) first!";
