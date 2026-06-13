@@ -3,10 +3,13 @@ import { supabase } from '../supabaseClient.js';
 import { ICONS } from '../icons.js';
 import { dbSet } from '../db.js';
 import { validateExampleSentence } from './spellingEngine.js';
+import { parseVocabularyCard } from '../utils.js';
 
 export async function saveIncorrectExampleSentence() {
     const card = state.reviewQueue[state.currentReviewIndex];
     if (!card) return;
+    
+    const { targetWord } = parseVocabularyCard(card);
     
     const sentenceInput = document.getElementById('incorrect-sentence-input');
     const sentenceText = sentenceInput.value.trim();
@@ -20,8 +23,8 @@ export async function saveIncorrectExampleSentence() {
         return;
     }
     
-    if (!validateExampleSentence(sentenceText, card.back)) {
-        errorMsg.textContent = `The sentence must contain the target word "${card.back}"!`;
+    if (!validateExampleSentence(sentenceText, targetWord)) {
+        errorMsg.textContent = `The sentence must contain the target word "${targetWord}"!`;
         errorMsg.style.color = "#ea4335";
         errorMsg.classList.remove('hidden');
         return;

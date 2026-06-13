@@ -163,7 +163,10 @@ export async function handleCreateCard(e) {
     const sentenceInput = document.getElementById('create-new-sentence');
     if (sentenceInput && sentenceInput.value.trim() !== '') {
         const sentenceText = sentenceInput.value.trim();
-        if (validateExampleSentence(sentenceText, backText)) {
+        const checkWord = isVocabularyType(activeType)
+            ? (document.getElementById('vocab-word') ? document.getElementById('vocab-word').value.trim() : '')
+            : backText;
+        if (validateExampleSentence(sentenceText, checkWord)) {
             if (!state.draftCreateSentences.includes(sentenceText)) {
                 state.draftCreateSentences.push(sentenceText);
             }
@@ -724,7 +727,10 @@ export async function handleEditCardSubmit(e) {
     const editSentenceInput = document.getElementById('edit-new-sentence');
     if (editSentenceInput && editSentenceInput.value.trim() !== '') {
         const sentenceText = editSentenceInput.value.trim();
-        if (validateExampleSentence(sentenceText, backText)) {
+        const checkWord = isVocabularyType(typeText)
+            ? (document.getElementById('edit-vocab-word') ? document.getElementById('edit-vocab-word').value.trim() : '')
+            : backText;
+        if (validateExampleSentence(sentenceText, checkWord)) {
             if (!state.editSentences.includes(sentenceText)) {
                 state.editSentences.push(sentenceText);
             }

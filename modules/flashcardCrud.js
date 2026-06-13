@@ -349,9 +349,10 @@ export function renderManageView() {
                     return;
                 }
                 
-                if (card && !validateExampleSentence(newText, card.back)) {
+                const { targetWord } = parseVocabularyCard(card);
+                if (card && !validateExampleSentence(newText, targetWord)) {
                     input.style.borderColor = 'var(--danger)';
-                    await window.alert(`Clue sentence must contain the target recall word "${card.back}"!`);
+                    await window.alert(`Clue sentence must contain the target recall word "${targetWord}"!`);
                     finished = false;
                     input.focus();
                     return;
