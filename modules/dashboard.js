@@ -229,11 +229,11 @@ export async function updateDashboard() {
     const now = Date.now();
     const dueCards = filteredCards.filter(c => c.nextReview <= now);
 
-    if (totalElement) totalElement.textContent = state.cards.length;
+    if (totalElement) totalElement.textContent = total;
     
     const scoreElement = document.getElementById('stat-score');
     if (scoreElement) {
-        const totalScore = state.cards.reduce((acc, curr) => acc + (curr.score !== undefined && curr.score !== null ? curr.score : 50), 0);
+        const totalScore = filteredCards.reduce((acc, curr) => acc + (curr.score !== undefined && curr.score !== null ? curr.score : 50), 0);
         scoreElement.textContent = totalScore;
     }
 

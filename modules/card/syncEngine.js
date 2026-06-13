@@ -106,14 +106,18 @@ export async function loadData() {
                 needsUpdate = true;
                 cacheChanged = true;
             }
-            if (needsUpdate) {
-                migratedCards.push(card);
+            if (card.type === 'Vocabulary' && (card.subcategory === null || card.subcategory === '')) {
+                card.subcategory = 'English';
+                needsUpdate = true;
+                cacheChanged = true;
             }
-            
             if (card.score === undefined || card.score === null) {
                 card.score = 50;
                 needsUpdate = true;
                 cacheChanged = true;
+            }
+            if (needsUpdate) {
+                migratedCards.push(card);
             }
             if (card.example_sentences) {
                 state.exampleSentences[card.id] = card.example_sentences;
@@ -133,10 +137,14 @@ export async function loadData() {
         updateDashboard();
 
         if (migratedCards.length > 0) {
-            console.log(`Migrating ${migratedCards.length} cards with missing types...`);
+            console.log(`Migrating ${migratedCards.length} cards...`);
             Promise.all(migratedCards.map(card => 
                 supabase.from('flashcards')
-                    .update({ type: card.type })
+                    .update({ 
+                        type: card.type,
+                        subcategory: card.subcategory,
+                        score: card.score
+                    })
                     .eq('id', card.id)
                     .eq('user_id', state.userSession.user.id)
             )).then(() => {
