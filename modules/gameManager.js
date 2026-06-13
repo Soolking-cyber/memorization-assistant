@@ -207,27 +207,28 @@ export function renderSettingsToggles() {
         
         const toggleItem = document.createElement('div');
         toggleItem.className = 'module-toggle-item';
+        toggleItem.title = mod.description;
         toggleItem.style.cssText = `
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 16px;
+            padding: 8px 12px;
             background: var(--bg-secondary);
             border: 2px solid var(--border-color);
-            border-radius: 16px;
+            border-radius: 12px;
             transition: all 0.2s ease;
+            cursor: help;
         `;
         
         toggleItem.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
-                <span style="font-size: 1.8rem; line-height: 1;">${mod.icon}</span>
-                <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
-                    <span style="font-weight: 800; font-size: 0.9rem; color: var(--text-primary);">${mod.name}</span>
-                    <span style="font-size: 0.72rem; color: var(--text-secondary); line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${mod.description}</span>
+            <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+                <span style="font-size: 1.35rem; line-height: 1; flex-shrink: 0;">${mod.icon}</span>
+                <div style="display: flex; flex-direction: column; min-width: 0;">
+                    <span style="font-weight: 700; font-size: 0.82rem; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${mod.name}</span>
                 </div>
             </div>
-            <label class="switch-control" style="position: relative; display: inline-block; width: 46px; height: 26px; flex-shrink: 0; margin-left: 12px;">
-                <input type="checkbox" id="module-toggle-${modId}" ${isActive ? 'checked' : ''} style="opacity: 0; width: 0; height: 0;">
+            <label class="switch-control" style="position: relative; display: inline-block; flex-shrink: 0; margin-left: 8px;">
+                <input type="checkbox" id="module-toggle-${modId}" ${isActive ? 'checked' : ''}>
                 <span class="switch-slider"></span>
             </label>
         `;
