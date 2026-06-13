@@ -198,7 +198,14 @@ export function cardMatchesFilters(card, selectId) {
         if (config && config.subcategories.length > 0) {
             const selectedSubs = select.selectedSubcategories[card.type] || [];
             const cardSub = card.subcategory || '';
-            return selectedSubs.includes(cardSub);
+            if (cardSub === '') {
+                // Uncategorized cards match if all subcategories are selected (i.e. no subcategory filtering is applied to this type)
+                if (selectedSubs.length !== config.subcategories.length) {
+                    return false;
+                }
+            } else {
+                if (!selectedSubs.includes(cardSub)) return false;
+            }
         }
     }
     
