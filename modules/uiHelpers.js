@@ -341,11 +341,19 @@ export function buildCustomDropdownUI(selectId) {
     
     const menu = document.createElement('div');
     menu.className = 'custom-dropdown-menu';
-    
-    [...select.options].forEach(opt => {
+        [...select.options].forEach(opt => {
         const item = document.createElement('div');
         item.className = 'custom-dropdown-item';
         item.dataset.value = opt.value;
+
+        // Content row wrapper to keep main row horizontal on mobile accordion layouts
+        const contentRow = document.createElement('div');
+        contentRow.className = 'custom-dropdown-item-content';
+        contentRow.style.display = 'flex';
+        contentRow.style.alignItems = 'center';
+        contentRow.style.width = '100%';
+        contentRow.style.gap = 'inherit';
+        item.appendChild(contentRow);
         
         // Setup draggability for card types dropdowns
         const canDrag = isCardTypeDropdown && opt.value !== 'mixed' && opt.value !== 'add_new';
@@ -355,7 +363,7 @@ export function buildCustomDropdownUI(selectId) {
             const grip = document.createElement('span');
             grip.className = 'custom-dropdown-grip';
             grip.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><circle cx="9" cy="5" r="1.5"></circle><circle cx="9" cy="12" r="1.5"></circle><circle cx="9" cy="19" r="1.5"></circle><circle cx="15" cy="5" r="1.5"></circle><circle cx="15" cy="12" r="1.5"></circle><circle cx="15" cy="19" r="1.5"></circle></svg>';
-            item.appendChild(grip);
+            contentRow.appendChild(grip);
             
             item.addEventListener('dragstart', (e) => {
                 e.dataTransfer.setData('text/plain', opt.value);
@@ -395,11 +403,11 @@ export function buildCustomDropdownUI(selectId) {
             if (isChecked) {
                 checkbox.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="width:11px; height:11px;"><polyline points="20 6 9 17 4 12"></polyline></svg>';
             }
-            item.appendChild(checkbox);
+            contentRow.appendChild(checkbox);
             
             const textSpan = document.createElement('span');
             textSpan.textContent = opt.textContent;
-            item.appendChild(textSpan);
+            contentRow.appendChild(textSpan);
             
             if (isChecked) {
                 item.classList.add('active');
@@ -408,7 +416,24 @@ export function buildCustomDropdownUI(selectId) {
             // Click listener for main item (multi-select)
             item.addEventListener('click', (e) => {
                 e.stopPropagation();
+
+                // If clicked inside submenu, ignore
+                if (e.target.closest('.custom-dropdown-submenu')) {
+                    return;
+                }
+
                 playUISound('click');
+
+                const isMobile = window.matchMedia('(max-width: 768px)').matches;
+                const tcConfig = state.cardTypesConfig ? state.cardTypesConfig.find(tc => tc.name === opt.value) : null;
+                if (isMobile && tcConfig && tcConfig.subcategories.length > 0) {
+                    const checkboxClicked = e.target.closest('.custom-dropdown-checkbox') || e.target.closest('svg');
+                    if (!checkboxClicked) {
+                        // Toggle submenu accordion expansion instead of toggling selection
+                        item.classList.toggle('submenu-open');
+                        return;
+                    }
+                }
                 
                 if (selectId === 'vocab-word-types' || selectId === 'edit-vocab-word-types' || selectId === 'vocab-type' || selectId === 'edit-vocab-type') {
                     const isChecked = select.selectedValues.includes(opt.value);
@@ -495,7 +520,7 @@ export function buildCustomDropdownUI(selectId) {
             // Single select
             const textSpan = document.createElement('span');
             textSpan.textContent = opt.textContent;
-            item.appendChild(textSpan);
+            contentRow.appendChild(textSpan);
             
             if (opt.value === select.value) {
                 item.classList.add('active');
@@ -511,13 +536,28 @@ export function buildCustomDropdownUI(selectId) {
                 check.style.height = '14px';
                 check.style.marginLeft = '8px';
                 check.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
-                item.appendChild(check);
+                contentRow.appendChild(check);
             }
             
             // Click listener for main item (single-select)
             item.addEventListener('click', (e) => {
                 e.stopPropagation();
+
+                // If clicked inside submenu, ignore
+                if (e.target.closest('.custom-dropdown-submenu')) {
+                    return;
+                }
+
                 playUISound('click');
+
+                const isMobile = window.matchMedia('(max-width: 768px)').matches;
+                const tcConfig = state.cardTypesConfig ? state.cardTypesConfig.find(tc => tc.name === opt.value) : null;
+                if (isMobile && tcConfig && tcConfig.subcategories.length > 0) {
+                    // Toggle submenu accordion expansion instead of selecting
+                    item.classList.toggle('submenu-open');
+                    return;
+                }
+                
                 select.value = opt.value;
                 if (isCardTypeDropdown) {
                     select.selectedSubcategory = null;
@@ -534,11 +574,12 @@ export function buildCustomDropdownUI(selectId) {
             if (tcConfig) {
                 // Add tiny indicator arrow to show submenu exists
                 const rightArrow = document.createElement('span');
+                rightArrow.className = 'custom-dropdown-arrow';
                 rightArrow.style.marginLeft = 'auto';
                 rightArrow.style.fontSize = '0.75rem';
                 rightArrow.style.opacity = '0.5';
                 rightArrow.innerHTML = '&#9656;';
-                item.appendChild(rightArrow);
+                contentRow.appendChild(rightArrow);
                 
                 const submenu = document.createElement('div');
                 submenu.className = 'custom-dropdown-submenu';
@@ -557,13 +598,26 @@ export function buildCustomDropdownUI(selectId) {
                 });
                 
                 // Render Subcategories
-                tcConfig.subcategories.forEach(sub => {
+                const subcategoriesList = [...tcConfig.subcategories];
+                const isMobile = window.matchMedia('(max-width: 768px)').matches;
+                
+                // Prepend Uncategorized option for mobile single select
+                if (isMobile && !isMultiSelect) {
+                    subcategoriesList.unshift('General (No Subcategory)');
+                }
+
+                subcategoriesList.forEach(sub => {
                     const submenuItem = document.createElement('div');
                     submenuItem.className = 'custom-dropdown-submenu-item';
                     
-                    const isSubChecked = isMultiSelect
-                        ? (select.selectedSubcategories[opt.value] && select.selectedSubcategories[opt.value].includes(sub))
-                        : (select.selectedSubcategory === sub);
+                    let isSubChecked = false;
+                    if (sub === 'General (No Subcategory)') {
+                        isSubChecked = (select.selectedSubcategory === null);
+                    } else {
+                        isSubChecked = isMultiSelect
+                            ? (select.selectedSubcategories[opt.value] && select.selectedSubcategories[opt.value].includes(sub))
+                            : (select.selectedSubcategory === sub);
+                    }
                     
                     const subCheckbox = document.createElement('span');
                     subCheckbox.className = `custom-dropdown-checkbox ${isSubChecked ? 'checked' : ''}`;
@@ -582,63 +636,70 @@ export function buildCustomDropdownUI(selectId) {
                         playUISound('click');
                         
                         if (isMultiSelect) {
-                            if (!select.selectedSubcategories[opt.value]) {
-                                select.selectedSubcategories[opt.value] = [];
-                            }
-                            const isAlreadyChecked = select.selectedSubcategories[opt.value].includes(sub);
-                            if (isAlreadyChecked) {
-                                select.selectedSubcategories[opt.value] = select.selectedSubcategories[opt.value].filter(v => v !== sub);
-                            } else {
-                                select.selectedSubcategories[opt.value].push(sub);
-                            }
-                            
-                            // Adjust parent type checkbox selection
-                            const hasAnyChecked = select.selectedSubcategories[opt.value].length > 0;
-                            const isParentChecked = select.selectedValues.includes(opt.value);
-                            if (hasAnyChecked && !isParentChecked) {
-                                select.selectedValues.push(opt.value);
-                            } else if (!hasAnyChecked && isParentChecked) {
-                                select.selectedValues = select.selectedValues.filter(v => v !== opt.value);
-                            }
-                            
-                            // Update mixed option status based on complete subcategory selections
-                            const allIndividualTypes = [...select.options]
-                                .map(o => o.value)
-                                .filter(v => v !== 'mixed' && v !== 'add_new');
-                            const allChecked = allIndividualTypes.every(v => select.selectedValues.includes(v));
-                            
-                            let hasSubcategoryFiltering = false;
-                            if (select.selectedSubcategories && state.cardTypesConfig) {
-                                hasSubcategoryFiltering = Object.keys(select.selectedSubcategories).some(type => {
-                                    const selected = select.selectedSubcategories[type] || [];
-                                    const config = state.cardTypesConfig.find(tc => tc.name === type);
-                                    return config && config.subcategories.length > 0 && selected.length < config.subcategories.length;
-                                });
-                            }
-                            
-                            if (allChecked && !hasSubcategoryFiltering) {
-                                if (!select.selectedValues.includes('mixed')) {
-                                    select.selectedValues.push('mixed');
+                            if (sub !== 'General (No Subcategory)') {
+                                if (!select.selectedSubcategories[opt.value]) {
+                                    select.selectedSubcategories[opt.value] = [];
                                 }
-                            } else {
-                                select.selectedValues = select.selectedValues.filter(v => v !== 'mixed');
-                            }
-                            
-                            // Re-calculate select.value
-                            if (select.selectedValues.includes('mixed')) {
-                                select.value = 'mixed';
-                            } else if (select.selectedValues.length > 0) {
-                                select.value = select.selectedValues[0];
-                            } else {
-                                select.value = '';
+                                const isAlreadyChecked = select.selectedSubcategories[opt.value].includes(sub);
+                                if (isAlreadyChecked) {
+                                    select.selectedSubcategories[opt.value] = select.selectedSubcategories[opt.value].filter(v => v !== sub);
+                                } else {
+                                    select.selectedSubcategories[opt.value].push(sub);
+                                }
+                                
+                                // Adjust parent type checkbox selection
+                                const hasAnyChecked = select.selectedSubcategories[opt.value].length > 0;
+                                const isParentChecked = select.selectedValues.includes(opt.value);
+                                if (hasAnyChecked && !isParentChecked) {
+                                    select.selectedValues.push(opt.value);
+                                } else if (!hasAnyChecked && isParentChecked) {
+                                    select.selectedValues = select.selectedValues.filter(v => v !== opt.value);
+                                }
+                                
+                                // Update mixed option status based on complete subcategory selections
+                                const allIndividualTypes = [...select.options]
+                                    .map(o => o.value)
+                                    .filter(v => v !== 'mixed' && v !== 'add_new');
+                                const allChecked = allIndividualTypes.every(v => select.selectedValues.includes(v));
+                                
+                                let hasSubcategoryFiltering = false;
+                                if (select.selectedSubcategories && state.cardTypesConfig) {
+                                    hasSubcategoryFiltering = Object.keys(select.selectedSubcategories).some(type => {
+                                        const selected = select.selectedSubcategories[type] || [];
+                                        const config = state.cardTypesConfig.find(tc => tc.name === type);
+                                        return config && config.subcategories.length > 0 && selected.length < config.subcategories.length;
+                                    });
+                                }
+                                
+                                if (allChecked && !hasSubcategoryFiltering) {
+                                    if (!select.selectedValues.includes('mixed')) {
+                                        select.selectedValues.push('mixed');
+                                    }
+                                } else {
+                                    select.selectedValues = select.selectedValues.filter(v => v !== 'mixed');
+                                }
+                                
+                                // Re-calculate select.value
+                                if (select.selectedValues.includes('mixed')) {
+                                    select.value = 'mixed';
+                                } else if (select.selectedValues.length > 0) {
+                                    select.value = select.selectedValues[0];
+                                } else {
+                                    select.value = '';
+                                }
                             }
                         } else {
                             // Single Select
-                            if (select.selectedSubcategory === sub) {
+                            if (sub === 'General (No Subcategory)') {
                                 select.selectedSubcategory = null;
-                            } else {
-                                select.selectedSubcategory = sub;
                                 select.value = opt.value;
+                            } else {
+                                if (select.selectedSubcategory === sub) {
+                                    select.selectedSubcategory = null;
+                                } else {
+                                    select.selectedSubcategory = sub;
+                                    select.value = opt.value;
+                                }
                             }
                             customWrapper.classList.remove('open');
                         }
