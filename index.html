@@ -286,15 +286,17 @@ Sum of all cards' memory strength scores (max 100 per card).">
                                     <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
                                         <button type="button" id="btn-vocab-add-meaning" class="btn secondary" style="min-height: 48px; font-size: 0.9rem;" title="Fetch definition from dictionary">Add Meaning</button>
                                     </div>
-                                    <div class="file-input-container">
-                                        <input type="file" id="vocab-front-image" class="file-input-hidden" accept="image/*">
-                                        <label for="vocab-front-image" class="file-input-button">Add Front Image</label>
-                                        <span id="vocab-front-image-name" class="file-input-name">No file chosen</span>
-                                    </div>
-                                    <div class="file-input-container">
-                                        <input type="file" id="vocab-back-image" class="file-input-hidden" accept="image/*">
-                                        <label for="vocab-back-image" class="file-input-button">Add Back Image</label>
-                                        <span id="vocab-back-image-name" class="file-input-name">No file chosen</span>
+                                    <div class="file-input-row">
+                                        <div class="file-input-container">
+                                            <input type="file" id="vocab-front-image" class="file-input-hidden" accept="image/*">
+                                            <label for="vocab-front-image" class="file-input-button">Add Front Image</label>
+                                            <span id="vocab-front-image-name" class="file-input-name">No file chosen</span>
+                                        </div>
+                                        <div class="file-input-container">
+                                            <input type="file" id="vocab-back-image" class="file-input-hidden" accept="image/*">
+                                            <label for="vocab-back-image" class="file-input-button">Add Back Image</label>
+                                            <span id="vocab-back-image-name" class="file-input-name">No file chosen</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -474,21 +476,24 @@ Sum of all cards' memory strength scores (max 100 per card).">
                                         <img src="" style="max-height: 100px; border-radius: 4px; display: block;" alt="Current Front Image">
                                         <button type="button" id="btn-delete-edit-vocab-front-img" style="position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; background: var(--danger); color: white; border: none; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); line-height: 1;" title="Delete Image">×</button>
                                     </div>
-                                    <div class="file-input-container">
-                                        <input type="file" id="edit-vocab-front-image" class="file-input-hidden" accept="image/*">
-                                        <label for="edit-vocab-front-image" class="file-input-button">Choose Front File</label>
-                                        <span id="edit-vocab-front-image-name" class="file-input-name">No file chosen</span>
-                                    </div>
-                                    
+
                                     <!-- Edit Vocab Back Image Preview and Upload -->
                                     <div id="edit-vocab-back-img-preview" class="hidden" style="margin-top: 10px; margin-bottom: 10px; position: relative; display: inline-block;">
                                         <img src="" style="max-height: 100px; border-radius: 4px; display: block;" alt="Current Back Image">
                                         <button type="button" id="btn-delete-edit-vocab-back-img" style="position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; background: var(--danger); color: white; border: none; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); line-height: 1;" title="Delete Image">×</button>
                                     </div>
-                                    <div class="file-input-container">
-                                        <input type="file" id="edit-vocab-back-image" class="file-input-hidden" accept="image/*">
-                                        <label for="edit-vocab-back-image" class="file-input-button">Choose Back File</label>
-                                        <span id="edit-vocab-back-image-name" class="file-input-name">No file chosen</span>
+
+                                    <div class="file-input-row">
+                                        <div class="file-input-container">
+                                            <input type="file" id="edit-vocab-front-image" class="file-input-hidden" accept="image/*">
+                                            <label for="edit-vocab-front-image" class="file-input-button">Choose Front File</label>
+                                            <span id="edit-vocab-front-image-name" class="file-input-name">No file chosen</span>
+                                        </div>
+                                        <div class="file-input-container">
+                                            <input type="file" id="edit-vocab-back-image" class="file-input-hidden" accept="image/*">
+                                            <label for="edit-vocab-back-image" class="file-input-button">Choose Back File</label>
+                                            <span id="edit-vocab-back-image-name" class="file-input-name">No file chosen</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

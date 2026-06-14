@@ -1105,3 +1105,30 @@ body.dark-theme [data-game-id="scramble"] .game-card-icon {
         gap: 8px !important;
     }
 }
+
+.file-input-row {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    margin-top: 12px;
+}
+.file-input-row .file-input-container {
+    flex: 1;
+    margin-top: 0;
+}
+.file-input-row .file-input-button {
+    width: 155px; /* Symmetrical size */
+    text-align: center;
+    flex-shrink: 0;
+    font-size: 0.82rem;
+}
+
+@media (max-width: 600px) {
+    .file-input-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .file-input-row .file-input-button {
+        width: 100%;
+    }
+}
