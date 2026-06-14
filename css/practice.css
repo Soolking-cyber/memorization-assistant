@@ -519,8 +519,13 @@ body.dark-theme .heatmap-tooltip-activity {
 
 @media (max-width: 768px) {
     #view-practice.practice-layout-map {
-        height: calc(100vh - 180px) !important;
-        height: calc(100dvh - 180px) !important;
+        height: calc(100vh - 85px) !important;
+        height: calc(100dvh - 85px) !important;
+    }
+    .letter-box {
+        width: 32px !important;
+        height: 40px !important;
+        font-size: 1.25rem !important;
     }
 }
 

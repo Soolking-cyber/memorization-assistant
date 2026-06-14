@@ -468,16 +468,16 @@ body.dark-theme .scramble-slot.active-slot {
 /* Responsive adjust */
 @media (max-width: 480px) {
     .scramble-slot, .scramble-tile {
-        width: 30px;
-        height: 38px;
-        font-size: 1rem;
+        width: 35px;
+        height: 45px;
+        font-size: 1.25rem;
     }
     .scramble-deck-card {
-        height: 160px;
+        height: 170px;
         padding: 16px;
     }
     .scramble-clue-content {
-        font-size: 1.15rem;
+        font-size: 1.3rem;
     }
 }
 

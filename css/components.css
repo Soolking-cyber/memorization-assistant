@@ -1067,4 +1067,41 @@ body.dark-theme [data-game-id="scramble"] .game-card-icon {
     background: var(--bg-secondary);
 }
 
+.responsive-settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
 
+@media (max-width: 768px) {
+    /* Prevent iOS browser auto-zoom by forcing minimum 16px font-size on form controls */
+    .input-field,
+    textarea,
+    select,
+    .custom-dropdown-trigger {
+        font-size: 1rem !important; /* 16px */
+    }
+
+    /* Modal Backdrop mobile optimizations */
+    .modal-backdrop,
+    .custom-modal-overlay {
+        padding: var(--space-sm) !important; /* Extremely small margin to maximize space */
+    }
+
+    /* Expand modals to use maximum screen width on mobile */
+    .modal-content,
+    .custom-modal-content {
+        max-width: 96% !important;
+        width: 96% !important;
+        border-radius: var(--radius-md) !important;
+        padding: var(--space-md) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Stack settings grid vertically on very small screens */
+    .responsive-settings-grid {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
+}

@@ -1103,7 +1103,7 @@ Sum of all cards' memory strength scores (max 100 per card).">
                 <!-- Account Profile Settings Section -->
                 <div class="settings-section" style="display: flex; flex-direction: column; gap: 16px;">
                     <!-- Username & Daily Limit side-by-side -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="responsive-settings-grid">
                         <div class="input-group" style="display: flex; flex-direction: column; gap: 4px;">
                             <label for="settings-username-input" style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Username</label>
                             <input type="text" id="settings-username-input" class="input-field" placeholder="Set username..." style="padding: 8px 12px; font-size: 0.85rem; height: 38px;">
@@ -1118,7 +1118,7 @@ Sum of all cards' memory strength scores (max 100 per card).">
                     <!-- Games & Modules Section -->
                     <div class="settings-modules-section" style="display: flex; flex-direction: column; gap: 6px;">
                         <h4 style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin: 0;">Games & Modules</h4>
-                        <div id="settings-modules-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div id="settings-modules-list" class="responsive-settings-grid" style="gap: 10px;">
                             <!-- Dynamically generated toggles -->
                         </div>
                     </div>

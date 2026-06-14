@@ -728,35 +728,35 @@ body.logged-out .app-container {
 
 /* Responsive Adaptations for Mobile Bottom Tab Bar */
 @media (max-width: 768px) {
-    .top-header { padding: 10px var(--space-md); }
+    .top-header { padding: 10px var(--space-sm); }
     .top-header-right { gap: var(--space-sm); }
     .app-container {
         flex-direction: column;
-        padding: var(--space-md) var(--space-md) calc(var(--space-xl) * 2.5 + env(safe-area-inset-bottom, 0px)) var(--space-md) !important;
-        gap: var(--space-md) !important;
+        padding: var(--space-sm) var(--space-sm) calc(var(--space-xl) * 2.2 + env(safe-area-inset-bottom, 0px)) var(--space-sm) !important;
+        gap: var(--space-sm) !important;
     }
     body.logged-out .app-container {
-        padding: var(--space-lg) var(--space-md) !important;
+        padding: var(--space-md) var(--space-sm) !important;
         min-height: calc(100vh - 60px) !important;
     }
     .view {
-        gap: var(--space-md) !important;
+        gap: var(--space-sm) !important;
     }
     .hero-section h2 {
-        font-size: 2.0rem !important;
-        margin-bottom: 12px !important;
-        letter-spacing: -0.8px !important;
+        font-size: 1.8rem !important;
+        margin-bottom: 8px !important;
+        letter-spacing: -0.6px !important;
     }
     .hero-section p {
-        font-size: 0.95rem !important;
-        line-height: 1.5 !important;
+        font-size: 0.9rem !important;
+        line-height: 1.4 !important;
     }
     .auth-box {
-        padding: var(--space-lg) var(--space-md) !important;
-        margin: var(--space-md) auto 0 auto !important;
+        padding: var(--space-md) var(--space-sm) !important;
+        margin: var(--space-sm) auto 0 auto !important;
     }
     .form-container {
-        padding: var(--space-lg) var(--space-md) !important;
+        padding: var(--space-md) var(--space-sm) !important;
     }
     .sidebar {
         width: 100%;
@@ -840,9 +840,9 @@ body.logged-out .app-container {
     }
     .hero-right { display: none; }
     .stats-row { flex-direction: column; gap: var(--space-sm); }
-    .flashcard { min-height: 300px; }
-    .card-face { min-height: 300px; padding: var(--space-md) !important; }
-    .card-content { font-size: 1.15rem; }
+    .flashcard { min-height: 280px; }
+    .card-face { min-height: 280px; padding: var(--space-sm) !important; }
+    .card-content { font-size: 1.4rem !important; }
 
     /* Canvas specific mobile styles */
     #create-map-canvas-container,
