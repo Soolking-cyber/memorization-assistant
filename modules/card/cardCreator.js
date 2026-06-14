@@ -452,6 +452,13 @@ export function openEditView(cardId) {
             
             document.getElementById('edit-vocab-word').value = parsed.targetWord;
             document.getElementById('edit-vocab-meaning').value = parsed.definition;
+
+            const lookupResultBox = document.getElementById('edit-vocab-lookup-result');
+            if (lookupResultBox) {
+                lookupResultBox.classList.add('hidden');
+                const textEl = lookupResultBox.querySelector('.lookup-text');
+                if (textEl) textEl.textContent = '';
+            }
             
             const typeSelect = document.getElementById('edit-vocab-type');
             if (typeSelect) {
@@ -1173,9 +1180,13 @@ export function initVocabFormListeners() {
             btnCreateAddMeaning.disabled = false;
             
             if (res) {
-                const meaningTextarea = document.getElementById('vocab-meaning');
-                if (meaningTextarea) {
-                    meaningTextarea.value = res.definition;
+                const lookupResultBox = document.getElementById('vocab-lookup-result');
+                if (lookupResultBox) {
+                    const textEl = lookupResultBox.querySelector('.lookup-text');
+                    if (textEl) {
+                        textEl.textContent = res.definition;
+                    }
+                    lookupResultBox.classList.remove('hidden');
                 }
                 
                 // Auto-select type(s)
@@ -1219,9 +1230,13 @@ export function initVocabFormListeners() {
             btnEditAddMeaning.disabled = false;
             
             if (res) {
-                const meaningTextarea = document.getElementById('edit-vocab-meaning');
-                if (meaningTextarea) {
-                    meaningTextarea.value = res.definition;
+                const lookupResultBox = document.getElementById('edit-vocab-lookup-result');
+                if (lookupResultBox) {
+                    const textEl = lookupResultBox.querySelector('.lookup-text');
+                    if (textEl) {
+                        textEl.textContent = res.definition;
+                    }
+                    lookupResultBox.classList.remove('hidden');
                 }
                 
                 // Auto-select type(s)
@@ -1243,6 +1258,46 @@ export function initVocabFormListeners() {
                         buildCustomDropdownUI('edit-vocab-type');
                     }
                 }
+            }
+        };
+    }
+
+    // Block pasting on vocabulary meaning textareas to require typing
+    const vocabMeaningTextarea = document.getElementById('vocab-meaning');
+    if (vocabMeaningTextarea) {
+        vocabMeaningTextarea.onpaste = (e) => {
+            e.preventDefault();
+            window.alert("Pasting is disabled. Please type your own understanding of the meaning.");
+        };
+    }
+    const editVocabMeaningTextarea = document.getElementById('edit-vocab-meaning');
+    if (editVocabMeaningTextarea) {
+        editVocabMeaningTextarea.onpaste = (e) => {
+            e.preventDefault();
+            window.alert("Pasting is disabled. Please type your own understanding of the meaning.");
+        };
+    }
+
+    // Clear lookup results on word input change to prevent stale display
+    const vocabWordInput = document.getElementById('vocab-word');
+    if (vocabWordInput) {
+        vocabWordInput.oninput = () => {
+            const lookupBox = document.getElementById('vocab-lookup-result');
+            if (lookupBox) {
+                lookupBox.classList.add('hidden');
+                const textEl = lookupBox.querySelector('.lookup-text');
+                if (textEl) textEl.textContent = '';
+            }
+        };
+    }
+    const editVocabWordInput = document.getElementById('edit-vocab-word');
+    if (editVocabWordInput) {
+        editVocabWordInput.oninput = () => {
+            const lookupBox = document.getElementById('edit-vocab-lookup-result');
+            if (lookupBox) {
+                lookupBox.classList.add('hidden');
+                const textEl = lookupBox.querySelector('.lookup-text');
+                if (textEl) textEl.textContent = '';
             }
         };
     }

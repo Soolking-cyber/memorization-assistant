@@ -284,7 +284,11 @@ Sum of all cards' memory strength scores (max 100 per card).">
                                     <label for="vocab-meaning">Description / Meaning</label>
                                     <textarea id="vocab-meaning" placeholder="Meaning of the word..."></textarea>
                                     <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
-                                        <button type="button" id="btn-vocab-add-meaning" class="btn secondary" style="min-height: 48px; font-size: 0.9rem;" title="Fetch definition from dictionary">Add Meaning</button>
+                                        <button type="button" id="btn-vocab-add-meaning" class="btn secondary" style="min-height: 48px; font-size: 0.9rem;" title="Fetch definition from dictionary">Lookup</button>
+                                    </div>
+                                    <div id="vocab-lookup-result" class="hidden" style="margin-top: 12px; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 12px; user-select: none; pointer-events: none;">
+                                        <div style="font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; letter-spacing: 0.5px;">Dictionary Lookup (Read Only)</div>
+                                        <div class="lookup-text" style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.4;"></div>
                                     </div>
                                     <div class="file-input-row">
                                         <div class="file-input-container">
@@ -468,7 +472,11 @@ Sum of all cards' memory strength scores (max 100 per card).">
                                     <label for="edit-vocab-meaning">Description / Meaning</label>
                                     <textarea id="edit-vocab-meaning" placeholder="Meaning of the word..."></textarea>
                                     <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
-                                        <button type="button" id="btn-edit-vocab-add-meaning" class="btn secondary" style="min-height: 48px; font-size: 0.9rem;" title="Fetch definition from dictionary">Add Meaning</button>
+                                        <button type="button" id="btn-edit-vocab-add-meaning" class="btn secondary" style="min-height: 48px; font-size: 0.9rem;" title="Fetch definition from dictionary">Lookup</button>
+                                    </div>
+                                    <div id="edit-vocab-lookup-result" class="hidden" style="margin-top: 12px; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 12px; user-select: none; pointer-events: none;">
+                                        <div style="font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; letter-spacing: 0.5px;">Dictionary Lookup (Read Only)</div>
+                                        <div class="lookup-text" style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.4;"></div>
                                     </div>
                                     
                                     <!-- Edit Vocab Front Image Preview and Upload -->

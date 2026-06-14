@@ -222,6 +222,13 @@ export async function switchView(viewId) {
         const createError = document.getElementById('create-sentence-error');
         if (createError) createError.style.display = 'none';
         renderCreateSentencesList();
+
+        const lookupResultBox = document.getElementById('vocab-lookup-result');
+        if (lookupResultBox) {
+            lookupResultBox.classList.add('hidden');
+            const textEl = lookupResultBox.querySelector('.lookup-text');
+            if (textEl) textEl.textContent = '';
+        }
         
         state.createZettelLinks = [];
         if (window.renderZettelLinksList) window.renderZettelLinksList(false);
