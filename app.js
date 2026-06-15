@@ -69,6 +69,13 @@ async function checkAuth() {
                 const storedLimit = localStorage.getItem(`daily_review_limit_${session.user.id}`);
                 state.dailyReviewLimit = storedLimit ? parseInt(storedLimit, 10) : 0;
             }
+            if (session.user.user_metadata.vocab_meaning_mode !== undefined) {
+                state.vocabMeaningMode = session.user.user_metadata.vocab_meaning_mode;
+                localStorage.setItem(`vocab_meaning_mode_${session.user.id}`, state.vocabMeaningMode);
+            } else {
+                const storedMode = localStorage.getItem(`vocab_meaning_mode_${session.user.id}`);
+                state.vocabMeaningMode = storedMode || 'copy';
+            }
         }
         
         try {
@@ -118,6 +125,13 @@ async function checkAuth() {
                 } else {
                     const storedLimit = localStorage.getItem(`daily_review_limit_${session.user.id}`);
                     state.dailyReviewLimit = storedLimit ? parseInt(storedLimit, 10) : 0;
+                }
+                if (session.user.user_metadata.vocab_meaning_mode !== undefined) {
+                    state.vocabMeaningMode = session.user.user_metadata.vocab_meaning_mode;
+                    localStorage.setItem(`vocab_meaning_mode_${session.user.id}`, state.vocabMeaningMode);
+                } else {
+                    const storedMode = localStorage.getItem(`vocab_meaning_mode_${session.user.id}`);
+                    state.vocabMeaningMode = storedMode || 'copy';
                 }
             }
             

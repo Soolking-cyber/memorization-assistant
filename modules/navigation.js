@@ -359,6 +359,9 @@ export function initProfileMenu() {
                 if (usernameInput) usernameInput.value = savedUsername;
                 if (dailyLimitInput) dailyLimitInput.value = savedDailyLimit ? parseInt(savedDailyLimit, 10) : '';
                 
+                const vocabModeSelect = document.getElementById('settings-vocab-mode-select');
+                if (vocabModeSelect) vocabModeSelect.value = state.vocabMeaningMode;
+                
                 if (settingsAvatar) {
                     if (savedAvatarUrl) {
                         settingsAvatar.style.backgroundImage = `url('${savedAvatarUrl}')`;
@@ -537,15 +540,21 @@ export function initProfileMenu() {
             const dailyLimitVal = dailyLimitInput ? parseInt(dailyLimitInput.value, 10) : 0;
             const dailyLimit = isNaN(dailyLimitVal) || dailyLimitVal < 0 ? 0 : dailyLimitVal;
             
+            const vocabModeSelect = document.getElementById('settings-vocab-mode-select');
+            const vocabMode = vocabModeSelect ? vocabModeSelect.value : 'copy';
+            
             localStorage.setItem(`profile_username_${userId}`, username);
             localStorage.setItem(`daily_review_limit_${userId}`, dailyLimit);
+            localStorage.setItem(`vocab_meaning_mode_${userId}`, vocabMode);
             state.dailyReviewLimit = dailyLimit;
+            state.vocabMeaningMode = vocabMode;
             
             if (supabase) {
                 supabase.auth.updateUser({
                     data: {
                         display_name: username,
-                        daily_review_limit: dailyLimit
+                        daily_review_limit: dailyLimit,
+                        vocab_meaning_mode: vocabMode
                     }
                 }).then();
             }

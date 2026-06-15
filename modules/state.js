@@ -60,6 +60,7 @@ export const state = {
         localStorage.setItem('customTypes', JSON.stringify(newTypes));
     },
     dailyReviewLimit: 0,
+    vocabMeaningMode: 'copy',
 
     reviewQueue: [],
     currentReviewIndex: 0,

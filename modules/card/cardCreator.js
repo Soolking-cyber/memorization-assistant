@@ -1189,6 +1189,14 @@ export function initVocabFormListeners() {
                     lookupResultBox.classList.remove('hidden');
                 }
                 
+                if (state.vocabMeaningMode === 'copy') {
+                    const meaningTextarea = document.getElementById('vocab-meaning');
+                    if (meaningTextarea) {
+                        meaningTextarea.value = res.definition;
+                        meaningTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+                
                 // Auto-select type(s)
                 if (res.partsOfSpeech && res.partsOfSpeech.length > 0) {
                     const vocabTypeSelect = document.getElementById('vocab-type');
@@ -1239,6 +1247,14 @@ export function initVocabFormListeners() {
                     lookupResultBox.classList.remove('hidden');
                 }
                 
+                if (state.vocabMeaningMode === 'copy') {
+                    const editMeaningTextarea = document.getElementById('edit-vocab-meaning');
+                    if (editMeaningTextarea) {
+                        editMeaningTextarea.value = res.definition;
+                        editMeaningTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+                
                 // Auto-select type(s)
                 if (res.partsOfSpeech && res.partsOfSpeech.length > 0) {
                     const vocabTypeSelect = document.getElementById('edit-vocab-type');
@@ -1266,15 +1282,19 @@ export function initVocabFormListeners() {
     const vocabMeaningTextarea = document.getElementById('vocab-meaning');
     if (vocabMeaningTextarea) {
         vocabMeaningTextarea.onpaste = (e) => {
-            e.preventDefault();
-            window.alert("Pasting is disabled. Please type your own understanding of the meaning.");
+            if (state.vocabMeaningMode === 'recall') {
+                e.preventDefault();
+                window.alert("Pasting is disabled. Please type your own understanding of the meaning.");
+            }
         };
     }
     const editVocabMeaningTextarea = document.getElementById('edit-vocab-meaning');
     if (editVocabMeaningTextarea) {
         editVocabMeaningTextarea.onpaste = (e) => {
-            e.preventDefault();
-            window.alert("Pasting is disabled. Please type your own understanding of the meaning.");
+            if (state.vocabMeaningMode === 'recall') {
+                e.preventDefault();
+                window.alert("Pasting is disabled. Please type your own understanding of the meaning.");
+            }
         };
     }
 

@@ -1187,6 +1187,9 @@ body.dark-theme [data-game-id="scramble"] .game-card-icon {
         grid-template-columns: 1fr !important;
         gap: 8px !important;
     }
+    .responsive-settings-grid > * {
+        grid-column: span 1 !important;
+    }
 }
 
 .file-input-row {

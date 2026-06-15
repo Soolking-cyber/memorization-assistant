@@ -1126,6 +1126,14 @@ Sum of all cards' memory strength scores (max 100 per card).">
                             <label for="settings-daily-limit-input" style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Daily Limit</label>
                             <input type="number" id="settings-daily-limit-input" class="input-field" min="0" placeholder="Unlimited" style="padding: 8px 12px; font-size: 0.85rem; height: 38px;" title="Limit the number of due cards you can review each day.">
                         </div>
+
+                        <div class="input-group" style="display: flex; flex-direction: column; gap: 4px; grid-column: span 2;">
+                            <label for="settings-vocab-mode-select" style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Vocab Meaning Input Mode</label>
+                            <select id="settings-vocab-mode-select" class="input-field" style="padding: 8px 12px; font-size: 0.85rem; height: 38px;" title="Choose whether to type your own definitions or auto-fill/paste them.">
+                                <option value="copy">Direct Copy (Auto-fill from lookup & pasting allowed)</option>
+                                <option value="recall">Active Recall (Type own meaning, paste blocked, lookup read-only)</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Games & Modules Section -->
