@@ -10,6 +10,7 @@ import { renderEditSentencesList, renderCreateSentencesList } from './sentenceBu
 import { loadData } from './syncEngine.js';
 import { renderManageView } from '../flashcardCrud.js';
 import { parseVocabularyCard } from '../utils.js';
+import { playUISound } from '../sound.js';
 
 export function updateFormLabelsAndPlaceholders(isEdit, type) {
     const labelFront = document.querySelector(`label[for="${isEdit ? 'edit-card-front' : 'card-front'}"]`);
@@ -1178,8 +1179,8 @@ export function initVocabFormListeners() {
             const lookupResultBox = document.getElementById('vocab-lookup-result');
             const textEl = lookupResultBox ? lookupResultBox.querySelector('.lookup-text') : null;
             
-            // If the button is in "Use Definition" action mode, copy definition to textarea
-            if (btnCreateAddMeaning.dataset.action === 'use') {
+            // If the button is in "Add Description" action mode, copy definition to textarea
+            if (btnCreateAddMeaning.dataset.action === 'add-description') {
                 if (textEl) {
                     const meaningTextarea = document.getElementById('vocab-meaning');
                     if (meaningTextarea) {
@@ -1215,8 +1216,8 @@ export function initVocabFormListeners() {
                 }
                 
                 if (state.vocabMeaningMode === 'copy') {
-                    btnCreateAddMeaning.textContent = 'Use Definition';
-                    btnCreateAddMeaning.dataset.action = 'use';
+                    btnCreateAddMeaning.textContent = 'Add Description';
+                    btnCreateAddMeaning.dataset.action = 'add-description';
                 }
                 
                 // Auto-select type(s)
@@ -1248,8 +1249,8 @@ export function initVocabFormListeners() {
             const lookupResultBox = document.getElementById('edit-vocab-lookup-result');
             const textEl = lookupResultBox ? lookupResultBox.querySelector('.lookup-text') : null;
             
-            // If the button is in "Use Definition" action mode, copy definition to textarea
-            if (btnEditAddMeaning.dataset.action === 'use') {
+            // If the button is in "Add Description" action mode, copy definition to textarea
+            if (btnEditAddMeaning.dataset.action === 'add-description') {
                 if (textEl) {
                     const editMeaningTextarea = document.getElementById('edit-vocab-meaning');
                     if (editMeaningTextarea) {
@@ -1285,8 +1286,8 @@ export function initVocabFormListeners() {
                 }
                 
                 if (state.vocabMeaningMode === 'copy') {
-                    btnEditAddMeaning.textContent = 'Use Definition';
-                    btnEditAddMeaning.dataset.action = 'use';
+                    btnEditAddMeaning.textContent = 'Add Description';
+                    btnEditAddMeaning.dataset.action = 'add-description';
                 }
                 
                 // Auto-select type(s)
