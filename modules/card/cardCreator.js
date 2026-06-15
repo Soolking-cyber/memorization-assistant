@@ -221,6 +221,11 @@ export async function handleCreateCard(e) {
     if (vocabWord) vocabWord.value = '';
     const vocabMeaning = document.getElementById('vocab-meaning');
     if (vocabMeaning) vocabMeaning.value = '';
+    const btnCreateAddMeaning = document.getElementById('btn-vocab-add-meaning');
+    if (btnCreateAddMeaning) {
+        btnCreateAddMeaning.textContent = 'Lookup';
+        delete btnCreateAddMeaning.dataset.action;
+    }
     const vocabType = document.getElementById('vocab-type');
     if (vocabType) {
         vocabType.selectedValues = [];
@@ -458,6 +463,11 @@ export function openEditView(cardId) {
                 lookupResultBox.classList.add('hidden');
                 const textEl = lookupResultBox.querySelector('.lookup-text');
                 if (textEl) textEl.textContent = '';
+            }
+            const btnEditAddMeaning = document.getElementById('btn-edit-vocab-add-meaning');
+            if (btnEditAddMeaning) {
+                btnEditAddMeaning.textContent = 'Lookup';
+                delete btnEditAddMeaning.dataset.action;
             }
             
             const typeSelect = document.getElementById('edit-vocab-type');
@@ -1165,10 +1175,27 @@ export function initVocabFormListeners() {
     const btnCreateAddMeaning = document.getElementById('btn-vocab-add-meaning');
     if (btnCreateAddMeaning) {
         btnCreateAddMeaning.onclick = async () => {
+            const lookupResultBox = document.getElementById('vocab-lookup-result');
+            const textEl = lookupResultBox ? lookupResultBox.querySelector('.lookup-text') : null;
+            
+            // If the button is in "Use Definition" action mode, copy definition to textarea
+            if (btnCreateAddMeaning.dataset.action === 'use') {
+                if (textEl) {
+                    const meaningTextarea = document.getElementById('vocab-meaning');
+                    if (meaningTextarea) {
+                        meaningTextarea.value = textEl.textContent;
+                        meaningTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+                btnCreateAddMeaning.textContent = 'Lookup';
+                delete btnCreateAddMeaning.dataset.action;
+                playUISound('click');
+                return;
+            }
+            
             const wordInput = document.getElementById('vocab-word');
             const word = wordInput ? wordInput.value.trim() : '';
             
-            const btnText = btnCreateAddMeaning.textContent;
             btnCreateAddMeaning.textContent = "Fetching...";
             btnCreateAddMeaning.disabled = true;
             
@@ -1176,13 +1203,11 @@ export function initVocabFormListeners() {
             const subcategory = cardTypeEl ? cardTypeEl.selectedSubcategory : null;
             const res = await fetchDictionaryDefinition(word, subcategory);
             
-            btnCreateAddMeaning.textContent = btnText;
+            btnCreateAddMeaning.textContent = 'Lookup';
             btnCreateAddMeaning.disabled = false;
             
             if (res) {
-                const lookupResultBox = document.getElementById('vocab-lookup-result');
                 if (lookupResultBox) {
-                    const textEl = lookupResultBox.querySelector('.lookup-text');
                     if (textEl) {
                         textEl.textContent = res.definition;
                     }
@@ -1190,11 +1215,8 @@ export function initVocabFormListeners() {
                 }
                 
                 if (state.vocabMeaningMode === 'copy') {
-                    const meaningTextarea = document.getElementById('vocab-meaning');
-                    if (meaningTextarea) {
-                        meaningTextarea.value = res.definition;
-                        meaningTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-                    }
+                    btnCreateAddMeaning.textContent = 'Use Definition';
+                    btnCreateAddMeaning.dataset.action = 'use';
                 }
                 
                 // Auto-select type(s)
@@ -1223,10 +1245,27 @@ export function initVocabFormListeners() {
     const btnEditAddMeaning = document.getElementById('btn-edit-vocab-add-meaning');
     if (btnEditAddMeaning) {
         btnEditAddMeaning.onclick = async () => {
+            const lookupResultBox = document.getElementById('edit-vocab-lookup-result');
+            const textEl = lookupResultBox ? lookupResultBox.querySelector('.lookup-text') : null;
+            
+            // If the button is in "Use Definition" action mode, copy definition to textarea
+            if (btnEditAddMeaning.dataset.action === 'use') {
+                if (textEl) {
+                    const editMeaningTextarea = document.getElementById('edit-vocab-meaning');
+                    if (editMeaningTextarea) {
+                        editMeaningTextarea.value = textEl.textContent;
+                        editMeaningTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+                btnEditAddMeaning.textContent = 'Lookup';
+                delete btnEditAddMeaning.dataset.action;
+                playUISound('click');
+                return;
+            }
+            
             const wordInput = document.getElementById('edit-vocab-word');
             const word = wordInput ? wordInput.value.trim() : '';
             
-            const btnText = btnEditAddMeaning.textContent;
             btnEditAddMeaning.textContent = "Fetching...";
             btnEditAddMeaning.disabled = true;
             
@@ -1234,13 +1273,11 @@ export function initVocabFormListeners() {
             const subcategory = editCardTypeEl ? editCardTypeEl.selectedSubcategory : null;
             const res = await fetchDictionaryDefinition(word, subcategory);
             
-            btnEditAddMeaning.textContent = btnText;
+            btnEditAddMeaning.textContent = 'Lookup';
             btnEditAddMeaning.disabled = false;
             
             if (res) {
-                const lookupResultBox = document.getElementById('edit-vocab-lookup-result');
                 if (lookupResultBox) {
-                    const textEl = lookupResultBox.querySelector('.lookup-text');
                     if (textEl) {
                         textEl.textContent = res.definition;
                     }
@@ -1248,11 +1285,8 @@ export function initVocabFormListeners() {
                 }
                 
                 if (state.vocabMeaningMode === 'copy') {
-                    const editMeaningTextarea = document.getElementById('edit-vocab-meaning');
-                    if (editMeaningTextarea) {
-                        editMeaningTextarea.value = res.definition;
-                        editMeaningTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-                    }
+                    btnEditAddMeaning.textContent = 'Use Definition';
+                    btnEditAddMeaning.dataset.action = 'use';
                 }
                 
                 // Auto-select type(s)
@@ -1308,6 +1342,11 @@ export function initVocabFormListeners() {
                 const textEl = lookupBox.querySelector('.lookup-text');
                 if (textEl) textEl.textContent = '';
             }
+            const btnCreateAddMeaning = document.getElementById('btn-vocab-add-meaning');
+            if (btnCreateAddMeaning) {
+                btnCreateAddMeaning.textContent = 'Lookup';
+                delete btnCreateAddMeaning.dataset.action;
+            }
         };
     }
     const editVocabWordInput = document.getElementById('edit-vocab-word');
@@ -1318,6 +1357,11 @@ export function initVocabFormListeners() {
                 lookupBox.classList.add('hidden');
                 const textEl = lookupBox.querySelector('.lookup-text');
                 if (textEl) textEl.textContent = '';
+            }
+            const btnEditAddMeaning = document.getElementById('btn-edit-vocab-add-meaning');
+            if (btnEditAddMeaning) {
+                btnEditAddMeaning.textContent = 'Lookup';
+                delete btnEditAddMeaning.dataset.action;
             }
         };
     }
